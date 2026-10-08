@@ -1,0 +1,258 @@
+/* Wisely Arcade — shared stylesheet
+   Clean flat design, mobile-first. No grid/square pattern backgrounds. */
+
+:root{
+  --bg:#FFF8EE;
+  --card:#FFFFFF;
+  --ink:#24313D;
+  --muted:#6B7684;
+  --teal:#0EA5A4;
+  --teal-dark:#0B7E7D;
+  --coral:#FF6B5E;
+  --coral-dark:#E55347;
+  --sun:#FFC93C;
+  --sun-soft:#FFF3C9;
+  --purple:#7C6FF0;
+  --green:#22C55E;
+  --line:#EADFCB;
+  --radius:18px;
+  --shadow:0 6px 18px rgba(36,49,61,.08);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.6;
+}
+img{max-width:100%}
+a{color:var(--teal-dark)}
+
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+
+/* ---------- Header ---------- */
+header.site{
+  position:sticky;top:0;z-index:50;
+  background:var(--card);
+  border-bottom:2px solid var(--line);
+}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 16px}
+.brand{
+  display:flex;align-items:center;gap:9px;
+  font-weight:900;font-size:1.25rem;color:var(--ink);text-decoration:none;
+  white-space:nowrap;
+}
+.brand-dot{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--sun);
+  border:3px solid var(--coral);
+  flex:none;
+}
+nav.main{display:flex;gap:2px;margin-left:auto;overflow-x:auto}
+nav.main a{
+  color:var(--ink);text-decoration:none;font-weight:800;
+  padding:8px 12px;border-radius:999px;white-space:nowrap;font-size:.95rem;
+}
+nav.main a:hover{background:var(--sun-soft)}
+nav.main a.active{background:var(--ink);color:#fff}
+
+/* ---------- Hero ---------- */
+.hero{text-align:center;padding:44px 16px 30px}
+.hero h1{font-size:clamp(2.2rem,7vw,3.6rem);margin:0 0 6px;font-weight:900;letter-spacing:-.5px}
+.hero .tag{
+  display:inline-block;background:var(--ink);color:#fff;font-weight:800;
+  padding:6px 18px;border-radius:999px;font-size:1.05rem;margin-bottom:14px;
+}
+.hero p.lead{max-width:640px;margin:0 auto 8px;color:var(--muted);font-size:1.1rem}
+
+/* ---------- Age picker ---------- */
+.age-picker{
+  display:grid;gap:14px;grid-template-columns:1fr;
+  max-width:860px;margin:26px auto 10px;padding:0 4px;
+}
+@media(min-width:720px){.age-picker{grid-template-columns:repeat(3,1fr)}}
+.age-btn{
+  display:block;text-align:center;text-decoration:none;color:#fff;
+  font-weight:900;font-size:1.35rem;
+  padding:26px 12px;border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  transition:transform .12s ease;
+}
+.age-btn small{display:block;font-weight:700;font-size:.9rem;opacity:.92;margin-top:4px}
+.age-btn:hover{transform:translateY(-3px)}
+.age-kids{background:var(--teal)}
+.age-teens{background:var(--purple)}
+.age-adults{background:var(--coral)}
+
+/* ---------- Sections & cards ---------- */
+section.block{padding:26px 0}
+section.block h2{font-size:1.6rem;margin:0 0 4px;font-weight:900}
+section.block p.sub{color:var(--muted);margin:0 0 18px}
+.cards{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:640px){.cards{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:960px){.cards.cols3{grid-template-columns:repeat(3,1fr)}}
+.card{
+  background:var(--card);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);
+  border:2px solid transparent;
+  display:flex;flex-direction:column;gap:10px;
+}
+.card h3{margin:0;font-size:1.25rem}
+.card p{margin:0;color:var(--muted)}
+.card .lesson-line{
+  background:var(--sun-soft);border-radius:12px;padding:10px 12px;
+  font-size:.92rem;color:var(--ink);font-weight:700;
+}
+.card .lesson-line b{color:var(--coral-dark)}
+.card.coming{opacity:.75;border:2px dashed var(--line);box-shadow:none}
+.pill{
+  display:inline-block;font-size:.75rem;font-weight:900;letter-spacing:.4px;
+  text-transform:uppercase;padding:4px 12px;border-radius:999px;
+  background:var(--sun);color:var(--ink);align-self:flex-start;
+}
+.pill.soon{background:#E7E2D5;color:var(--muted)}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-block;text-align:center;text-decoration:none;cursor:pointer;
+  background:var(--teal);color:#fff;font-weight:900;font-size:1.05rem;
+  border:none;border-radius:999px;padding:13px 30px;
+  box-shadow:var(--shadow);
+}
+.btn:hover{background:var(--teal-dark)}
+.btn.coral{background:var(--coral)}
+.btn.coral:hover{background:var(--coral-dark)}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.center{text-align:center}
+
+/* ---------- Lesson callout ---------- */
+.lesson-box{
+  background:var(--sun-soft);
+  border-left:8px solid var(--sun);
+  border-radius:0 var(--radius) var(--radius) 0;
+  padding:18px 20px;margin:22px 0;
+}
+.lesson-box h2{margin:0 0 8px;font-size:1.35rem}
+.lesson-box h2 .cap{font-size:.8rem;vertical-align:middle;background:var(--sun);border-radius:999px;padding:3px 10px;margin-right:8px}
+.lesson-box p{margin:0 0 10px}
+.lesson-box p:last-child{margin-bottom:0}
+
+/* ---------- Prose pages ---------- */
+.prose{max-width:760px;margin:0 auto;padding:30px 16px 40px}
+.prose h1{font-size:2rem;margin:0 0 12px}
+.prose h2{font-size:1.3rem;margin:26px 0 8px}
+.prose p,.prose li{color:#3A4753}
+.prose ul{padding-left:20px}
+
+/* ---------- Game shell ---------- */
+.game-head{text-align:center;padding:28px 16px 6px}
+.game-head h1{margin:0 0 6px;font-size:clamp(1.7rem,5.5vw,2.4rem)}
+.game-head p{color:var(--muted);margin:0 auto;max-width:620px}
+.game-area{
+  background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:18px;margin:18px auto;
+  max-width:520px;
+}
+.stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.stat{
+  background:var(--bg);border-radius:12px;padding:8px 16px;
+  font-weight:800;font-size:.95rem;min-width:96px;text-align:center;
+}
+.stat span{display:block;font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.overlay{
+  position:absolute;inset:0;border-radius:var(--radius);
+  background:rgba(36,49,61,.88);color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;text-align:center;padding:20px;
+}
+.overlay.hidden{display:none}
+.overlay h2{margin:0;font-size:1.8rem}
+.overlay p{margin:0;opacity:.9}
+.stage{position:relative}
+
+/* ---------- Memory Match ---------- */
+.mboard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mcard{perspective:600px;cursor:pointer;aspect-ratio:1}
+.mcard .inner{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;transition:transform .35s ease;
+}
+.mcard.flipped .inner{transform:rotateY(180deg)}
+.mface{
+  position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:14px;font-size:clamp(1.6rem,9vw,2.4rem);
+}
+.mface.back{background:var(--purple);color:#fff;font-weight:900}
+.mface.front{background:var(--sun-soft);transform:rotateY(180deg);border:2px solid var(--sun)}
+.mcard.matched .mface.front{background:#D9F7D4;border-color:var(--green)}
+.mcard.matched{cursor:default}
+
+/* ---------- Neon Snake ---------- */
+#snakeCanvas{
+  width:100%;max-width:480px;aspect-ratio:1;display:block;margin:0 auto;
+  background:#0C1322;border-radius:16px;touch-action:none;
+}
+
+/* ---------- Sudoku ---------- */
+.sudoku-meta{text-align:center;color:var(--muted);font-weight:700;margin-bottom:10px}
+.sboard{
+  display:grid;grid-template-columns:repeat(9,1fr);
+  max-width:460px;margin:0 auto;border:3px solid var(--ink);border-radius:8px;overflow:hidden;
+  background:#fff;
+}
+.scell{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-right:1px solid #D8DEE6;border-bottom:1px solid #D8DEE6;
+  font-weight:800;font-size:clamp(1rem,4.6vw,1.5rem);cursor:pointer;
+  position:relative;user-select:none;-webkit-user-select:none;
+  color:#1D4ED8;
+}
+.scell.given{color:var(--ink);cursor:default}
+.scell.br{border-right:2px solid var(--ink)}
+.scell.bb{border-bottom:2px solid var(--ink)}
+.scell.sel{background:#DBEAFE}
+.scell.peer{background:#EFF6FF}
+.scell.same{background:#BFDBFE}
+.scell.err{background:#FECACA !important;color:#B91C1C;animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.scell .notes{
+  position:absolute;inset:2px;display:grid;
+  grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  font-size:clamp(.42rem,1.9vw,.62rem);color:var(--muted);font-weight:700;line-height:1;
+  pointer-events:none;
+}
+.scell .notes span{display:flex;align-items:center;justify-content:center}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;max-width:460px;margin:14px auto 0}
+.pad button{
+  border:2px solid var(--line);background:#fff;border-radius:12px;
+  font-weight:900;font-size:1.15rem;padding:10px 0;cursor:pointer;color:var(--ink);
+}
+.pad button:active{background:var(--sun-soft)}
+.pad button.tool{font-size:.85rem;background:var(--bg)}
+.pad button.tool.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.mistakes{color:var(--coral-dark);font-weight:900}
+
+/* ---------- Footer ---------- */
+footer.site{background:var(--ink);color:#DDE5EC;margin-top:40px}
+.foot{padding:30px 16px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.foot .fbrand{font-weight:900;font-size:1.15rem;color:#fff}
+.foot nav{display:flex;gap:4px;justify-content:center;flex-wrap:wrap}
+.foot nav a{color:#DDE5EC;text-decoration:none;font-weight:700;padding:6px 10px}
+.foot nav a:hover{color:var(--sun)}
+.foot .copy{font-size:.85rem;color:#9AA7B4}
+
+/* ---------- Misc ---------- */
+.howto{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin:18px 0}
+.howto h2{margin:0 0 10px;font-size:1.3rem}
+.howto ol,.howto ul{margin:0;padding-left:22px;color:#3A4753}
+.howto li{margin-bottom:6px}
+.kbd{
+  display:inline-block;background:var(--ink);color:#fff;border-radius:6px;
+  padding:1px 9px;font-size:.85rem;font-weight:800;font-family:inherit;
+}
+.browse-link{display:inline-block;margin-top:14px;font-weight:800}
