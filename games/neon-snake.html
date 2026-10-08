@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Snake — Free Online Snake Game | Wisely Arcade</title>
+<meta name="description" content="Play Neon Snake free online — the classic snake game with a glowing neon twist. Eat, grow, and don't get greedy. Keyboard + swipe controls, works on mobile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="../index.html"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="../index.html">Home</a>
+      <a href="../kids.html">Kids</a>
+      <a href="../teens.html">Teens</a>
+      <a href="../adults.html">Adults</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Neon Snake</h1>
+    <p>Eat the glowing orbs, grow longer, and survive. It gets faster — and greedier — the longer you last.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="s-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="s-best">0</div></div>
+      </div>
+      <div class="stage">
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <div class="overlay" id="s-start">
+          <h2>Neon Snake</h2>
+          <p>Eat orbs to grow. Don't hit the walls — or yourself.</p>
+          <button class="btn coral" id="s-start-btn">Start</button>
+        </div>
+        <div class="overlay hidden" id="s-over">
+          <h2>Game Over</h2>
+          <p id="s-over-stats"></p>
+          <button class="btn coral" id="s-again-btn">Play again</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Guide the snake to the glowing red orb to eat it and grow longer.</li>
+        <li>Every orb scores a point — and the snake gets a little faster.</li>
+        <li>The game ends if you hit a wall or bite your own tail.</li>
+        <li>Plan your path: a long snake needs room to turn!</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Keyboard:</strong> <span class="kbd">↑</span> <span class="kbd">↓</span> <span class="kbd">←</span> <span class="kbd">→</span> or <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> to steer. <span class="kbd">Space</span> to start, <span class="kbd">P</span> to pause.</li>
+        <li><strong>Touch:</strong> swipe on the game to steer. Tap to start or resume.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Greed traps you — know when enough is enough</h2>
+      <p>Snake feels great at first — every glowing orb makes you longer, stronger, hungrier. But the longer you get, the more dangerous your own tail becomes, until one greedy bite too many ends the run.</p>
+      <p>That's the trap of greed in real life too: chasing "just a little more" can tangle up everything you've already built. Enjoy the game, celebrate the growth — but know when enough is enough.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens.html">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about.html">About</a>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../terms.html">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/neon-snake.js"></script>
+</body>
+</html>
