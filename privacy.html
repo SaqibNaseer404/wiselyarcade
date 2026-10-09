@@ -12,6 +12,9 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Privacy Policy | Wisely Arcade</title>
 <meta name="description" content="Wisely Arcade privacy policy: no accounts, no data collection. High scores are stored only in your own browser. No personal data from children is stored anywhere.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -71,5 +74,10 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
 </body>
 </html>

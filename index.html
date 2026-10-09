@@ -12,6 +12,9 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Wisely Arcade — Play. Learn. Repeat. | Family-safe games that teach life lessons</title>
 <meta name="description" content="Wisely Arcade is a family-safe arcade where every game teaches a life lesson. Pick your age group and play free games online — no downloads, no accounts. Play. Learn. Repeat.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,5 +120,10 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
 </body>
 </html>
