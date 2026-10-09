@@ -12,6 +12,9 @@
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Daily Sudoku — Free Online Sudoku Puzzle Every Day | Wisely Arcade</title>
 <meta name="description" content="Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -115,5 +118,10 @@
 <script src="../js/main.js"></script>
 <script src="../js/sudoku-data.js"></script>
 <script src="../js/daily-sudoku.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
 </body>
 </html>
