@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Tower Stack — Free Online Stacking Game for Teens | Wisely Arcade</title>
+<meta name="description" content="Play Tower Stack free online — drop each sliding block at just the right moment and build the tallest tower you can. Levels get faster, wind kicks in, and patience wins. No download.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  #tower{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids.html">Kids</a>
+      <a href="../teens.html">Teens</a>
+      <a href="../adults.html">Adults</a>
+      <a href="../about.html">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Tower Stack</h1>
+    <p>Drop each block at just the right moment. Rush it and the tower leans — time it well and you'll touch the stars.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Height</span><div id="t-height">0</div></div>
+        <div class="stat"><span>Level</span><div id="t-level">1</div></div>
+        <div class="stat"><span>Best</span><div id="t-best">—</div></div>
+      </div>
+      <div class="stage">
+        <canvas id="tower" width="420" height="620" aria-label="Tower Stack game: tap to drop each sliding block onto the tower"></canvas>
+        <div class="overlay hidden" id="t-over">
+          <h2>Tower toppled!</h2>
+          <p id="t-over-stats"></p>
+          <button class="btn" id="t-again">Build again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="t-restart">Restart</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>A block slides back and forth above your tower. Tap, click, or press <span class="kbd">Space</span> to drop it.</li>
+        <li>Any part hanging over the edge gets sliced off — the tower keeps only what lands squarely.</li>
+        <li>Land a block almost perfectly and it stays whole. Stack them true to earn a <strong>Perfect</strong> streak.</li>
+        <li>Every 5 blocks is a new <strong>level</strong>: the block slides faster, and from level 3 the wind starts pushing it.</li>
+        <li>Miss the tower completely and the block tumbles away — game over. How high can you build?</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click anywhere on the tower to drop the block.</li>
+        <li><strong>Keyboard:</strong> <span class="kbd">Space</span> or <span class="kbd">↓</span> to drop the block.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Steady wins — rushing topples towers</h2>
+      <p>Every block in Tower Stack is a small decision, and hurried decisions make leaning towers. The players who build highest aren't the fastest tappers — they're the ones who wait half a second for the right moment, every single time.</p>
+      <p>Life stacks the same way. Skills, friendships, a career — they're all built one careful block at a time, and no one remembers how fast you built, only whether it stood. Slow down, aim true, and let steady win.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens.html">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about.html">About</a>
+      <a href="../privacy.html">Privacy</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../terms.html">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/tower-stack.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
