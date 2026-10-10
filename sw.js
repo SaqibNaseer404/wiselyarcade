@@ -1,6 +1,6 @@
 /* Wisely Arcade service worker — offline shell + stale-while-revalidate for same-origin assets */
-const CACHE = 'wiselyarcade-v1';
-const CORE = ['/', '/index.html', '/css/style.css', '/js/main.js', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
+const CACHE = 'wiselyarcade-v2';
+const CORE = ['/', '/css/style.css', '/js/main.js', '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
