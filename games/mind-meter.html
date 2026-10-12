@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Mind Meter — Free Online IQ Challenge Game | Wisely Arcade</title>
+<meta name="description" content="Play Mind Meter free online — a 3D IQ challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your estimated IQ, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=6">
+<style>
+  #mm-bg{position:absolute;inset:0;width:100%;height:100%;border-radius:12px;display:block}
+  .mm-wrap{position:relative;border-radius:12px;overflow:hidden;min-height:560px;
+    background:linear-gradient(160deg,#e9ddff 0%,#d7ecff 45%,#ffe9f2 100%)}
+  .mm-screen{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;min-height:560px;padding:28px 18px;text-align:center}
+  .mm-screen.hidden{display:none}
+  .mm-badge{font-size:3.2rem;filter:drop-shadow(0 8px 14px rgba(122,96,178,.35));
+    animation:mm-float 3.2s ease-in-out infinite}
+  @keyframes mm-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .mm-title{font-size:2rem;font-weight:900;color:#3b3449;margin:10px 0 4px}
+  .mm-sub{color:#6d6480;max-width:420px;margin:0 0 18px}
+  .mm-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+  .mm-chip{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);
+    box-shadow:0 6px 16px rgba(122,96,178,.16), inset 0 2px 0 #fff;
+    border-radius:999px;padding:6px 14px;font-weight:800;color:#5b4f70;font-size:.9rem}
+  #mm-card{perspective:900px;width:100%;max-width:520px}
+  .mm-card-inner{background:rgba(255,255,255,.82);backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.95);border-radius:22px;
+    box-shadow:0 18px 44px rgba(122,96,178,.25), inset 0 2px 0 #fff;
+    padding:26px 22px;transform-style:preserve-3d;transition:transform .12s ease-out}
+  .mm-pop{animation:mm-pop .35s ease}
+  @keyframes mm-pop{0%{transform:scale(.94) rotateX(6deg);opacity:.4}100%{transform:scale(1) rotateX(0);opacity:1}}
+  #mm-cat{display:inline-block;font-size:.8rem;font-weight:900;color:#8a5cf6;background:#efe7ff;
+    border-radius:999px;padding:5px 14px;margin-bottom:10px}
+  #mm-num{font-size:.8rem;font-weight:800;color:#9a90ad;margin-bottom:8px}
+  #mm-q{font-size:1.25rem;font-weight:900;color:#3b3449;margin:0 0 18px;line-height:1.45}
+  .mm-timer{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+  #mm-ring-fg{transition:stroke-dashoffset 1s linear}
+  #mm-time{font-weight:900;color:#5b4f70;min-width:64px;text-align:left}
+  #mm-opts{display:grid;gap:10px}
+  .mm-opt{display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;
+    background:#fff;border:2px solid #e6def7;border-radius:16px;padding:12px 14px;
+    font-family:inherit;font-size:1rem;font-weight:800;color:#4a415c;
+    box-shadow:0 4px 12px rgba(122,96,178,.12), inset 0 2px 0 #fff;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
+  .mm-opt:hover:not(:disabled){transform:translateY(-2px) scale(1.01);border-color:#b79df5;
+    box-shadow:0 8px 20px rgba(122,96,178,.22), inset 0 2px 0 #fff}
+  .mm-opt:disabled{cursor:default;opacity:.85}
+  .mm-letter{flex:0 0 34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(145deg,#c9b3f5,#9d7bea);color:#fff;font-weight:900;
+    box-shadow:0 3px 8px rgba(157,123,234,.4)}
+  .mm-opt.correct{border-color:#34c98e;background:#e9fff4}
+  .mm-opt.correct .mm-letter{background:linear-gradient(145deg,#5fe0a8,#2bb673)}
+  .mm-opt.wrong{border-color:#f2789f;background:#ffedf3;animation:mm-shake .3s ease}
+  .mm-opt.wrong .mm-letter{background:linear-gradient(145deg,#f5a3b8,#e15b85)}
+  @keyframes mm-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  #mm-stage{position:relative}
+  .mm-popup{position:absolute;top:-6px;left:50%;transform:translate(-50%,0);z-index:5;
+    font-size:1.6rem;font-weight:900;pointer-events:none;animation:mm-rise .9s ease forwards}
+  .mm-popup.good{color:#1fae6e;text-shadow:0 2px 0 #fff}
+  .mm-popup.bad{color:#e15b85;text-shadow:0 2px 0 #fff}
+  @keyframes mm-rise{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}30%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,-46px) scale(1.1)}}
+  .mm-iq-ring{width:150px;height:150px;border-radius:50%;margin:6px auto 10px;
+    background:conic-gradient(#9d7bea 0deg,#5fe0a8 120deg,#ffd166 240deg,#9d7bea 360deg);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 34px rgba(122,96,178,.35), inset 0 3px 0 rgba(255,255,255,.7);
+    animation:mm-spin-in .8s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes mm-spin-in{0%{transform:scale(.4) rotate(-120deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
+  .mm-iq-inner{width:118px;height:118px;border-radius:50%;background:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:inset 0 3px 10px rgba(122,96,178,.18)}
+  #mm-iq{font-size:2.6rem;font-weight:900;color:#3b3449;line-height:1}
+  .mm-iq-label{font-size:.72rem;font-weight:900;color:#9a90ad;letter-spacing:2px}
+  #mm-rank{font-size:1.3rem;font-weight:900;color:#5b4f70;margin:4px 0 2px}
+  #mm-acc{color:#6d6480;font-weight:700;margin:0 0 6px}
+  #mm-best-line{font-weight:900;color:#8a5cf6;margin:0 0 16px}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Mind Meter</h1>
+    <p>An IQ challenge in glowing 3D — 12 timed brain-teasers across number logic, patterns, words, and math. How high can your meter go?</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="mm-score">0</div></div>
+        <div class="stat"><span>Streak</span><div id="mm-streak"></div></div>
+        <div class="stat"><span>Best IQ</span><div id="mm-best">—</div></div>
+      </div>
+
+      <div class="mm-wrap" id="mm-stage">
+        <canvas id="mm-bg" aria-hidden="true"></canvas>
+
+        <div class="mm-screen" id="mm-start">
+          <div class="mm-badge">🧠</div>
+          <div class="mm-title">Measure your mind</div>
+          <p class="mm-sub">12 questions. 30 seconds each. Answer fast and keep a streak going for bonus points — then get your estimated IQ.</p>
+          <button class="btn" id="mm-play">Start the challenge</button>
+        </div>
+
+        <div class="mm-screen hidden" id="mm-quiz">
+          <div class="mm-stats">
+            <span class="mm-chip" id="mm-num">Question 1 of 12</span>
+            <span class="mm-chip">Score: <b id="mm-score2">0</b></span>
+          </div>
+          <div id="mm-card">
+            <div class="mm-card-inner">
+              <span id="mm-cat">🔢 Number Logic</span>
+              <div class="mm-timer">
+                <svg width="56" height="56" viewBox="0 0 56 56">
+                  <circle cx="28" cy="28" r="26" fill="none" stroke="#e6def7" stroke-width="6"/>
+                  <circle id="mm-ring-fg" cx="28" cy="28" r="26" fill="none" stroke="#9d7bea"
+                    stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0"
+                    transform="rotate(-90 28 28)"/>
+                </svg>
+                <span id="mm-time">30s</span>
+              </div>
+              <p id="mm-q"></p>
+              <div id="mm-opts"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mm-screen hidden" id="mm-done">
+          <div class="mm-badge">🏆</div>
+          <div class="mm-title">Your estimated IQ</div>
+          <div class="mm-iq-ring"><div class="mm-iq-inner">
+            <span class="mm-iq-label">IQ</span><span id="mm-iq">0</span>
+          </div></div>
+          <div id="mm-rank"></div>
+          <p id="mm-acc"></p>
+          <p id="mm-best-line"></p>
+          <button class="btn" id="mm-again">Play again</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="mm-restart">Restart</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>Mind Meter is a race against your own brain: 12 original puzzles drawn from number logic, visual patterns, word reasoning, and classic math riddles. Each question gives you 30 seconds on the clock.</p>
+      <ol>
+        <li>Read the question, pick one of the four answers — <strong>faster answers earn bigger time bonuses</strong>.</li>
+        <li>Chain correct answers into a <strong>streak</strong> — every streak step adds bonus points, up to +100 per question.</li>
+        <li>Run out of time and the question is gone — no points, streak resets. Keep moving!</li>
+        <li>At the end you get an <strong>estimated IQ score</strong> (85–145 scale) and a rank, from Curious Mind up to Certified Genius. Beat your best next time.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap an answer. Move your mouse or tilt your phone — the 3D background drifts with you.</li>
+        <li><strong>Keyboard:</strong> press <span class="kbd">1</span>–<span class="kbd">4</span> to answer A–D.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>A sharp mind is built, not born</h2>
+      <p>Every IQ question you solve is a rep for your brain — the same way every push-up is a rep for your muscles. Nobody is born a genius at puzzles; the people who ace them have simply done hundreds before you.</p>
+      <p>So a low score today means nothing except "you haven't practiced yet." Play again tomorrow, and the meter moves. Brains grow the same way everything else grows: one small effort, repeated.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+      <a class="btn ghost" href="../adults">← More games for ages 18+</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/three.min.js"></script>
+<script src="../js/mind-meter.js?v=1"></script>
+<script>
+/* 3D ambience: floating pastel shapes behind the quiz, drifting with the pointer. */
+(function () {
+  if (!window.THREE) return;
+  var canvas = document.getElementById('mm-bg');
+  var stage = document.getElementById('mm-stage');
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); }
+  catch (e) { return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, 2, 0.1, 100);
+  camera.position.z = 14;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xc9b3f5, 0.95));
+  var sun = new THREE.DirectionalLight(0xfff1d6, 0.7);
+  sun.position.set(6, 10, 8);
+  scene.add(sun);
+
+  var shapes = [];
+  var geos = [
+    new THREE.IcosahedronGeometry(1, 0),
+    new THREE.TorusGeometry(0.8, 0.32, 12, 24),
+    new THREE.OctahedronGeometry(1, 0),
+    new THREE.TorusKnotGeometry(0.6, 0.2, 48, 8),
+    new THREE.SphereGeometry(0.9, 18, 14)
+  ];
+  var cols = [0xc9b3f5, 0x9be3d0, 0xffc7dd, 0xffe08a, 0xa9c8f5, 0xf5b3c9];
+  for (var i = 0; i < 16; i++) {
+    var m = new THREE.Mesh(
+      geos[i % geos.length],
+      new THREE.MeshLambertMaterial({ color: cols[i % cols.length], transparent: true, opacity: 0.55 })
+    );
+    var s = 0.5 + Math.random() * 0.9;
+    m.scale.set(s, s, s);
+    m.position.set((Math.random() - 0.5) * 18, (Math.random() - 0.5) * 11, -2 - Math.random() * 7);
+    m.userData = { rx: (Math.random() - 0.5) * 0.8, ry: (Math.random() - 0.5) * 0.8,
+                   fy: 0.4 + Math.random() * 0.8, ph: Math.random() * 6.28, y0: m.position.y };
+    scene.add(m);
+    shapes.push(m);
+  }
+
+  var mx = 0, my = 0;
+  stage.addEventListener('pointermove', function (e) {
+    var r = stage.getBoundingClientRect();
+    mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  });
+
+  function resize() {
+    var w = stage.clientWidth || 400, h = stage.clientHeight || 560;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  var t = 0;
+  (function loop() {
+    requestAnimationFrame(loop);
+    t += 0.008;
+    for (var i = 0; i < shapes.length; i++) {
+      var s2 = shapes[i], u = s2.userData;
+      s2.rotation.x += u.rx * 0.01;
+      s2.rotation.y += u.ry * 0.01;
+      s2.position.y = u.y0 + Math.sin(t * u.fy + u.ph) * 0.7;
+    }
+    camera.position.x += (mx * 1.6 - camera.position.x) * 0.04;
+    camera.position.y += (-my * 1.0 - camera.position.y) * 0.04;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  })();
+})();
+</script>
+<script>
+/* Keyboard answers 1-4 */
+document.addEventListener('keydown', function (e) {
+  var n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4) {
+    var btns = document.querySelectorAll('#mm-quiz:not(.hidden) .mm-opt');
+    if (btns[n - 1] && !btns[n - 1].disabled) btns[n - 1].click();
+  }
+});
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
