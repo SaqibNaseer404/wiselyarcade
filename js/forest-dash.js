@@ -59,6 +59,8 @@
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
 
   function hexRgb(h) {
+    var m = /^rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/.exec(h);
+    if (m) return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
     return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)];
   }
   function mix(h1, h2, k) {
