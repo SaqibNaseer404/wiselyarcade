@@ -43,14 +43,14 @@
       <h2>Games for Ages 18+</h2>
       <p class="sub">Brain games for grown-ups — quiet challenges about patience, practice, and thinking before you act.</p>
       <div class="cards cols3">
-        <div class="card">
+        <div class="card"><img class="thumb" src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku — free online game">
           <span class="pill">Playable now</span>
           <h3>Daily Sudoku</h3>
           <p>A fresh Sudoku puzzle every single day. Logic, patience, and one certain number at a time.</p>
           <div class="lesson-line"><b>The lesson:</b> big problems break into small steps — logic beats panic.</div>
           <div class="btn-row"><a class="btn" href="games/daily-sudoku">Play now</a></div>
         </div>
-        <div class="card">
+        <div class="card"><img class="thumb" src="images/thumbs/2048-merge.jpg" alt="2048 Merge — free online game">
           <span class="pill">Playable now</span>
           <h3>2048 Merge</h3>
           <p>Slide, merge, and chase the legendary 2048 tile. A calm number puzzle for sharp minds.</p>
@@ -63,12 +63,15 @@
           <p>How fast can your fingers really go? Race the clock and watch practice compound.</p>
           <div class="lesson-line"><b>The lesson:</b> practice compounds — a little every day makes you unstoppable.</div>
         </div>
-        <div class="card coming">
-          <span class="pill soon">Coming soon</span>
+        <div class="card">
+          <img class="thumb" src="images/thumbs/minesweeper.jpg" alt="Minesweeper — free online game">
+          <span class="pill">Playable now</span>
           <h3>Minesweeper</h3>
-          <p>The timeless logic classic, rebuilt clean for modern screens.</p>
+          <p>The timeless logic classic, rebuilt with glossy 3D tiles for modern screens.</p>
           <div class="lesson-line"><b>The lesson:</b> think before you act — one careless move can cost everything.</div>
+          <div class="btn-row"><a class="btn" href="games/minesweeper">Play now</a></div>
         </div>
+
       </div>
     </section>
   </div>
@@ -88,6 +91,7 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/recommend.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
