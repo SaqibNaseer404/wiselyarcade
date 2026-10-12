@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Bubble Pop — Free Online Bubble Shooter Game | Wisely Arcade</title>
+<meta name="description" content="Play Bubble Pop free online — the classic bubble shooter with glossy 3D bubbles! Aim the cannon, match 3 or more bubbles to pop them, and drop whole clusters for bonus points. A new row slides in every 6 shots. No download, no sign-up, family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  #bpop{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:crosshair}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Bubble Pop</h1>
+    <p>The timeless bubble shooter, rebuilt glossy and gorgeous — aim the cannon, match three or more bubbles, and watch whole clusters tumble. Every shot counts.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="b-score">0</div></div>
+        <div class="stat"><span>Level</span><div id="b-level">1</div></div>
+        <div class="stat"><span>Best</span><div id="b-best">—</div></div>
+      </div>
+      <div class="stage">
+        <canvas id="bpop" width="420" height="640" aria-label="Bubble Pop game: aim the cannon with mouse or finger, shoot to match three or more bubbles"></canvas>
+        <div class="overlay hidden" id="b-over">
+          <h2 id="b-over-title">Ready to pop?</h2>
+          <p id="b-over-stats"></p>
+          <button class="btn" id="b-again">Pop again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="b-restart">Restart</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>If you love classic bubble shooters, you'll feel right at home — but these glossy 3D bubbles pop more satisfyingly than any you've seen. Line up the cannon, plan each shot, and clear the board before it reaches you.</p>
+      <ol>
+        <li>Move your mouse or drag your finger to <strong>aim</strong> the cannon — a dotted guide shows exactly where your bubble will fly, including bounces off the walls.</li>
+        <li><strong>Click or release to shoot.</strong> Match <strong>3 or more bubbles</strong> of the same color to pop them in a juicy burst.</li>
+        <li>Bubbles left hanging with nothing connecting them to the top <strong>tumble down</strong> for bonus points — set up big drops by popping their anchors!</li>
+        <li>Every <strong>6 shots</strong>, a new row slides in from the top. If any bubble crosses the red <strong>danger line</strong>, the game is over.</li>
+        <li>Clear the whole board to reach the <strong>next level</strong> — more rows, and a sneaky sixth color joins the fun. How far can you pop?</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse:</strong> move to aim, click to shoot.</li>
+        <li><strong>Touch:</strong> drag to aim, release to shoot.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Aim with intention — random shots waste good chances.</h2>
+      <p>In Bubble Pop, every bubble you fire sticks around. Spray shots randomly and the board fills up, the danger line creeps closer, and suddenly you're out of moves. But line up each shot — pick the color, plan the bounce, pop a whole cluster — and the board melts away.</p>
+      <p>Life works the same way. Random effort fills your days without moving you forward; intentional effort clears the path. Aim with intention: choose where your energy goes, and make every shot count.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/bubble-pop.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
