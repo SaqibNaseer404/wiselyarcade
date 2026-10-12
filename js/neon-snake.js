@@ -93,36 +93,146 @@
     timerId = setTimeout(tick, stepMs());
   }
 
-  function draw() {
-    ctx.clearRect(0, 0, SIZE, SIZE);
+  // ---- Glossy 3D candy look (visuals only; game logic untouched) ----
 
-    // Food: glowing orb.
-    var fx = food.x * CELL + CELL / 2, fy = food.y * CELL + CELL / 2;
+  // Board backdrop: deep radial gradient for depth, vignette edges,
+  // and a faint dot grid for texture.
+  function drawBoard() {
+    var g = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.05,
+                                     SIZE / 2, SIZE / 2, SIZE * 0.72);
+    g.addColorStop(0, '#161d38');
+    g.addColorStop(0.6, '#0c1226');
+    g.addColorStop(1, '#05070f');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, SIZE, SIZE);
+
+    ctx.fillStyle = 'rgba(120,160,255,0.07)';
+    var gx, gy;
+    for (gx = 0; gx < CELLS; gx++) {
+      for (gy = 0; gy < CELLS; gy++) {
+        ctx.beginPath();
+        ctx.arc(gx * CELL + CELL / 2, gy * CELL + CELL / 2, 1.1, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  // One glossy candy orb: soft grounding shadow, neon glow, radial-gradient
+  // sphere shading (light source upper-left), dark bottom rim for volume,
+  // and a white specular highlight like a candy wrapper.
+  function drawGlossyOrb(x, y, r, light, mid, dark, glowColor, glowBlur) {
+    // Soft drop shadow beneath the orb.
     ctx.save();
-    ctx.shadowColor = '#FF6B5E';
-    ctx.shadowBlur = 18;
-    ctx.fillStyle = '#FF6B5E';
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.arc(fx, fy, CELL * 0.38, 0, Math.PI * 2);
+    ctx.ellipse(x, y + r * 0.55, r * 0.9, r * 0.35, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Snake: neon green body, brighter head.
-    for (var i = snake.length - 1; i >= 0; i--) {
+    // Sphere body with neon glow.
+    ctx.save();
+    ctx.shadowColor = glowColor;
+    ctx.shadowBlur = glowBlur;
+    var g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+    g.addColorStop(0, light);
+    g.addColorStop(0.45, mid);
+    g.addColorStop(1, dark);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Dark crescent along the bottom for volume.
+    ctx.save();
+    var shade = ctx.createRadialGradient(x, y + r * 0.3, r * 0.2, x, y, r * 1.2);
+    shade.addColorStop(0, 'rgba(0,0,20,0)');
+    shade.addColorStop(1, 'rgba(0,0,20,0.38)');
+    ctx.fillStyle = shade;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // White specular highlight (upper-left).
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    var hi = ctx.createRadialGradient(x - r * 0.36, y - r * 0.42, 0,
+                                      x - r * 0.36, y - r * 0.42, r * 0.42);
+    hi.addColorStop(0, 'rgba(255,255,255,0.95)');
+    hi.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = hi;
+    ctx.beginPath();
+    ctx.ellipse(x - r * 0.36, y - r * 0.42, r * 0.42, r * 0.28, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Glossy 3D eyeball: white sphere, dark pupil, tiny glint.
+  function drawEye(x, y, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 4;
+    var g = ctx.createRadialGradient(x - r * 0.3, y - r * 0.35, r * 0.1, x, y, r);
+    g.addColorStop(0, '#ffffff');
+    g.addColorStop(1, '#c7d2e6');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#0b1020';
+    ctx.beginPath();
+    ctx.arc(x + r * 0.12, y + r * 0.1, r * 0.52, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.arc(x - r * 0.16, y - r * 0.2, r * 0.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function draw() {
+    if (!snake || !food) return;
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    drawBoard();
+
+    var now = performance.now();
+
+    // Food: juicy glowing orb with a soft halo and a gentle pulse.
+    var fx = food.x * CELL + CELL / 2, fy = food.y * CELL + CELL / 2;
+    var pulse = 1 + 0.09 * Math.sin(now / 300);
+    var fr = CELL * 0.36 * pulse;
+    ctx.save();
+    var halo = ctx.createRadialGradient(fx, fy, fr * 0.4, fx, fy, fr * 2.1);
+    halo.addColorStop(0, 'rgba(255,107,94,0.55)');
+    halo.addColorStop(1, 'rgba(255,107,94,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(fx, fy, fr * 2.1, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    drawGlossyOrb(fx, fy, fr, '#ffd9d2', '#ff6b5e', '#b81f14', '#ff6b5e', 22);
+
+    // Snake: glossy orbs, neon green head + cyan body, tapering to the tail.
+    var n = snake.length;
+    for (var i = n - 1; i >= 0; i--) {
       var s = snake[i];
-      var isHead = (i === 0);
-      ctx.save();
-      ctx.shadowColor = isHead ? '#4ADE80' : '#22D3EE';
-      ctx.shadowBlur = 14;
-      ctx.fillStyle = isHead ? '#4ADE80' : '#22D3EE';
-      var pad = 1.5;
-      var r = 5;
-      var x = s.x * CELL + pad, y = s.y * CELL + pad;
-      var w = CELL - pad * 2, h = CELL - pad * 2;
-      ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(x, y, w, h, r); else ctx.rect(x, y, w, h);
-      ctx.fill();
-      ctx.restore();
+      var x = s.x * CELL + CELL / 2, y = s.y * CELL + CELL / 2;
+      if (i === 0) {
+        // Head: bigger glossy orb + directional 3D eyes.
+        var hr = CELL * 0.52;
+        drawGlossyOrb(x, y, hr, '#cfffb0', '#4ade80', '#15803d', '#4ade80', 18);
+        var px = -dir.y, py = dir.x; // perpendicular to travel direction
+        var fwd = hr * 0.5, side = hr * 0.42, er = hr * 0.34;
+        drawEye(x + dir.x * fwd + px * side, y + dir.y * fwd + py * side, er);
+        drawEye(x + dir.x * fwd - px * side, y + dir.y * fwd - py * side, er);
+      } else {
+        var taper = n > 1 ? i / n : 0;
+        var r = CELL * 0.48 - taper * CELL * 0.14;
+        drawGlossyOrb(x, y, r, '#d6f6ff', '#22d3ee', '#0e7490', '#22d3ee', 12);
+      }
     }
   }
 
@@ -221,6 +331,13 @@
     startBtn.textContent = 'Start';
     start();
   });
+
+  // Cosmetic-only animation loop (food pulse / highlight shimmer).
+  // draw() never changes game state, so this is purely visual.
+  (function visualLoop() {
+    if (!document.hidden) draw();
+    requestAnimationFrame(visualLoop);
+  })();
 
   best = getBest();
   reset();

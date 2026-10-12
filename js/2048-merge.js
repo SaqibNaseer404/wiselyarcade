@@ -16,19 +16,21 @@
   var winStatsEl = document.getElementById('m-win-stats');
   var overStatsEl = document.getElementById('m-over-stats');
 
-  // Teal-family palette: soft board, tiles deepen as values grow.
+  // Glossy candy-3D palette: {l: light bevel, b: base, d: dark bevel, t: text}.
+  // Low values ramp through teal; 128+ ramp through orange, echoing the
+  // game's candy-gloss thumbnail.
   var TILE_STYLE = {
-    2:    ['#EDFAF9', '#0B3B39'],
-    4:    ['#D7F3F1', '#0B3B39'],
-    8:    ['#ABE6E3', '#0B3B39'],
-    16:   ['#7CD7D4', '#0B3B39'],
-    32:   ['#4CC6C2', '#FFFFFF'],
-    64:   ['#1FB3AF', '#FFFFFF'],
-    128:  ['#0EA5A4', '#FFFFFF'],
-    256:  ['#0C8F8E', '#FFFFFF'],
-    512:  ['#0A7A79', '#FFFFFF'],
-    1024: ['#086463', '#FFFFFF'],
-    2048: ['#064E4D', '#FFFFFF']
+    2:    { l: '#F4FEFD', b: '#DFF8F6', d: '#A9E3E0', t: '#0B3B39' },
+    4:    { l: '#E9FBF9', b: '#C6F1EE', d: '#8BD9D5', t: '#0B3B39' },
+    8:    { l: '#D8F8F5', b: '#A5E8E4', d: '#5FCFC9', t: '#0B3B39' },
+    16:   { l: '#C4F2EF', b: '#83DED9', d: '#38BCB7', t: '#0B3B39' },
+    32:   { l: '#A9EAE6', b: '#5BD2CC', d: '#1FA8A3', t: '#FFFFFF' },
+    64:   { l: '#8AE0DA', b: '#38C3BC', d: '#0E7F7A', t: '#FFFFFF' },
+    128:  { l: '#FFEBCC', b: '#FFC46E', d: '#EE931E', t: '#FFFFFF' },
+    256:  { l: '#FFDFB0', b: '#FFAE45', d: '#E07F10', t: '#FFFFFF' },
+    512:  { l: '#FFD69C', b: '#FF9C2E', d: '#D06E0B', t: '#FFFFFF' },
+    1024: { l: '#FCC489', b: '#FB8B1E', d: '#C05F06', t: '#FFFFFF' },
+    2048: { l: '#FDB45C', b: '#F8770A', d: '#A84E03', t: '#FFFFFF' }
   };
 
   var grid;        // SIZE x SIZE array of tile objects or null
@@ -43,7 +45,21 @@
 
   function tileColors(value) {
     if (TILE_STYLE[value]) return TILE_STYLE[value];
-    return ['#053D3C', '#FFFFFF']; // super tiles beyond 2048
+    return { l: '#F2A93B', b: '#D98A12', d: '#8A5604', t: '#FFFFFF' }; // super tiles beyond 2048
+  }
+
+  // Glossy candy-3D surface: white specular bloom top-left over a
+  // light-to-dark diagonal bevel gradient.
+  function tileGloss(style) {
+    return 'radial-gradient(120% 90% at 28% 16%, rgba(255,255,255,.65) 0%, rgba(255,255,255,0) 52%),' +
+      'linear-gradient(160deg,' + style.l + ' 0%,' + style.b + ' 45%,' + style.d + ' 100%)';
+  }
+
+  // 3D relief shadows: light top edge, dark bottom edge, soft drop shadow.
+  // Optional extra glow (2048+) is layered in front.
+  function tileShadow(glow) {
+    var base = 'inset 0 2px 3px rgba(255,255,255,.55),inset 0 -4px 7px rgba(0,0,0,.20),0 5px 10px rgba(11,59,57,.24)';
+    return glow ? glow + ',' + base : base;
   }
 
   /* ---------- layout ---------- */
@@ -73,19 +89,24 @@
     el.style.fontSize = Math.round(cellPx * (digits <= 2 ? 0.44 : digits === 3 ? 0.38 : 0.31)) + 'px';
   }
 
-  function createTileEl(tile, pop) {
+  function createTileEl(tile, pop, mergePop) {
     var el = document.createElement('div');
     el.className = 'b2048-tile';
     var colors = tileColors(tile.value);
-    el.style.background = colors[0];
-    el.style.color = colors[1];
+    el.style.background = tileGloss(colors);
+    el.style.color = colors.t;
+    el.style.textShadow = colors.t === '#FFFFFF' ?
+      '0 2px 4px rgba(0,0,0,.35)' : '0 1px 0 rgba(255,255,255,.55)';
     el.textContent = tile.value;
-    if (tile.value >= 2048) el.style.boxShadow = '0 0 18px rgba(14,165,164,.85)';
+    el.style.boxShadow = tileShadow(tile.value >= 2048 ?
+      '0 0 22px rgba(255,170,60,.90)' : null);
     el._tile = tile;
     placeTile(el, tile);
     if (pop) {
-      el.classList.add('pop');
-      setTimeout(function () { el.classList.remove('pop'); }, 220);
+      var animClass = mergePop ? 'merge-pop' : 'pop';
+      var animMs = mergePop ? 260 : 200;
+      el.classList.add(animClass);
+      setTimeout(function () { el.classList.remove(animClass); }, animMs);
     }
     boardEl.appendChild(el);
     tileEls[tile.id] = el;
@@ -242,7 +263,7 @@
           el._tile = t;
           placeTile(el, t);
         } else {
-          createTileEl(t, true);
+          createTileEl(t, true, true);
         }
       });
     });

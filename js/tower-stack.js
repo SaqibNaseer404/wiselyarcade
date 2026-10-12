@@ -161,6 +161,16 @@
   }
   function css(c) { return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')'; }
 
+  function shade(hex, amt) {
+    // Lighten (amt > 0) or darken (amt < 0) a #rrggbb color.
+    var n = parseInt(hex.slice(1), 16);
+    var r = (n >> 16) + amt, g = ((n >> 8) & 255) + amt, b = (n & 255) + amt;
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+  }
+
   function rr(x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
@@ -172,22 +182,67 @@
   }
 
   function drawBlock(cx, w, topY, paletteIdx, alpha) {
+    // Glossy 3D candy-style block: soft cast shadow, beveled gradient body,
+    // lighter left / darker right side shading, glossy top-face highlight,
+    // specular strip on the top edge, and contact occlusion at the bottom.
     var p = PALETTE[paletteIdx % PALETTE.length];
+    var a = alpha === undefined ? 1 : alpha;
     ctx.save();
-    ctx.globalAlpha = alpha === undefined ? 1 : alpha;
-    var g = ctx.createLinearGradient(0, topY, 0, topY + BH);
+    ctx.globalAlpha = a;
+    var x = cx - w / 2, y = topY, r = Math.min(7, BH / 2);
+
+    // ---- body with soft drop shadow cast onto the block below ----
+    ctx.save();
+    ctx.shadowColor = 'rgba(25,12,45,0.38)';
+    ctx.shadowBlur = 12;
+    ctx.shadowOffsetY = 4;
+    var g = ctx.createLinearGradient(0, y, 0, y + BH);
     g.addColorStop(0, p[0]);
-    g.addColorStop(1, p[1]);
-    rr(cx - w / 2, topY, w, BH, 5);
+    g.addColorStop(0.55, p[1]);
+    g.addColorStop(1, shade(p[1], -28));
+    rr(x, y, w, BH, r);
     ctx.fillStyle = g;
     ctx.fill();
-    ctx.strokeStyle = 'rgba(120,70,20,0.25)';
+    ctx.restore();
+
+    // ---- side shading: lighter left, darker right (rounded 3D face) ----
+    var sg = ctx.createLinearGradient(x, 0, x + w, 0);
+    sg.addColorStop(0, 'rgba(255,255,255,0.20)');
+    sg.addColorStop(0.35, 'rgba(255,255,255,0)');
+    sg.addColorStop(0.8, 'rgba(0,0,0,0.10)');
+    sg.addColorStop(1, 'rgba(0,0,0,0.28)');
+    rr(x, y, w, BH, r);
+    ctx.fillStyle = sg;
+    ctx.fill();
+
+    // ---- glossy top-face highlight ----
+    var tg = ctx.createLinearGradient(0, y, 0, y + BH * 0.65);
+    tg.addColorStop(0, 'rgba(255,255,255,0.72)');
+    tg.addColorStop(0.45, 'rgba(255,255,255,0.18)');
+    tg.addColorStop(1, 'rgba(255,255,255,0)');
+    rr(x + 3, y + 3, Math.max(1, w - 6), BH * 0.62, Math.max(1, r - 2));
+    ctx.fillStyle = tg;
+    ctx.fill();
+
+    // ---- thin specular strip on the top edge ----
+    rr(x + 6, y + 4.5, Math.max(1, w - 12), 3.5, 1.75);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fill();
+
+    // ---- contact occlusion along the bottom edge ----
+    var bg = ctx.createLinearGradient(0, y + BH * 0.6, 0, y + BH);
+    bg.addColorStop(0, 'rgba(0,0,0,0)');
+    bg.addColorStop(1, 'rgba(0,0,0,0.22)');
+    rr(x, y + BH * 0.6, w, BH * 0.4, r);
+    ctx.fillStyle = bg;
+    ctx.fill();
+
+    // ---- beveled edge ----
+    rr(x, y, w, BH, r);
+    ctx.strokeStyle = shade(p[1], -50);
+    ctx.globalAlpha = a * 0.5;
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    // highlight stripe
-    rr(cx - w / 2 + 4, topY + 4, w - 8, 5, 2.5);
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fill();
     ctx.restore();
   }
 
@@ -197,6 +252,39 @@
     g.addColorStop(0, sky.top);
     g.addColorStop(1, sky.bot);
     ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // soft sun glow (day) fading as night falls
+    var sun = ctx.createRadialGradient(W * 0.5, H * 0.30, 8, W * 0.5, H * 0.30, W * 0.8);
+    sun.addColorStop(0, 'rgba(255,244,214,' + (0.32 * (1 - sky.night)).toFixed(3) + ')');
+    sun.addColorStop(1, 'rgba(255,244,214,0)');
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, H);
+
+    // cool moon glow + glowing moon disc at high altitude
+    if (sky.night > 0.5) {
+      var mk = (sky.night - 0.5) * 2;
+      var moon = ctx.createRadialGradient(W * 0.78, H * 0.16, 8, W * 0.78, H * 0.16, W * 0.5);
+      moon.addColorStop(0, 'rgba(235,242,255,' + (0.35 * mk).toFixed(3) + ')');
+      moon.addColorStop(1, 'rgba(235,242,255,0)');
+      ctx.fillStyle = moon;
+      ctx.fillRect(0, 0, W, H);
+      ctx.save();
+      ctx.globalAlpha = mk;
+      ctx.shadowColor = 'rgba(220,232,255,0.9)';
+      ctx.shadowBlur = 26;
+      ctx.fillStyle = 'rgba(240,246,255,0.95)';
+      ctx.beginPath();
+      ctx.arc(W * 0.78, H * 0.16, 20, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // gentle vignette for depth
+    var vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.75);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(20,10,40,0.20)');
+    ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
 
     // stars at high altitude
@@ -213,11 +301,15 @@
       ctx.restore();
     }
 
-    // ground
-    ctx.fillStyle = 'rgba(120, 85, 40, 0.35)';
+    // ground (glossy soil band)
+    var gg = ctx.createLinearGradient(0, H - GROUND + BH, 0, H);
+    gg.addColorStop(0, 'rgba(112,78,36,0.6)');
+    gg.addColorStop(0.12, 'rgba(150,108,52,0.55)');
+    gg.addColorStop(1, 'rgba(80,54,24,0.45)');
+    ctx.fillStyle = gg;
     ctx.fillRect(0, H - GROUND + BH, W, GROUND - BH);
-    ctx.fillStyle = 'rgba(120, 85, 40, 0.55)';
-    ctx.fillRect(0, H - GROUND + BH, W, 4);
+    ctx.fillStyle = 'rgba(255,235,200,0.35)';
+    ctx.fillRect(0, H - GROUND + BH, W, 3);
 
     // placed blocks
     for (var i = 0; i < blocks.length; i++) {

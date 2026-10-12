@@ -4,6 +4,81 @@
 (function () {
   'use strict';
 
+  // ---- Glossy 3D "candy tile" visual theme (visuals only — no game logic) ----
+  // Injected after style.css, so these rules override the flat board look with
+  // beveled 3D tiles, specular highlights, embossed givens and chunky buttons.
+  (function injectSudokuGloss() {
+    var css =
+    /* Glossy 3D frame around the grid */
+    '.sboard{border:none;border-radius:16px;padding:10px;gap:2px;' +
+      'background:linear-gradient(150deg,#2b4fb8 0%,#1e3a8a 45%,#152a66 100%);' +
+      'box-shadow:0 18px 36px rgba(21,42,102,.45),0 4px 10px rgba(21,42,102,.35),' +
+      'inset 0 2px 2px rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,0,0,.35);}' +
+    /* 3D beveled tiles: light top-left edge, dark bottom-right edge */
+    '.scell{border:none;margin:0;border-radius:7px;' +
+      'background:linear-gradient(145deg,#ffffff 0%,#f2f6fd 55%,#dfe8f8 100%);' +
+      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
+      '0 1px 2px rgba(21,42,102,.25);' +
+      'text-shadow:0 1px 0 rgba(255,255,255,.65);}' +
+    /* Thicker 3x3 box separators (inset shadows: no layout shift) */
+    '.scell.br{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
+      '0 1px 2px rgba(21,42,102,.25),inset -4px 0 0 0 rgba(21,42,102,.85)}' +
+    '.scell.bb{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
+      '0 1px 2px rgba(21,42,102,.25),inset 0 -4px 0 0 rgba(21,42,102,.85)}' +
+    '.scell.br.bb{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
+      '0 1px 2px rgba(21,42,102,.25),inset -4px 0 0 0 rgba(21,42,102,.85),' +
+      'inset 0 -4px 0 0 rgba(21,42,102,.85)}' +
+    /* Given numbers: glossy embossed dark navy */
+    '.scell.given{color:#0f2743;font-weight:900;' +
+      'text-shadow:0 2px 0 rgba(255,255,255,.85),0 -1px 1px rgba(0,0,0,.28);}' +
+    /* Player digits: clean blue with soft depth */
+    '.scell:not(.given){color:#1d4ed8;font-weight:900;' +
+      'text-shadow:0 2px 0 rgba(255,255,255,.6),0 3px 4px rgba(29,78,216,.22);}' +
+    /* Selected cell: glowing 3D highlight ring */
+    '.scell.sel{background:linear-gradient(145deg,#f8fcff 0%,#e3edfd 60%,#cfe0fb 100%);' +
+      'box-shadow:inset 0 0 0 3px #1d4ed8,inset 2px 2px 0 rgba(255,255,255,.9),' +
+      '0 0 14px 3px rgba(29,78,216,.55),0 1px 3px rgba(21,42,102,.4);}' +
+    /* Same row/column/box: soft tint */
+    '.scell.peer{background:linear-gradient(145deg,#fdf6e8 0%,#fbf0d8 55%,#f5e3b8 100%);}' +
+    /* Cells with the same value: stronger glossy tint */
+    '.scell.same{background:linear-gradient(145deg,#fff3d1 0%,#ffe8a8 55%,#ffd97a 100%);' +
+      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(180,120,20,.3),' +
+      '0 0 8px rgba(255,190,60,.55);}' +
+    /* Wrong-entry flash: glossy red */
+    '.scell.err{background:linear-gradient(145deg,#fecaca 0%,#fca5a5 60%,#f87171 100%)!important;' +
+      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.7),inset 0 0 0 2px #b91c1c,' +
+      '0 0 12px rgba(185,28,28,.5);}' +
+    /* Number pad: chunky glossy 3D buttons */
+    '.pad{gap:10px}' +
+    '.pad button{border:none;border-radius:14px;padding:11px 0;position:relative;' +
+      'background:radial-gradient(circle at 30% 18%,#ffffff 0%,#eaf1fd 45%,#c9d8f5 100%);' +
+      'box-shadow:0 5px 0 #8fa6d4,0 10px 16px rgba(30,60,120,.30),' +
+      'inset 0 2px 2px rgba(255,255,255,.95),inset 0 -3px 5px rgba(90,120,190,.25);' +
+      'color:#16295e;font-weight:900;font-size:1.25rem;' +
+      'text-shadow:0 1px 0 rgba(255,255,255,.7);cursor:pointer;' +
+      'transition:transform .06s ease,box-shadow .06s ease;}' +
+    '.pad button:hover{filter:brightness(1.04)}' +
+    '.pad button:active{transform:translateY(4px);' +
+      'box-shadow:0 1px 0 #8fa6d4,0 3px 6px rgba(30,60,120,.28),' +
+      'inset 0 2px 2px rgba(255,255,255,.95),inset 0 -2px 4px rgba(90,120,190,.25);}' +
+    /* Erase tool button: coral gloss */
+    '.pad button.tool{' +
+      'background:radial-gradient(circle at 30% 18%,#ffd9c9 0%,#ffb49a 45%,#ff8f6b 100%);' +
+      'box-shadow:0 5px 0 #c96a4b,0 10px 16px rgba(190,90,50,.32),' +
+      'inset 0 2px 2px rgba(255,255,255,.85),inset 0 -3px 5px rgba(150,70,40,.28);' +
+      'color:#5f2210;}' +
+    '.pad button.tool:active{transform:translateY(4px);' +
+      'box-shadow:0 1px 0 #c96a4b,0 3px 6px rgba(190,90,50,.3),' +
+      'inset 0 2px 2px rgba(255,255,255,.85),inset 0 -2px 4px rgba(150,70,40,.28);}' +
+    /* Pencil notes stay small and quiet */
+    '.scell .notes{inset:3px}' +
+    '.scell .notes span{color:#7c8db0;text-shadow:0 1px 0 rgba(255,255,255,.7)}';
+    var style = document.createElement('style');
+    style.id = 'sudoku-3d-theme';
+    style.appendChild(document.createTextNode(css));
+    document.head.appendChild(style);
+  })();
+
   var BEST_KEY = 'wisely_sudoku_best';
 
   var boardEl = document.getElementById('sboard');
