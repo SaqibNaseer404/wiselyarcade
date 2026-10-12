@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Trail Stunts — Free Online Bike Stunt Game | Wisely Arcade</title>
+<meta name="description" content="Play Trail Stunts free online — a Moto X3M-style physics bike stunt game with 100% original trails. Throttle, tilt, backflip and stick the landing across 3 wild trails. Fans of Moto X3M will feel right at home. No download.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  #trail{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Trail Stunts</h1>
+    <p>Moto X3M-style bike stunts — throttle, tilt, flip, and stick the landing.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Trail</span><div id="ts-level">1 / 3</div></div>
+        <div class="stat"><span>Time</span><div id="ts-time">0:00.0</div></div>
+        <div class="stat"><span>Best</span><div id="ts-best">—</div></div>
+      </div>
+      <div class="stage">
+        <canvas id="trail" width="720" height="480" aria-label="Trail Stunts game: ride the stunt bike over hills, do flips, and reach the finish flag"></canvas>
+        <div class="overlay hidden" id="ts-over">
+          <h2 id="ts-over-title">Wipeout!</h2>
+          <p id="ts-over-stats"></p>
+          <button class="btn" id="ts-again">Ride again</button>
+          <button class="btn ghost hidden" id="ts-next" style="margin-left:8px">Next trail →</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="ts-restart">Restart</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Hold <span class="kbd">↑</span> (or <span class="kbd">W</span>) to throttle over the hills and reach the checkered flag at the end of the trail.</li>
+        <li>In the air, use <span class="kbd">←</span> / <span class="kbd">→</span> (or <span class="kbd">A</span> / <span class="kbd">D</span>) to tilt the bike — lean back for a backflip, forward for a frontflip.</li>
+        <li>Land on both wheels, fairly level, to score a <strong>flip bonus</strong>. Land nose-first or tail-first at speed and you'll wipe out!</li>
+        <li>If your rider's head hits the ground, that's a wipeout too. Keep the rubber side down.</li>
+        <li>Finish all <strong>3 trails</strong> — each one hillier and longer than the last. Your best time per trail is saved.</li>
+        <li>Love Moto X3M-style stunt riding? You'll feel at home here — Trail Stunts is our own original take on the physics bike-stunt genre.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Keyboard:</strong> <span class="kbd">↑</span>/<span class="kbd">W</span> throttle · <span class="kbd">↓</span>/<span class="kbd">S</span> brake · <span class="kbd">←</span>/<span class="kbd">A</span> lean back · <span class="kbd">→</span>/<span class="kbd">D</span> lean forward · <span class="kbd">R</span> restart.</li>
+        <li><strong>Touch:</strong> use the on-screen buttons — GAS and BRAKE on the edges, LEAN buttons to tilt in the air.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Balance beats speed — control wins the race</h2>
+      <p>Trail Stunts tempts you to hold the throttle down the whole way — and that's exactly how you wipe out. The riders who finish fastest aren't the ones going full speed everywhere; they're the ones who brake before the big jump, tilt gently in the air, and land level. Control beats raw speed, every trail.</p>
+      <p>Life rides the same way. Rushing every decision feels fast, but it ends in wipeouts — missed chances, sloppy work, burnout. The people who go farest aren't the fastest starters; they're the ones who balance ambition with self-control. Ease off the throttle when you need to, and you'll finish the race.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/trail-stunts.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>

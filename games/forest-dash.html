@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Forest Dash — Free Online Endless Runner Game | Wisely Arcade</title>
+<meta name="description" content="Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  #dash{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Forest Dash</h1>
+    <p>An endless runner in the spirit of Subway Surfers and Temple Run — dodge, jump, slide, and keep going. Every obstacle passes if you do.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="f-score">0</div></div>
+        <div class="stat"><span>Fireflies</span><div id="f-flies">0</div></div>
+        <div class="stat"><span>Best</span><div id="f-best">—</div></div>
+      </div>
+      <div class="stage">
+        <canvas id="dash" width="420" height="640" aria-label="Forest Dash game: swipe or use arrow keys to dodge obstacles and collect fireflies"></canvas>
+        <div class="overlay hidden" id="f-over">
+          <h2>Run over!</h2>
+          <p id="f-over-stats"></p>
+          <button class="btn" id="f-again">Run again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="f-restart">Restart</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>If you love Subway Surfers and Temple Run, you'll feel right at home — but this forest trail is all your own. Sprint down three lanes, dodge what blocks you, grab every glowing firefly, and see how far the journey takes you.</p>
+      <ol>
+        <li>You run forward automatically and the trail keeps getting <strong>faster</strong>. Switch lanes with <span class="kbd">←</span> <span class="kbd">→</span>, jump with <span class="kbd">↑</span>, slide with <span class="kbd">↓</span>.</li>
+        <li><strong>Fallen logs</strong> — jump clean over them. <strong>Low branches</strong> — slide right under. <strong>Rock walls</strong> — you can't jump or slide through these, so switch lanes!</li>
+        <li>Grab <strong>glowing fireflies</strong> for bonus points. They light your way as day turns to sunset and then to a starry night.</li>
+        <li>One hit ends the run. Watch ahead, plan your moves, and chase your best score. How far can you go?</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Keyboard:</strong> <span class="kbd">←</span> <span class="kbd">→</span> or <span class="kbd">A</span> <span class="kbd">D</span> to switch lanes · <span class="kbd">↑</span> / <span class="kbd">W</span> / <span class="kbd">Space</span> to jump · <span class="kbd">↓</span> / <span class="kbd">S</span> to slide.</li>
+        <li><strong>Touch:</strong> swipe left/right to switch lanes, swipe up to jump, swipe down to slide, tap to jump.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Keep going — every obstacle passes</h2>
+      <p>In Forest Dash, every log, branch, and rock wall looks like the end of the run — until you jump it, slide under it, or sidestep it, and it's behind you in a second. That's the whole game: obstacles only stop you if you stop moving.</p>
+      <p>Life works the same way. Bad weeks, hard exams, rejections — they feel permanent while you're staring at them, but they pass the way every obstacle on the trail passes: you keep going. You don't have to be the fastest runner. You just have to not stop.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/forest-dash.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
