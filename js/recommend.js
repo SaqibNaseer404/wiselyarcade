@@ -12,7 +12,8 @@
     { slug: 'trail-stunts', name: 'Trail Stunts',         ages: ['teens'] },
     { slug: '2048-merge',   name: '2048 Merge',           ages: ['teens', 'adults'] },
     { slug: 'daily-sudoku', name: 'Daily Sudoku',         ages: ['adults'] },
-    { slug: 'minesweeper',   name: 'Minesweeper',          ages: ['adults'] }
+    { slug: 'minesweeper',   name: 'Minesweeper',          ages: ['adults'] },
+    { slug: 'mind-meter',    name: 'Mind Meter',           ages: ['teens', 'adults'] }
   ];
 
   // Are we on a game page? e.g. /games/neon-snake
