@@ -1,7 +1,8 @@
 /* Forest Dash 3D — real-time 3D endless runner (Three.js).
-   Run through a living forest toward the mountain: switch lanes,
-   jump fallen logs, slide under branches, dodge rock walls,
-   grab fireflies. Lesson: keep going — every obstacle passes. */
+   Run through a living, dense green forest toward the mountain: switch lanes,
+   jump fallen logs, slide under branches, dodge rock walls, grab fireflies.
+   LEVELS: each mountain reached unlocks a deeper, darker, faster forest.
+   Lesson: keep going — every obstacle passes. */
 (function () {
   'use strict';
 
@@ -10,6 +11,7 @@
   var elFlies = document.getElementById('f-flies');
   var elBest = document.getElementById('f-best');
   var elMtn = document.getElementById('f-mtn');
+  var elLevel = document.getElementById('f-level');
   var overBox = document.getElementById('f-over');
   var overStats = document.getElementById('f-over-stats');
   var startBox = document.getElementById('f-start');
@@ -27,6 +29,27 @@
     return;
   }
 
+  /* ---------------- Levels ---------------- */
+  var LEVELS = [
+    { name: 'Sunny Grove',    leg: 800,  speed: 9,  max: 16, trees: 34, bushes: 14, tufts: 18, fog: 0xcfe8f7, fogNear: 40, fogFar: 210, grass: 0x8fd694, gap: 26 },
+    { name: 'Deep Woods',     leg: 900,  speed: 13, max: 20, trees: 52, bushes: 22, tufts: 30, fog: 0xb9d9e8, fogNear: 30, fogFar: 170, grass: 0x76c282, gap: 22 },
+    { name: 'Misty Pines',    leg: 1000, speed: 16, max: 24, trees: 64, bushes: 28, tufts: 38, fog: 0xc0cfd8, fogNear: 22, fogFar: 135, grass: 0x62b774, gap: 19 },
+    { name: 'Thunder Forest', leg: 1100, speed: 19, max: 28, trees: 78, bushes: 34, tufts: 44, fog: 0xacbdd0, fogNear: 16, fogFar: 112, grass: 0x51a364, gap: 16 }
+  ];
+  function levelConfig(n) { // n = 1-based; scales endlessly past the named levels
+    var i = Math.min(n, LEVELS.length) - 1;
+    var c = LEVELS[i];
+    if (n <= LEVELS.length) return c;
+    var extra = n - LEVELS.length;
+    return {
+      name: c.name + ' +' + extra, leg: c.leg,
+      speed: Math.min(30, c.speed + extra * 2), max: Math.min(34, c.max + extra * 2),
+      trees: c.trees, bushes: c.bushes, tufts: c.tufts,
+      fog: c.fog, fogNear: c.fogNear, fogFar: c.fogFar, grass: c.grass,
+      gap: Math.max(12, c.gap - extra)
+    };
+  }
+
   /* ---------------- Renderer / scene / camera ---------------- */
   var renderer;
   try {
@@ -41,9 +64,8 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   var scene = new THREE.Scene();
-  var SKY = 0xcfe8f7;
-  scene.background = new THREE.Color(SKY);
-  scene.fog = new THREE.Fog(SKY, 40, 210);
+  scene.background = new THREE.Color(0xcfe8f7);
+  scene.fog = new THREE.Fog(0xcfe8f7, 40, 210);
 
   var camera = new THREE.PerspectiveCamera(58, 2, 0.1, 400);
   camera.position.set(0, 4.4, 8.2);
@@ -74,9 +96,14 @@
     grass: new THREE.MeshLambertMaterial({ color: 0x8fd694 }),
     path: new THREE.MeshLambertMaterial({ color: 0xe9cb92 }),
     trunk: new THREE.MeshLambertMaterial({ color: 0x8a5a3b }),
-    pine: new THREE.MeshLambertMaterial({ color: 0x3f9e63 }),
-    pine2: new THREE.MeshLambertMaterial({ color: 0x55b774 }),
-    leaf: new THREE.MeshLambertMaterial({ color: 0x63c76f }),
+    trunkDark: new THREE.MeshLambertMaterial({ color: 0x6e452c }),
+    pine: new THREE.MeshLambertMaterial({ color: 0x2f8f57 }),
+    pine2: new THREE.MeshLambertMaterial({ color: 0x3aa863 }),
+    pine3: new THREE.MeshLambertMaterial({ color: 0x27784a }),
+    leaf: new THREE.MeshLambertMaterial({ color: 0x4fb96a }),
+    leaf2: new THREE.MeshLambertMaterial({ color: 0x3da35c }),
+    bush: new THREE.MeshLambertMaterial({ color: 0x46a862 }),
+    tuft: new THREE.MeshLambertMaterial({ color: 0x5cc475 }),
     rock: new THREE.MeshLambertMaterial({ color: 0x8d99a8 }),
     rockDark: new THREE.MeshLambertMaterial({ color: 0x6f7a8c }),
     snow: new THREE.MeshLambertMaterial({ color: 0xffffff }),
@@ -90,6 +117,8 @@
     shorts: new THREE.MeshLambertMaterial({ color: 0x3b4a6b }),
     cap: new THREE.MeshLambertMaterial({ color: 0xf2789f })
   };
+  var PINES = [M.pine, M.pine2, M.pine3];
+  var LEAVES = [M.leaf, M.leaf2, M.pine2];
   var G = {
     box: new THREE.BoxGeometry(1, 1, 1),
     sphere: new THREE.SphereGeometry(0.5, 14, 12),
@@ -140,46 +169,101 @@
   var mSnow = mesh(G.cone, M.snow, 20, 26, 20); mSnow.position.y = 68; mountain.add(mSnow);
   var mBase2 = mesh(G.cone, M.rockDark, 30, 44, 30); mBase2.position.set(30, 22, 6); mountain.add(mBase2);
   var mSnow2 = mesh(G.cone, M.snow, 11, 15, 11); mSnow2.position.set(30, 40, 6); mountain.add(mSnow2);
-  var MTN_FAR = -150, MTN_NEAR = -34, MTN_LEG = 1500;
+  var MTN_FAR = -150, MTN_NEAR = -34;
   mountain.position.set(-6, 0, MTN_FAR);
   scene.add(mountain);
 
-  /* ---------------- Trees ---------------- */
-  var trees = [];
+  /* ---------------- Forest: trees, bushes, grass tufts ---------------- */
+  var MAX_TREES = 80, MAX_BUSHES = 34, MAX_TUFTS = 44;
+  var trees = [], bushes = [], tufts = [];
+
   function makeTree() {
     var g = new THREE.Group();
-    var trunk = mesh(G.cyl, M.trunk, 0.5, 1.6, 0.5);
-    trunk.position.y = 0.8;
+    var trunkMat = Math.random() < 0.5 ? M.trunk : M.trunkDark;
+    var trunk = mesh(G.cyl, trunkMat, 0.55, 1.8, 0.55);
+    trunk.position.y = 0.9;
     g.add(trunk);
-    if (Math.random() < 0.55) { // pine
-      var mat = Math.random() < 0.5 ? M.pine : M.pine2;
-      for (var i = 0; i < 3; i++) {
-        var c = mesh(G.cone, mat, 3.4 - i * 0.8, 2.6, 3.4 - i * 0.8);
-        c.position.y = 2.2 + i * 1.5;
-        g.add(c);
-      }
-    } else { // leafy
-      var blob = mesh(G.sphere, M.leaf, 3.2, 2.8, 3.2);
-      blob.position.y = 3.2;
-      g.add(blob);
-      var blob2 = mesh(G.sphere, M.leaf, 2.0, 1.8, 2.0);
-      blob2.position.set(0.9, 4.2, 0.4);
-      g.add(blob2);
+    var kind = Math.random();
+    if (kind < 0.45) { // tall pine
+      var pm = PINES[(Math.random() * PINES.length) | 0];
+      var c1 = mesh(G.cone, pm, 3.2, 3.4, 3.2); c1.position.y = 3.0; g.add(c1);
+      var c2 = mesh(G.cone, pm, 2.2, 2.6, 2.2); c2.position.y = 4.9; g.add(c2);
+    } else if (kind < 0.8) { // broad leafy
+      var lm = LEAVES[(Math.random() * LEAVES.length) | 0];
+      var b1 = mesh(G.sphere, lm, 3.6, 3.0, 3.6); b1.position.y = 3.4; g.add(b1);
+      var b2 = mesh(G.sphere, lm, 2.2, 2.0, 2.2); b2.position.set(1.0, 4.6, 0.5); g.add(b2);
+    } else { // round canopy tree
+      var lm2 = LEAVES[(Math.random() * LEAVES.length) | 0];
+      var r1 = mesh(G.sphere, lm2, 2.8, 3.4, 2.8); r1.position.y = 3.6; g.add(r1);
     }
-    var s = 0.8 + Math.random() * 0.7;
+    var s = 0.85 + Math.random() * 0.8;
     g.scale.set(s, s, s);
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
   }
-  function treeLaneX() {
+  function forestX(min, max) {
     var side = Math.random() < 0.5 ? -1 : 1;
-    return side * (5.6 + Math.random() * 8);
+    return side * (min + Math.random() * (max - min));
   }
-  for (var ti = 0; ti < 30; ti++) {
+  for (var ti = 0; ti < MAX_TREES; ti++) {
     var t = makeTree();
-    t.position.set(treeLaneX(), 0, -75 + Math.random() * 85);
+    t.position.set(forestX(4.8, 13.5), 0, -85 + Math.random() * 97);
     scene.add(t);
     trees.push(t);
+  }
+  function makeBush() {
+    var g = new THREE.Group();
+    var b = mesh(G.sphere, Math.random() < 0.5 ? M.bush : M.leaf2, 1.6, 1.1, 1.6);
+    b.position.y = 0.5;
+    g.add(b);
+    var s = 0.8 + Math.random() * 0.9;
+    g.scale.set(s, s, s);
+    return g;
+  }
+  for (var bi = 0; bi < MAX_BUSHES; bi++) {
+    var bu = makeBush();
+    bu.position.set(forestX(4.2, 10.5), 0, -85 + Math.random() * 97);
+    scene.add(bu);
+    bushes.push(bu);
+  }
+  function makeTuft() {
+    var g = new THREE.Group();
+    for (var k = 0; k < 3; k++) {
+      var blade = mesh(G.cone, M.tuft, 0.35, 0.9 + Math.random() * 0.5, 0.35);
+      blade.position.set((Math.random() - 0.5) * 0.5, 0.4, (Math.random() - 0.5) * 0.5);
+      blade.rotation.z = (Math.random() - 0.5) * 0.35;
+      g.add(blade);
+    }
+    return g;
+  }
+  for (var gi = 0; gi < MAX_TUFTS; gi++) {
+    var tu = makeTuft();
+    tu.position.set(forestX(3.8, 11.5), 0, -85 + Math.random() * 97);
+    scene.add(tu);
+    tufts.push(tu);
+  }
+
+  function applyTheme(cfg) {
+    scene.fog.color.setHex(cfg.fog);
+    scene.fog.near = cfg.fogNear;
+    scene.fog.far = cfg.fogFar;
+    scene.background.setHex(cfg.fog);
+    M.grass.color.setHex(cfg.grass);
+    var i;
+    for (i = 0; i < trees.length; i++) trees[i].visible = i < cfg.trees;
+    for (i = 0; i < bushes.length; i++) bushes[i].visible = i < cfg.bushes;
+    for (i = 0; i < tufts.length; i++) tufts[i].visible = i < cfg.tufts;
+  }
+  function recycleFlora(list, min, max) {
+    for (var i = 0; i < list.length; i++) {
+      var o = list[i];
+      if (!o.visible) continue;
+      o.position.z += scrollDz;
+      if (o.position.z > KILL_Z) {
+        o.position.z -= 97;
+        o.position.x = forestX(min, max);
+      }
+    }
   }
 
   /* ---------------- The runner ---------------- */
@@ -319,12 +403,13 @@
   var laneIdx = 1, targetX = 0;
   var py = 0, vy = 0, grounded = true;
   var sliding = 0;
-  var dist = 0, flyCount = 0, score = 0;
+  var dist = 0, flyCount = 0, score = 0, bonus = 0;
   var speed = 9;
   var runT = 0;
   var nextRowAt = 30, nextFliesAt = 14;
   var toastTimer = null;
-  var lastLeg = 0;
+  var level = 1, cfg = levelConfig(1);
+  var scrollDz = 0;
 
   function toast(msg) {
     var t = document.getElementById('f-toast');
@@ -332,15 +417,19 @@
     t.textContent = msg;
     t.classList.add('show');
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2600);
   }
 
   function resetWorld() {
     for (var i = 0; i < hurdles.length; i++) hurdles[i].visible = false;
     for (var j = 0; j < flies.length; j++) { flies[j].active = false; flies[j].m.visible = false; }
-    for (var k = 0; k < trees.length; k++) trees[k].position.z = -75 + Math.random() * 85;
+    for (var k = 0; k < trees.length; k++) trees[k].position.z = -85 + Math.random() * 97;
+    for (var b = 0; b < bushes.length; b++) bushes[b].position.z = -85 + Math.random() * 97;
+    for (var q = 0; q < tufts.length; q++) tufts[q].position.z = -85 + Math.random() * 97;
     mountain.position.z = MTN_FAR;
-    lastLeg = 0;
+    level = 1;
+    cfg = levelConfig(1);
+    applyTheme(cfg);
   }
 
   function startGame() {
@@ -348,7 +437,10 @@
     laneIdx = 1; targetX = 0;
     player.position.set(0, 0, 0);
     py = 0; vy = 0; grounded = true; sliding = 0;
-    dist = 0; flyCount = 0; score = 0; speed = 9; runT = 0;
+    dist = 0; flyCount = 0; score = 0; bonus = 0; runT = 0;
+    level = 1;
+    cfg = levelConfig(1);
+    speed = cfg.speed;
     nextRowAt = 34; nextFliesAt = 16;
     resetWorld();
     overBox.classList.add('hidden');
@@ -356,6 +448,17 @@
     elScore.textContent = '0';
     elFlies.textContent = '0';
     elMtn.textContent = '0%';
+    elLevel.textContent = '1';
+  }
+
+  function levelUp() {
+    level++;
+    cfg = levelConfig(level);
+    speed = cfg.speed;
+    applyTheme(cfg);
+    bonus += 250;
+    elLevel.textContent = level;
+    toast('🏔 Level ' + level + ': ' + cfg.name + '! +250');
   }
 
   function endGame() {
@@ -365,7 +468,7 @@
       try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
       showBest(best);
     }
-    overStats.innerHTML = 'You dashed <strong>' + Math.floor(dist) + ' m</strong> toward the mountain and caught <strong>' + flyCount + '</strong> fireflies.<br>Score: <strong>' + score + '</strong> · Best: <strong>' + best + '</strong>';
+    overStats.innerHTML = 'You reached <strong>Level ' + level + '</strong>, dashed <strong>' + Math.floor(dist) + ' m</strong> and caught <strong>' + flyCount + '</strong> fireflies.<br>Score: <strong>' + score + '</strong> · Best: <strong>' + best + '</strong>';
     overBox.classList.remove('hidden');
   }
 
@@ -453,54 +556,46 @@
     var dt = Math.min(clock.getDelta(), 0.05);
 
     if (state === 'playing') {
-      speed = Math.min(24, speed + dt * 0.22);
+      speed = Math.min(cfg.max, speed + dt * 0.22);
       var prevDist = dist;
       dist += speed * dt;
-      score = Math.floor(dist) + flyCount * 25;
+      score = Math.floor(dist) + flyCount * 25 + bonus;
 
       // spawners
-      if (dist > nextRowAt) { spawnRow(); nextRowAt = dist + 26 - Math.min(12, dist / 160); }
+      if (dist > nextRowAt) { spawnRow(); nextRowAt = dist + cfg.gap - Math.min(6, dist / 300); }
       if (dist > nextFliesAt) { spawnFlies(); nextFliesAt = dist + 34 + Math.random() * 20; }
 
-      // mountain approach — every 1500 m you reach it, then a new peak awaits
-      var leg = (dist % MTN_LEG) / MTN_LEG;
+      // mountain approach — reaching it completes the level
+      var leg = (dist % cfg.leg) / cfg.leg;
       mountain.position.z = MTN_FAR + (MTN_NEAR - MTN_FAR) * leg;
       elMtn.textContent = Math.floor(leg * 100) + '%';
-      if (Math.floor(dist / MTN_LEG) > Math.floor(prevDist / MTN_LEG)) {
-        score += 250;
-        toast('🏔 You reached the mountain! +250 — onward to the next peak!');
+      if (Math.floor(dist / cfg.leg) > Math.floor(prevDist / cfg.leg)) {
+        levelUp();
       }
 
       // move world
-      var dz = speed * dt;
+      scrollDz = speed * dt;
+      recycleFlora(trees, 4.8, 13.5);
+      recycleFlora(bushes, 4.2, 10.5);
+      recycleFlora(tufts, 3.8, 11.5);
       var i, o;
-      for (i = 0; i < trees.length; i++) {
-        o = trees[i];
-        o.position.z += dz;
-        if (o.position.z > KILL_Z) {
-          o.position.z -= 88;
-          o.position.x = treeLaneX();
-          var s = 0.8 + Math.random() * 0.7;
-          o.scale.set(s, s, s);
-        }
-      }
       for (i = 0; i < clouds.length; i++) {
         o = clouds[i];
-        o.position.z += dz * 0.25;
+        o.position.z += scrollDz * 0.25;
         o.position.x += dt * 0.4;
         if (o.position.z > 20) { o.position.z = -130; o.position.x = (Math.random() - 0.5) * 90; }
       }
       for (i = 0; i < hurdles.length; i++) {
         o = hurdles[i];
         if (!o.visible) continue;
-        o.position.z += dz;
+        o.position.z += scrollDz;
         if (o.position.z > KILL_Z) { o.visible = false; continue; }
         if (checkHit(o)) { endGame(); }
       }
       for (i = 0; i < flies.length; i++) {
         var fl = flies[i];
         if (!fl.active) continue;
-        fl.m.position.z += dz;
+        fl.m.position.z += scrollDz;
         fl.ph += dt * 5;
         fl.m.position.y += Math.sin(fl.ph) * dt * 0.6;
         var s2 = 0.28 + Math.sin(fl.ph * 1.7) * 0.05;
@@ -528,6 +623,7 @@
     renderer.render(scene, camera);
   }
 
+  applyTheme(cfg);
   resize();
   setTimeout(resize, 60);
   frame();
