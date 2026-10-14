@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
@@ -38,10 +38,19 @@
 </header>
 
 <main>
-  <div class="hero">
-    <h1>Wisely Arcade</h1>
-    <div><span class="tag">Play. Learn. Repeat.</span></div>
-    <p class="lead">A family-safe arcade where <strong>every game teaches you a life lesson</strong>. Pick your age, play free games right in your browser — no downloads, no accounts, no worries.</p>
+  <div class="hero hero-3d">
+    <canvas id="hero3d" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <h1>Wisely Arcade</h1>
+      <div><span class="tag">Play. Learn. Repeat.</span></div>
+      <p class="lead">A family-safe arcade where <strong>every game teaches you a life lesson</strong>. Pick your age, play free games right in your browser — no downloads, no accounts, no worries.</p>
+      <div class="hero-search">
+        <input id="game-search" type="search" placeholder="🔍 Search 10 games…" aria-label="Search games">
+      </div>
+      <div class="hero-stats">
+        <span>🎮 10 games</span><span>👨‍👩‍👧‍👦 3 age groups</span><span>💜 100% free</span>
+      </div>
+    </div>
   </div>
 
   <div class="wrap hub">
@@ -103,6 +112,9 @@
     <section class="block" id="all-games">
       <h2>All games</h2>
       <p class="sub">Ten are ready today — three more are on the way.</p>
+      <div class="hub-search">
+        <input class="game-search" type="search" placeholder="🔍 Search games…" aria-label="Search games">
+      </div>
       <div class="cards cols3">
         <div class="card"><img class="thumb" src="images/thumbs/memory-match.jpg" alt="Animal Memory Match — free online game"><span class="pill">Ages 5–9</span><h3>Animal Memory Match</h3><p>Find all eight animal pairs.</p><div class="btn-row"><a class="btn ghost" href="games/memory-match">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/forest-dash.jpg" alt="Forest Dash — free online game"><span class="pill">Ages 5–9</span><h3>Forest Dash</h3><p>Run, jump, slide — how far through the forest can you get?</p><div class="btn-row"><a class="btn ghost" href="games/forest-dash">Play</a></div></div>
@@ -147,6 +159,77 @@
 
 <script src="js/main.js"></script>
 <script src="js/recommend.js"></script>
+<script src="js/three.min.js"></script>
+<script>
+/* 3D hero: floating pastel shapes drifting behind the headline. */
+(function () {
+  var canvas = document.getElementById('hero3d');
+  if (!canvas || !window.THREE) return;
+  var renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true }); }
+  catch (e) { return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(55, 2, 0.1, 100);
+  camera.position.z = 16;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xc9b3f5, 1.0));
+  var sun = new THREE.DirectionalLight(0xfff1d6, 0.75);
+  sun.position.set(6, 10, 8);
+  scene.add(sun);
+  var geos = [
+    new THREE.IcosahedronGeometry(1, 0), new THREE.TorusGeometry(0.85, 0.34, 12, 26),
+    new THREE.OctahedronGeometry(1, 0), new THREE.TorusKnotGeometry(0.62, 0.2, 56, 8),
+    new THREE.SphereGeometry(0.95, 18, 14), new THREE.BoxGeometry(1.2, 1.2, 1.2)
+  ];
+  var cols = [0xc9b3f5, 0x9be3d0, 0xffc7dd, 0xffe08a, 0xa9c8f5, 0xf5b3c9];
+  var shapes = [];
+  for (var i = 0; i < 22; i++) {
+    var m = new THREE.Mesh(geos[i % geos.length],
+      new THREE.MeshLambertMaterial({ color: cols[i % cols.length], transparent: true, opacity: 0.5 }));
+    var s = 0.5 + Math.random() * 1.1;
+    m.scale.set(s, s, s);
+    m.position.set((Math.random() - 0.5) * 24, (Math.random() - 0.5) * 12, -3 - Math.random() * 8);
+    m.userData = { rx: (Math.random() - 0.5) * 0.9, ry: (Math.random() - 0.5) * 0.9,
+                   fy: 0.35 + Math.random() * 0.7, ph: Math.random() * 6.28, y0: m.position.y };
+    scene.add(m);
+    shapes.push(m);
+  }
+  var mx = 0, my = 0;
+  var hero = document.querySelector('.hero-3d');
+  if (hero) hero.addEventListener('pointermove', function (e) {
+    var r = hero.getBoundingClientRect();
+    mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+  });
+  function resize() {
+    var w = hero ? hero.clientWidth : 800, h = hero ? hero.clientHeight : 420;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  var t = 0;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  (function loop() {
+    requestAnimationFrame(loop);
+    if (document.hidden) return;
+    if (!reduced) {
+      t += 0.008;
+      for (var i = 0; i < shapes.length; i++) {
+        var s2 = shapes[i], u = s2.userData;
+        s2.rotation.x += u.rx * 0.01;
+        s2.rotation.y += u.ry * 0.01;
+        s2.position.y = u.y0 + Math.sin(t * u.fy + u.ph) * 0.8;
+      }
+      camera.position.x += (mx * 1.8 - camera.position.x) * 0.04;
+      camera.position.y += (-my * 1.1 - camera.position.y) * 0.04;
+      camera.lookAt(0, 0, 0);
+    }
+    renderer.render(scene, camera);
+  })();
+})();
+</script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
