@@ -1,6 +1,6 @@
 /* Wisely Arcade ambient background — endless auto-playing game scenes (watermark).
    Scenes cycle: Snake (self-playing) -> Sudoku (self-solving) -> Runner (endless).
-   Subtle, pointer-transparent, pauses when tab hidden. Skipped for reduced-motion. */
+   Full-page, subtle, pointer-transparent, pauses when tab hidden. Skipped for reduced-motion. */
 (function () {
   'use strict';
   var cv = document.getElementById('ambient');
@@ -35,34 +35,35 @@
   }
 
   var PAL = {
-    snake: '#2dd4bf', snakeHead: '#0d9488', food: '#f472b6',
-    grid: 'rgba(124,58,237,.45)', num: 'rgba(109,40,217,.75)',
-    board: 'rgba(255,255,255,.5)',
-    hillFar: 'rgba(167,243,208,.55)', hillNear: 'rgba(110,231,183,.6)',
-    runner: '#f472b6', obstacle: 'rgba(124,58,237,.65)',
-    ground: 'rgba(109,40,217,.35)'
+    snake: '#14b8a6', snakeHead: '#0f766e', food: '#ec4899',
+    grid: 'rgba(124,58,237,.5)', num: 'rgba(109,40,217,.8)',
+    hillFar: 'rgba(110,231,183,.5)', hillNear: 'rgba(52,211,153,.55)',
+    runner: '#ec4899', obstacle: 'rgba(124,58,237,.6)',
+    ground: 'rgba(109,40,217,.4)'
   };
 
-  /* ---------------- Snake (self-playing) ---------------- */
+  /* ---------------- Snake (self-playing, full page) ---------------- */
   function SnakeScene() {
-    var N = 24, snake, dir, food, alive, deadT, stepT, ox, oy, cell;
+    var cols, rows, cell, snake, dir, food, alive, deadT, stepT;
+    var DIRS = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
     function layout() {
-      cell = Math.max(16, Math.min(W, H * 0.8) / N);
-      ox = (W - cell * N) / 2; oy = (H - cell * N) / 2;
+      cell = 46;
+      cols = Math.max(8, Math.ceil(W / cell));
+      rows = Math.max(8, Math.ceil(H / cell));
     }
     function dropFood() {
-      for (var tries = 0; tries < 200; tries++) {
-        var f = { x: (Math.random() * N) | 0, y: (Math.random() * N) | 0 };
+      for (var tries = 0; tries < 300; tries++) {
+        var f = { x: (Math.random() * cols) | 0, y: (Math.random() * rows) | 0 };
         var ok = true;
         for (var i = 0; i < snake.length; i++) {
           if (snake[i].x === f.x && snake[i].y === f.y) { ok = false; break; }
         }
         if (ok) { food = f; return; }
       }
-      food = { x: N - 2, y: N - 2 };
+      food = { x: cols - 2, y: rows - 2 };
     }
     function safe(x, y) {
-      if (x < 0 || y < 0 || x >= N || y >= N) return false;
+      if (x < 0 || y < 0 || x >= cols || y >= rows) return false;
       for (var i = 0; i < snake.length - 1; i++) {
         if (snake[i].x === x && snake[i].y === y) return false;
       }
@@ -70,19 +71,18 @@
     }
     function reset() {
       layout();
-      var cy = (N / 2) | 0;
-      snake = [{ x: 12, y: cy }, { x: 11, y: cy }, { x: 10, y: cy }];
+      var cy = (rows / 2) | 0, cx = (cols / 2) | 0;
+      snake = [{ x: cx, y: cy }, { x: cx - 1, y: cy }, { x: cx - 2, y: cy }];
       dir = { x: 1, y: 0 }; alive = true; deadT = 0; stepT = 0;
       dropFood();
     }
     reset();
-    var DIRS = [{ x: 1, y: 0 }, { x: -1, y: 0 }, { x: 0, y: 1 }, { x: 0, y: -1 }];
     return {
       reset: reset,
       update: function (dt) {
-        if (!alive) { deadT += dt; if (deadT > 1.4) reset(); return; }
+        if (!alive) { deadT += dt; if (deadT > 1.2) reset(); return; }
         stepT += dt;
-        if (stepT < 0.085) return;
+        if (stepT < 0.09) return;
         stepT = 0;
         var h = snake[0], best = null, bestD = 1e9;
         for (var i = 0; i < 4; i++) {
@@ -93,7 +93,7 @@
           var d = Math.abs(nx - food.x) + Math.abs(ny - food.y);
           var free = 0;
           for (var j = 0; j < 4; j++) if (safe(nx + DIRS[j].x, ny + DIRS[j].y)) free++;
-          d += (4 - free) * 3;
+          d += (4 - free) * 4;
           if (d < bestD) { bestD = d; best = o; }
         }
         if (!best) { alive = false; return; }
@@ -102,30 +102,28 @@
         var nh = snake[0];
         if (nh.x === food.x && nh.y === food.y) {
           dropFood();
-          if (snake.length > 70) reset();
+          if (snake.length > 90) reset();
         } else snake.pop();
       },
       draw: function () {
         layout();
-        ctx.fillStyle = PAL.board;
-        rr(ox, oy, cell * N, cell * N, 20); ctx.fill();
         var t = performance.now() / 280;
-        var fr = cell * 0.34 * (1 + 0.14 * Math.sin(t));
+        var fr = cell * 0.3 * (1 + 0.16 * Math.sin(t));
         ctx.fillStyle = PAL.food;
         ctx.beginPath();
-        ctx.arc(ox + (food.x + 0.5) * cell, oy + (food.y + 0.5) * cell, fr, 0, 6.3);
+        ctx.arc((food.x + 0.5) * cell, (food.y + 0.5) * cell, fr, 0, 6.3);
         ctx.fill();
         for (var i = snake.length - 1; i >= 0; i--) {
-          var s = snake[i], pad = cell * 0.14;
+          var s = snake[i], pad = cell * 0.1;
           ctx.fillStyle = i === 0 ? PAL.snakeHead : PAL.snake;
-          rr(ox + s.x * cell + pad, oy + s.y * cell + pad, cell - pad * 2, cell - pad * 2, cell * 0.32);
+          rr(s.x * cell + pad, s.y * cell + pad, cell - pad * 2, cell - pad * 2, cell * 0.34);
           ctx.fill();
         }
       }
     };
   }
 
-  /* ---------------- Sudoku (self-solving) ---------------- */
+  /* ---------------- Sudoku (self-solving, full page) ---------------- */
   var SOLVED = [
     5,3,4,6,7,8,9,1,2, 6,7,2,1,9,5,3,4,8, 1,9,8,3,4,2,5,6,7,
     8,5,9,7,6,1,4,2,3, 4,2,6,8,5,3,7,9,1, 7,1,3,9,2,4,8,5,6,
@@ -148,30 +146,28 @@
       update: function (dt) {
         if (shown < 81) {
           t += dt;
-          if (t > 0.09) { t = 0; shown = Math.min(81, shown + 2); }
-        } else { doneT += dt; if (doneT > 2.2) reset(); }
+          if (t > 0.07) { t = 0; shown = Math.min(81, shown + 2); }
+        } else { doneT += dt; if (doneT > 2.4) reset(); }
       },
       draw: function () {
-        size = Math.min(W * 0.7, H * 0.72, 460);
+        size = Math.min(W, H) * 0.94;
         cell = size / 9;
         ox = (W - size) / 2; oy = (H - size) / 2;
-        ctx.fillStyle = PAL.board;
-        rr(ox - 8, oy - 8, size + 16, size + 16, 20); ctx.fill();
         ctx.fillStyle = PAL.num;
-        ctx.font = '700 ' + Math.round(cell * 0.52) + 'px Nunito, sans-serif';
+        ctx.font = '700 ' + Math.round(cell * 0.58) + 'px Nunito, sans-serif';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         for (var k = 0; k < shown; k++) {
           var idx = order[k], r = (idx / 9) | 0, c = idx % 9;
-          ctx.fillText(String(SOLVED[idx]), ox + (c + 0.5) * cell, oy + (r + 0.52) * cell);
+          ctx.fillText(String(SOLVED[idx]), ox + (c + 0.5) * cell, oy + (r + 0.54) * cell);
         }
-        ctx.strokeStyle = PAL.grid; ctx.lineWidth = 1;
+        ctx.strokeStyle = PAL.grid; ctx.lineWidth = 1.5;
         for (var i = 0; i <= 9; i++) {
           var p = ox + i * cell;
           ctx.beginPath(); ctx.moveTo(p, oy); ctx.lineTo(p, oy + size); ctx.stroke();
           var q = oy + i * cell;
           ctx.beginPath(); ctx.moveTo(ox, q); ctx.lineTo(ox + size, q); ctx.stroke();
         }
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 4;
         for (var b = 0; b <= 3; b++) {
           var bp = ox + b * cell * 3;
           ctx.beginPath(); ctx.moveTo(bp, oy); ctx.lineTo(bp, oy + size); ctx.stroke();
@@ -182,32 +178,29 @@
     };
   }
 
-  /* ---------------- Runner (endless) ---------------- */
+  /* ---------------- Runner (endless, full page) ---------------- */
   function RunnerScene() {
     var px, py, vy, onGround, obstacles, dist, speed, groundY, t;
     function reset() {
-      groundY = H * 0.74;
-      px = W * 0.32; py = groundY; vy = 0; onGround = true;
-      obstacles = []; dist = 0; speed = W * 0.28; t = 0;
+      groundY = H * 0.76;
+      px = W * 0.3; py = groundY; vy = 0; onGround = true;
+      obstacles = []; dist = 0; speed = W * 0.3; t = 0;
     }
     reset();
-    function jump() { if (onGround) { vy = -H * 0.62; onGround = false; } }
+    function jump() { if (onGround) { vy = -H * 0.6; onGround = false; } }
     return {
       reset: reset,
       update: function (dt) {
         t += dt;
         dist += speed * dt;
-        // spawn obstacles
-        if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < W - W * 0.45 - Math.random() * W * 0.2) {
-          obstacles.push({ x: W + 40, w: 26 + Math.random() * 22, h: 44 + Math.random() * 30 });
+        if (obstacles.length === 0 || obstacles[obstacles.length - 1].x < W - W * 0.4 - Math.random() * W * 0.25) {
+          obstacles.push({ x: W + 60, w: 30 + Math.random() * 26, h: 52 + Math.random() * 36 });
         }
         for (var i = obstacles.length - 1; i >= 0; i--) {
           var o = obstacles[i];
           o.x -= speed * dt;
-          // auto-jump when close
-          if (onGround && o.x - px < H * 0.22 && o.x - px > 0) jump();
-          if (o.x + o.w < -60) obstacles.splice(i, 1);
-          // pass through on hit (endless demo — never stops)
+          if (onGround && o.x - px < H * 0.24 && o.x - px > 0) jump();
+          if (o.x + o.w < -80) obstacles.splice(i, 1);
         }
         if (!onGround) {
           vy += H * 1.9 * dt;
@@ -216,39 +209,35 @@
         }
       },
       draw: function () {
-        groundY = H * 0.74; px = W * 0.32;
-        // hills (two parallax sine layers)
+        groundY = H * 0.76; px = W * 0.3;
         for (var L = 0; L < 2; L++) {
           ctx.fillStyle = L === 0 ? PAL.hillFar : PAL.hillNear;
           ctx.beginPath();
           ctx.moveTo(0, H);
-          var baseY = groundY - H * (L === 0 ? 0.16 : 0.07);
-          var amp = H * (L === 0 ? 0.06 : 0.035);
+          var baseY = groundY - H * (L === 0 ? 0.22 : 0.1);
+          var amp = H * (L === 0 ? 0.08 : 0.045);
           var spd = dist * (L === 0 ? 0.25 : 0.55);
-          for (var x = 0; x <= W; x += 14) {
-            var y = baseY + Math.sin((x + spd) * 0.012 + L * 2.4) * amp
-                          + Math.sin((x + spd) * 0.03 + L) * amp * 0.4;
+          for (var x = 0; x <= W; x += 12) {
+            var y = baseY + Math.sin((x + spd) * 0.011 + L * 2.4) * amp
+                          + Math.sin((x + spd) * 0.028 + L) * amp * 0.4;
             ctx.lineTo(x, y);
           }
           ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
         }
-        // ground line
-        ctx.strokeStyle = PAL.ground; ctx.lineWidth = 3;
+        ctx.strokeStyle = PAL.ground; ctx.lineWidth = 4;
         ctx.beginPath(); ctx.moveTo(0, groundY + 2); ctx.lineTo(W, groundY + 2); ctx.stroke();
-        // obstacles
         for (var i = 0; i < obstacles.length; i++) {
           var o = obstacles[i];
           ctx.fillStyle = PAL.obstacle;
-          rr(o.x, groundY - o.h, o.w, o.h, 8); ctx.fill();
+          rr(o.x, groundY - o.h, o.w, o.h, 10); ctx.fill();
         }
-        // runner (bouncy circle)
         var squash = onGround ? 1 + 0.08 * Math.sin(t * 14) : 1;
         ctx.fillStyle = PAL.runner;
         ctx.beginPath();
-        ctx.ellipse(px, py - 20 * squash, 20, 20 * (2 - squash) / 1.0, 0, 0, 6.3);
+        ctx.ellipse(px, py - 24 * squash, 24, 24 * (2 - squash), 0, 0, 6.3);
         ctx.fill();
-        ctx.fillStyle = 'rgba(255,255,255,.85)';
-        ctx.beginPath(); ctx.arc(px + 7, py - 26 * squash, 5, 0, 6.3); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.9)';
+        ctx.beginPath(); ctx.arc(px + 8, py - 31 * squash, 6, 0, 6.3); ctx.fill();
       }
     };
   }
