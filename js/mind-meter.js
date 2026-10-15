@@ -101,11 +101,13 @@
     timeLeft = TIME_PER_Q;
     elTime.textContent = timeLeft;
     ringSet(1);
+    elRing.classList.remove('low'); // Round 1: reset low-time ring style
     if (timerId) clearInterval(timerId);
     timerId = setInterval(function () {
       timeLeft--;
       elTime.textContent = Math.max(0, timeLeft);
       ringSet(timeLeft / TIME_PER_Q);
+      elRing.classList.toggle('low', timeLeft <= 10); // Round 1: warm amber ring under 10s
       if (timeLeft <= 0) {
         clearInterval(timerId);
         answer(-1, null); // time out
