@@ -21,6 +21,30 @@
 
   var snake, dir, queuedDir, food, score, best, timerId, running, dead;
 
+  // ---- Round 1 cinematic polish: eat-spark particle pool (fixed size, reused) ----
+  var sparks = [];
+  var sparkCursor = 0;
+  (function initSparks() {
+    for (var i = 0; i < 72; i++) {
+      sparks.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 1, c: '#F6B3C2' });
+    }
+  })();
+  var SPARK_COLORS = ['#F6B3C2', '#C2A9F2', '#FFDF9E', '#9ADCD6'];
+  function spawnSparks(x, y) {
+    for (var n = 0; n < 10; n++) {
+      var p = sparks[sparkCursor];
+      sparkCursor = (sparkCursor + 1) % sparks.length;
+      var a = Math.random() * Math.PI * 2;
+      var sp = 50 + Math.random() * 130;
+      p.x = x; p.y = y;
+      p.vx = Math.cos(a) * sp;
+      p.vy = Math.sin(a) * sp;
+      p.max = p.life = 0.45 + Math.random() * 0.45;
+      p.c = SPARK_COLORS[n % SPARK_COLORS.length];
+    }
+  }
+  var lastDrawT = 0;
+
   function getBest() {
     try { return parseInt(localStorage.getItem(BEST_KEY), 10) || 0; }
     catch (e) { return 0; }
@@ -83,6 +107,7 @@
     snake.unshift(head);
     if (eating) {
       score++;
+      spawnSparks(head.x * CELL + CELL / 2, head.y * CELL + CELL / 2);
       if (score > best) { best = score; setBest(best); }
       renderScores();
       placeFood();
@@ -115,6 +140,16 @@
         ctx.fill();
       }
     }
+
+    // Slow pastel vignette pulse (keeps the dark board, softens the edge).
+    var vt = performance.now() / 1600;
+    var va = 0.10 + 0.05 * Math.sin(vt);
+    var vg = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.34,
+                                      SIZE / 2, SIZE / 2, SIZE * 0.74);
+    vg.addColorStop(0, 'rgba(194,169,242,0)');
+    vg.addColorStop(1, 'rgba(194,169,242,' + va.toFixed(3) + ')');
+    ctx.fillStyle = vg;
+    ctx.fillRect(0, 0, SIZE, SIZE);
   }
 
   // One glossy candy orb: soft grounding shadow, neon glow, radial-gradient
@@ -199,10 +234,12 @@
     drawBoard();
 
     var now = performance.now();
+    var dt = lastDrawT ? Math.min(0.05, (now - lastDrawT) / 1000) : 0.016;
+    lastDrawT = now;
 
     // Food: juicy glowing orb with a soft halo and a gentle pulse.
     var fx = food.x * CELL + CELL / 2, fy = food.y * CELL + CELL / 2;
-    var pulse = 1 + 0.09 * Math.sin(now / 300);
+    var pulse = 1 + 0.16 * Math.sin(now / 300);
     var fr = CELL * 0.36 * pulse;
     ctx.save();
     var halo = ctx.createRadialGradient(fx, fy, fr * 0.4, fx, fy, fr * 2.1);
@@ -234,6 +271,48 @@
         drawGlossyOrb(x, y, r, '#d6f6ff', '#22d3ee', '#0e7490', '#22d3ee', 12);
       }
     }
+
+    // Trail glow: fading pastel-cyan glow dots over the last 6 body segments.
+    var glowN = Math.min(6, n - 1);
+    if (glowN > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (var gi = 1; gi <= glowN; gi++) {
+        var gs = snake[gi];
+        var gxx = gs.x * CELL + CELL / 2, gyy = gs.y * CELL + CELL / 2;
+        var ga = 0.20 * (1 - gi / (glowN + 1));
+        var gr = CELL * 0.62;
+        var gg = ctx.createRadialGradient(gxx, gyy, 0, gxx, gyy, gr);
+        gg.addColorStop(0, 'rgba(154,220,214,' + ga.toFixed(3) + ')');
+        gg.addColorStop(1, 'rgba(154,220,214,0)');
+        ctx.fillStyle = gg;
+        ctx.beginPath();
+        ctx.arc(gxx, gyy, gr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Eat sparks: drift + fade (gravity-free), additive.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var si = 0; si < sparks.length; si++) {
+      var sp = sparks[si];
+      if (sp.life <= 0) continue;
+      sp.life -= dt;
+      sp.x += sp.vx * dt;
+      sp.y += sp.vy * dt;
+      sp.vx *= (1 - 1.6 * dt);
+      sp.vy *= (1 - 1.6 * dt);
+      var sa = Math.max(0, sp.life / sp.max);
+      ctx.globalAlpha = sa;
+      ctx.fillStyle = sp.c;
+      ctx.beginPath();
+      ctx.arc(sp.x, sp.y, 1.2 + 2.4 * sa, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
   }
 
   function start() {
