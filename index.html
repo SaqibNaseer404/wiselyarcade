@@ -16,43 +16,13 @@
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Wisely Arcade — Play. Learn. Repeat. | Family-safe games that teach life lessons</title>
-<link rel="canonical" href="https://wiselyarcade.com/">
 <meta name="description" content="Wisely Arcade is a family-safe arcade where every game teaches a life lesson. Pick your age group and play free games online — no downloads, no accounts. Play. Learn. Repeat.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css?v=8">
-<style>
-/* Sidebar beside hero + ambient gameplay background */
-#ambient{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.32}
-header.site,main,footer.site{position:relative;z-index:1}
-/* Let the ambient gameplay show through across the whole page */
-.card{background:rgba(255,255,255,.48)!important}
-.lesson-box{background:rgba(255,250,234,.55)!important}
-header.site{background:rgba(255,255,255,.55)!important}
-/* Trending now shelf */
-.trend-strip{display:flex;gap:14px;overflow-x:auto;padding:6px 2px 14px;scroll-snap-type:x mandatory}
-.trend-card{position:relative;flex:0 0 152px;scroll-snap-align:start;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.9);border-radius:18px;padding:10px;text-align:center;text-decoration:none;color:var(--ink);box-shadow:var(--shadow)}
-.trend-card img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:12px}
-.trend-rank{position:absolute;top:4px;left:4px;background:linear-gradient(135deg,#a78bfa,#f472b6);color:#fff;font-weight:900;font-size:.8rem;padding:2px 10px;border-radius:999px;box-shadow:0 4px 10px rgba(167,139,250,.45)}
-.trend-name{display:block;font-weight:800;margin-top:8px;font-size:.92rem}
-.trend-plays{display:block;font-size:.78rem;color:#8b7bb8;font-weight:700}
-@media(min-width:1024px){
-.hub-top .hub-right{min-width:0}
-.hub-top .side-games{margin-top:26px}
-.hub-right .hero-3d{border-radius:26px}
-}
-@media(max-width:1023px){
-.hub-top{display:flex;flex-direction:column}
-.hub-top .hub-right{display:contents}
-.hub-top .hero-3d{order:1}
-.hub-top .side-games{order:2}
-.hub-top .hub-main{order:3}
-}
-</style>
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
-<canvas id="ambient" aria-hidden="true"></canvas>
 
 <header class="site">
   <div class="wrap bar">
@@ -68,55 +38,50 @@ header.site{background:rgba(255,255,255,.55)!important}
 </header>
 
 <main>
-  
-
-  <div class="wrap hub hub-top">
-<aside class="side-games">
-      <h3>All games</h3>
-      <nav>
-      <span class="sg-group">Ages 5–9</span>
-      <a href="games/memory-match"><img src="images/thumbs/memory-match.jpg" alt="Animal Memory Match"><span>Animal Memory Match</span></a>
-      <a href="games/forest-dash"><img src="images/thumbs/forest-dash.jpg" alt="Forest Dash"><span>Forest Dash</span></a>
-      <a href="games/bubble-pop"><img src="images/thumbs/bubble-pop.jpg" alt="Bubble Pop"><span>Bubble Pop</span></a>
-      <span class="sg-group">Ages 10–17</span>
-      <a href="games/neon-snake"><img src="images/thumbs/neon-snake.jpg" alt="Neon Snake"><span>Neon Snake</span></a>
-      <a href="games/tower-stack"><img src="images/thumbs/tower-stack.jpg" alt="Tower Stack"><span>Tower Stack</span></a>
-      <a href="games/trail-stunts"><img src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts"><span>Trail Stunts</span></a>
-      <a href="games/2048-merge"><img src="images/thumbs/2048-merge.jpg" alt="2048 Merge"><span>2048 Merge</span></a>
-      <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
-      <span class="sg-group">Ages 18+</span>
-      <a href="games/daily-sudoku"><img src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku"><span>Daily Sudoku</span></a>
-      <a href="games/minesweeper"><img src="images/thumbs/minesweeper.jpg" alt="Minesweeper"><span>Minesweeper</span></a>
-      <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
-      </nav>
-    </aside>
-<div class="hub-right">
-<div class="hero hero-3d">
+  <div class="hero hero-3d">
     <canvas id="hero3d" aria-hidden="true"></canvas>
     <div class="hero-inner">
       <h1>Wisely Arcade</h1>
       <div><span class="tag">Play. Learn. Repeat.</span></div>
       <p class="lead">A family-safe arcade where <strong>every game teaches you a life lesson</strong>. Pick your age, play free games right in your browser — no downloads, no accounts, no worries.</p>
       <div class="hero-search">
-        <input id="game-search" type="search" placeholder="🔍 Search 10 games…" aria-label="Search games">
+        <input id="game-search" type="search" placeholder="🔍 Search 12 games…" aria-label="Search games">
       </div>
       <div class="hero-stats">
-        <span>🎮 10 games</span><span>👨‍👩‍👧‍👦 3 age groups</span><span>💜 100% free</span>
+        <span>🎮 12 games</span><span>👨‍👩‍👧‍👦 3 age groups</span><span>💜 100% free</span>
       </div>
     </div>
   </div>
-<div class="hub-main">
+
+  <div class="wrap hub">
+    <aside class="side-games">
+      <h3>All games</h3>
+      <nav>
+      <span class="sg-group">Ages 5–9</span>
+      <a href="games/memory-match"><img src="images/thumbs/memory-match.jpg" alt="Animal Memory Match"><span>Animal Memory Match</span></a>
+      <a href="games/forest-dash"><img src="images/thumbs/forest-dash.jpg" alt="Forest Dash"><span>Forest Dash</span></a>
+      <a href="games/bubble-pop"><img src="images/thumbs/bubble-pop.jpg" alt="Bubble Pop"><span>Bubble Pop</span></a>
+      <a href="games/ludo"><img src="images/thumbs/ludo.jpg" alt="Ludo"><span>Ludo</span></a>
+      <span class="sg-group">Ages 10–17</span>
+      <a href="games/neon-snake"><img src="images/thumbs/neon-snake.jpg" alt="Neon Snake"><span>Neon Snake</span></a>
+      <a href="games/tower-stack"><img src="images/thumbs/tower-stack.jpg" alt="Tower Stack"><span>Tower Stack</span></a>
+      <a href="games/trail-stunts"><img src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts"><span>Trail Stunts</span></a>
+      <a href="games/2048-merge"><img src="images/thumbs/2048-merge.jpg" alt="2048 Merge"><span>2048 Merge</span></a>
+      <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
+      <a href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess"><span>Chess</span></a>
+      <span class="sg-group">Ages 18+</span>
+      <a href="games/daily-sudoku"><img src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku"><span>Daily Sudoku</span></a>
+      <a href="games/minesweeper"><img src="images/thumbs/minesweeper.jpg" alt="Minesweeper"><span>Minesweeper</span></a>
+      <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
+      <a href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess"><span>Chess</span></a>
+      </nav>
+    </aside>
+    <div class="hub-main">
     <div class="age-picker">
       <a class="age-btn age-kids" href="kids">Ages 5–9<small>Fun games for little learners</small></a>
       <a class="age-btn age-teens" href="teens">Ages 10–17<small>Challenges for sharp minds</small></a>
       <a class="age-btn age-adults" href="adults">Ages 18+<small>Brain games for grown-ups</small></a>
     </div>
-
-    <section class="block">
-      <h2>Trending now</h2>
-      <p class="sub">The games everyone is playing this week.</p>
-      <div class="trend-strip" id="trending-shelf"></div>
-    </section>
 
     <section class="block">
       <h2>Featured games</h2>
@@ -147,9 +112,54 @@ header.site{background:rgba(255,255,255,.55)!important}
       <div class="center"><a class="browse-link" href="#all-games">Browse all games ↓</a></div>
     </section>
 
+    <section class="block" id="recent-section" style="display:none">
+      <h2>↻ Continue playing</h2>
+      <p class="sub">Pick up where you left off — no account needed, this device remembers.</p>
+      <div class="shelf" id="recent-shelf"></div>
+    </section>
+
+    <section class="block">
+      <h2>🔥 Trending now</h2>
+      <p class="sub">The games players can't stop opening this week.</p>
+      <div class="shelf" id="trending-shelf"></div>
+    </section>
+
+    <section class="block">
+      <h2>Collections</h2>
+      <p class="sub">Hand-picked shelves for every mood.</p>
+      <div class="collection">
+        <div class="collection-head"><h3>🧠 Brain builders</h3><span>train your thinking</span></div>
+        <div class="shelf">
+          <a class="shelf-card" href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess — free online game" loading="lazy"><span class="shelf-name">Chess</span></a>
+          <a class="shelf-card" href="games/daily-sudoku"><img src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku — free online game" loading="lazy"><span class="shelf-name">Daily Sudoku</span></a>
+          <a class="shelf-card" href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter — free online game" loading="lazy"><span class="shelf-name">Mind Meter</span></a>
+          <a class="shelf-card" href="games/2048-merge"><img src="images/thumbs/2048-merge.jpg" alt="2048 Merge — free online game" loading="lazy"><span class="shelf-name">2048 Merge</span></a>
+          <a class="shelf-card" href="games/minesweeper"><img src="images/thumbs/minesweeper.jpg" alt="Minesweeper — free online game" loading="lazy"><span class="shelf-name">Minesweeper</span></a>
+        </div>
+      </div>
+      <div class="collection">
+        <div class="collection-head"><h3>⚡ Quick thrills</h3><span>fast, fun, five minutes</span></div>
+        <div class="shelf">
+          <a class="shelf-card" href="games/neon-snake"><img src="images/thumbs/neon-snake.jpg" alt="Neon Snake — free online game" loading="lazy"><span class="shelf-name">Neon Snake</span></a>
+          <a class="shelf-card" href="games/bubble-pop"><img src="images/thumbs/bubble-pop.jpg" alt="Bubble Pop — free online game" loading="lazy"><span class="shelf-name">Bubble Pop</span></a>
+          <a class="shelf-card" href="games/trail-stunts"><img src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts — free online game" loading="lazy"><span class="shelf-name">Trail Stunts</span></a>
+          <a class="shelf-card" href="games/forest-dash"><img src="images/thumbs/forest-dash.jpg" alt="Forest Dash — free online game" loading="lazy"><span class="shelf-name">Forest Dash</span></a>
+          <a class="shelf-card" href="games/tower-stack"><img src="images/thumbs/tower-stack.jpg" alt="Tower Stack — free online game" loading="lazy"><span class="shelf-name">Tower Stack</span></a>
+        </div>
+      </div>
+      <div class="collection">
+        <div class="collection-head"><h3>👨‍👩‍👧 Family table</h3><span>classics everyone knows</span></div>
+        <div class="shelf">
+          <a class="shelf-card" href="games/ludo"><img src="images/thumbs/ludo.jpg" alt="Ludo — free online game" loading="lazy"><span class="shelf-name">Ludo</span></a>
+          <a class="shelf-card" href="games/memory-match"><img src="images/thumbs/memory-match.jpg" alt="Animal Memory Match — free online game" loading="lazy"><span class="shelf-name">Animal Memory Match</span></a>
+          <a class="shelf-card" href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess — free online game" loading="lazy"><span class="shelf-name">Chess</span></a>
+        </div>
+      </div>
+    </section>
+
     <section class="block" id="all-games">
       <h2>All games</h2>
-      <p class="sub">Ten are ready today — three more are on the way.</p>
+      <p class="sub">Twelve are ready today — more on the way.</p>
       <div class="hub-search">
         <input class="game-search" type="search" placeholder="🔍 Search games…" aria-label="Search games">
       </div>
@@ -157,7 +167,8 @@ header.site{background:rgba(255,255,255,.55)!important}
         <div class="card"><img class="thumb" src="images/thumbs/memory-match.jpg" alt="Animal Memory Match — free online game"><span class="pill">Ages 5–9</span><h3>Animal Memory Match</h3><p>Find all eight animal pairs.</p><div class="btn-row"><a class="btn ghost" href="games/memory-match">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/forest-dash.jpg" alt="Forest Dash — free online game"><span class="pill">Ages 5–9</span><h3>Forest Dash</h3><p>Run, jump, slide — how far through the forest can you get?</p><div class="btn-row"><a class="btn ghost" href="games/forest-dash">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/bubble-pop.jpg" alt="Bubble Pop — free online game"><span class="pill">Ages 5–9</span><h3>Bubble Pop</h3><p>Match 3 bubbles — aim with intention.</p><div class="btn-row"><a class="btn ghost" href="games/bubble-pop">Play</a></div></div>
-        <div class="card coming"><span class="pill soon">Coming soon</span><h3>Paint the Rocket</h3><p>A tap-to-color space adventure.</p></div>
+        <div class="card"><img class="thumb" src="images/thumbs/ludo.jpg" alt="Ludo — free online game"><span class="pill">Ages 5–9</span><h3>Ludo</h3><p>The classic family race — you vs three computer rivals.</p><div class="btn-row"><a class="btn ghost" href="games/ludo">Play</a></div></div>
+                <div class="card coming"><span class="pill soon">Coming soon</span><h3>Paint the Rocket</h3><p>A tap-to-color space adventure.</p></div>
         <div class="card coming"><span class="pill soon">Coming soon</span><h3>Kindness Catch</h3><p>Catch hearts, dodge storm clouds.</p></div>
         <div class="card"><img class="thumb" src="images/thumbs/neon-snake.jpg" alt="Neon Snake — free online game"><span class="pill">Ages 10–17</span><h3>Neon Snake</h3><p>Eat, grow, and don't get greedy.</p><div class="btn-row"><a class="btn ghost" href="games/neon-snake">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/tower-stack.jpg" alt="Tower Stack — free online game"><span class="pill">Ages 10–17</span><h3>Tower Stack</h3><p>Drop each block true — how high can you build?</p><div class="btn-row"><a class="btn ghost" href="games/tower-stack">Play</a></div></div>
@@ -165,7 +176,8 @@ header.site{background:rgba(255,255,255,.55)!important}
         <div class="card"><img class="thumb" src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts — free online game"><span class="pill">Ages 10–17</span><h3>Trail Stunts</h3><p>Flip your dirt bike over wild hills — balance beats speed.</p><div class="btn-row"><a class="btn ghost" href="games/trail-stunts">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/2048-merge.jpg" alt="2048 Merge — free online game"><span class="pill">Ages 10–17</span><h3>2048 Merge</h3><p>Small smart steps add up to big wins.</p><div class="btn-row"><a class="btn ghost" href="games/2048-merge">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/mind-meter.jpg" alt="Mind Meter — free online game"><span class="pill">Ages 10–17 · 18+</span><h3>Mind Meter</h3><p>A 3D IQ challenge — how high can your meter go?</p><div class="btn-row"><a class="btn ghost" href="games/mind-meter">Play</a></div></div>
-        <div class="card"><img class="thumb" src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku — free online game"><span class="pill">Ages 18+</span><h3>Daily Sudoku</h3><p>A new puzzle every day.</p><div class="btn-row"><a class="btn ghost" href="games/daily-sudoku">Play</a></div></div>
+        <div class="card"><img class="thumb" src="images/thumbs/chess.jpg" alt="Chess — free online game"><span class="pill">Ages 10–17 · 18+</span><h3>Chess</h3><p>Full classic chess vs the computer — three difficulties.</p><div class="btn-row"><a class="btn ghost" href="games/chess">Play</a></div></div>
+                <div class="card"><img class="thumb" src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku — free online game"><span class="pill">Ages 18+</span><h3>Daily Sudoku</h3><p>A new puzzle every day.</p><div class="btn-row"><a class="btn ghost" href="games/daily-sudoku">Play</a></div></div>
         <div class="card coming"><span class="pill soon">Coming soon</span><h3>Typing Speed Test</h3><p>Practice compounds — how fast are you?</p></div>
         <div class="card"><img class="thumb" src="images/thumbs/minesweeper.jpg" alt="Minesweeper — free online game"><span class="pill">Ages 18+</span><h3>Minesweeper</h3><p>Think before you act — every click counts.</p><div class="btn-row"><a class="btn ghost" href="games/minesweeper">Play</a></div></div>
       </div>
@@ -179,8 +191,7 @@ header.site{background:rgba(255,255,255,.55)!important}
       </div>
     </section>
     </div>
-</div>
-</div>
+  </div>
 </main>
 
 <footer class="site">
@@ -274,6 +285,5 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
 }
 </script>
-<script src="js/ambient.js"></script>
 </body>
 </html>
