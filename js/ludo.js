@@ -48,17 +48,27 @@ function isSafe(color, steps) {
 
 /* ---------- state ---------- */
 var players, turn, dice, sixes, movable, phase, finishes;
-var humanColor = 'red';
+var humanColor = 'red', humanCount = 1;
+
+function aiTotal() { return players.filter(function (p) { return p.ai; }).length; }
+function pname(pl) { // display name for messages
+  if (pl.ai) return aiTotal() > 1 ? 'Computer (' + CNAME[pl.color] + ')' : 'Computer';
+  if (humanCount === 1) return 'You';
+  return 'Player ' + (pl.seat + 1);
+}
+function humanTurnMsg() {
+  var pl = cur();
+  return (humanCount === 1 ? 'Your turn' : pname(pl) + "'s turn") + ' — roll the dice!';
+}
 
 function newGame() {
-  players = COLORS.map(function (c) {
-    return { color: c, ai: c !== humanColor, tokens: [-1, -1, -1, -1] };
+  var order = [humanColor].concat(COLORS.filter(function (c) { return c !== humanColor; }));
+  players = order.map(function (c, i) {
+    return { color: c, seat: i, ai: i >= humanCount, tokens: [-1, -1, -1, -1] };
   });
-  // human first
-  players.sort(function (a, b) { return (a.color === humanColor ? 0 : 1) - (b.color === humanColor ? 0 : 1); });
   turn = 0; sixes = 0; movable = []; phase = 'roll'; finishes = [];
   renderAll();
-  setMsg('Your turn — roll the dice!');
+  setMsg(humanTurnMsg());
   updateDiceBtn();
 }
 
@@ -75,26 +85,26 @@ function doRoll() {
   drawDice(dice);
   if (dice === 6) sixes++; else sixes = 0;
   if (sixes === 3) {
-    setMsg(CNAME[cur().color] + ' rolled three 6s — turn skipped!');
+    setMsg(pname(cur()) + ' rolled three 6s — turn skipped!');
     sixes = 0;
     setTimeout(nextTurn, 1200);
     return;
   }
   movable = legalMoves(cur(), dice);
   if (!movable.length) {
-    setMsg(CNAME[cur().color] + ' rolled ' + dice + ' — no move possible.');
+    setMsg(pname(cur()) + ' rolled ' + dice + ' — no move possible.');
     setTimeout(nextTurn, 1100);
     return;
   }
   phase = 'move';
   if (cur().ai) {
-    setMsg(CNAME[cur().color] + ' rolled ' + dice + '…');
+    setMsg(pname(cur()) + ' rolled ' + dice + '…');
     setTimeout(function () {
       var mv = aiChoose(cur(), dice, movable);
       applyMove(cur(), mv.ti, dice);
     }, 900);
   } else {
-    setMsg('You rolled ' + dice + ' — tap a glowing token.');
+    setMsg(pname(cur()) + ' rolled ' + dice + ' — tap a glowing token.');
     highlightMovable();
   }
   updateDiceBtn();
@@ -150,7 +160,7 @@ function applyMove(pl, ti, d) {
   movable = [];
   if (extra) {
     phase = 'roll';
-    setMsg(CNAME[pl.color] + (pl.ai ? ' goes again!' : ' — roll again!'));
+    setMsg(pname(pl) + (pl.ai ? ' goes again!' : ' — roll again!'));
     if (pl.ai) setTimeout(doRoll, 900); else updateDiceBtn();
   } else {
     nextTurn();
@@ -166,10 +176,10 @@ function nextTurn() {
   renderAll();
   updateDiceBtn();
   if (cur().ai) {
-    setMsg(CNAME[cur().color] + "'s turn…");
+    setMsg(pname(cur()) + "'s turn…");
     setTimeout(doRoll, 900);
   } else {
-    setMsg('Your turn — roll the dice!');
+    setMsg(humanTurnMsg());
   }
 }
 
@@ -219,11 +229,14 @@ function aiChoose(pl, d, moves) {
 
 function endGame(winnerColor) {
   phase = 'over';
-  var you = winnerColor === humanColor;
-  document.getElementById('end-title').textContent = you ? '🏆 You win!' : CNAME[winnerColor] + ' wins';
-  document.getElementById('end-msg').textContent = you
+  var w = null;
+  players.forEach(function (p) { if (p.color === winnerColor) w = p; });
+  var humanWon = w && !w.ai;
+  document.getElementById('end-title').textContent =
+    humanWon ? ('🏆 ' + (humanCount === 1 ? 'You win!' : pname(w) + ' wins!')) : '🤖 Computer wins';
+  document.getElementById('end-msg').textContent = humanWon
     ? 'All four tokens home — beautifully played!'
-    : 'The ' + winnerColor + ' player got all four tokens home first. Rematch?';
+    : 'The computer got all four tokens home first. Rematch?';
   document.getElementById('gameover').classList.add('show');
 }
 
@@ -328,7 +341,11 @@ function renderAll() {
     dots[d].classList.toggle('active', players[turn] && dots[d].dataset.color === players[turn].color);
     var pl = null;
     for (var q = 0; q < players.length; q++) if (players[q].color === dots[d].dataset.color) pl = players[q];
-    if (pl) dots[d].querySelector('.phome').textContent = pl.tokens.filter(function (t) { return t === 56; }).length + '/4';
+    if (pl) {
+      dots[d].querySelector('.phome').textContent = pl.tokens.filter(function (t) { return t === 56; }).length + '/4';
+      var nm = dots[d].querySelector('.pname');
+      if (nm) nm.textContent = (pl.ai ? '🤖' : (humanCount === 1 ? 'You' : 'P' + (pl.seat + 1))) + ' · ' + CNAME[pl.color];
+    }
   }
 }
 
@@ -358,6 +375,7 @@ function updateDiceBtn() {
 document.getElementById('roll-btn').addEventListener('click', rollDice);
 document.getElementById('start-btn').addEventListener('click', function () {
   humanColor = document.querySelector('input[name="lcolor"]:checked').value;
+  humanCount = parseInt(document.querySelector('input[name="pcount"]:checked').value, 10) || 1;
   document.getElementById('setup').classList.remove('show');
   newGame();
 });
