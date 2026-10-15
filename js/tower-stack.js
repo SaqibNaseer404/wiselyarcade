@@ -19,6 +19,24 @@
   var missed = null;   // the block that missed, falling
   var popups = [];     // floating texts: {text, y, life, color}
 
+  // ---- Round 1 cinematic polish: dust puffs + shooting star (visual only) ----
+  var dusts = [];
+  var dustCursor = 0;
+  for (var di0 = 0; di0 < 40; di0++) dusts.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, max: 1 });
+  function spawnDust(x, y) {
+    for (var dn = 0; dn < 6; dn++) {
+      var dp = dusts[dustCursor];
+      dustCursor = (dustCursor + 1) % dusts.length;
+      dp.x = x + (Math.random() - 0.5) * 70;
+      dp.y = y + BH - 4;
+      dp.vx = (Math.random() - 0.5) * 90;
+      dp.vy = -20 - Math.random() * 55;
+      dp.max = dp.life = 0.32 + Math.random() * 0.16;
+    }
+  }
+  var meteor = null;
+  var nextMeteor = 9;
+
   var placed = 0, level = 1, combo = 0;
   var best = 0;
   try { best = parseInt(localStorage.getItem('towerStackBest') || '0', 10) || 0; } catch (e) {}
@@ -89,6 +107,7 @@
     if (Math.abs(dx) <= PERFECT_TOL) {
       // Perfect landing — no slice, combo grows.
       combo++;
+      spawnDust(rx, moverY());
       blocks.push({ x: rx, w: mover.w });
       popups.push({ text: combo > 1 ? 'Perfect x' + combo + '!' : 'Perfect!', y: moverY() - 14, life: 1, color: '#0EA5A4' });
     } else {
@@ -98,6 +117,7 @@
       var cutW = mover.w - newW;
       var cutX = dx > 0 ? right + cutW / 2 : left - cutW / 2;
       debris.push({ x: cutX, w: cutW, y: moverY(), vy: 40, rot: 0, vr: (dx > 0 ? 1.6 : -1.6), life: 1.1 });
+      spawnDust(newX, moverY());
       blocks.push({ x: newX, w: newW });
     }
 
@@ -261,6 +281,65 @@
     ctx.fillStyle = sun;
     ctx.fillRect(0, 0, W, H);
 
+    // Round 1: god-ray cone from the sun toward the tower (fades at night)
+    if (sky.night < 0.85) {
+      var rayA = 0.16 * (1 - sky.night);
+      var rayG = ctx.createLinearGradient(0, H * 0.30, 0, H * 0.80);
+      rayG.addColorStop(0, 'rgba(255,244,214,' + rayA.toFixed(3) + ')');
+      rayG.addColorStop(1, 'rgba(255,244,214,0)');
+      ctx.fillStyle = rayG;
+      ctx.beginPath();
+      ctx.moveTo(W * 0.5 - 24, H * 0.30);
+      ctx.lineTo(W * 0.5 + 24, H * 0.30);
+      ctx.lineTo(W * 0.5 + 95, H * 0.80);
+      ctx.lineTo(W * 0.5 - 95, H * 0.80);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // Round 1: three drifting pastel clouds (soft ellipses, wrap around)
+    ctx.save();
+    for (var ci = 0; ci < 3; ci++) {
+      var cww = 100 + ci * 34;
+      var cx = ((ci * 179 + time * (7 + ci * 4)) % (W + 260)) - 130;
+      var cy = 64 + ci * 48;
+      var cg = ctx.createRadialGradient(cx, cy, 4, cx, cy, cww / 2);
+      cg.addColorStop(0, 'rgba(255,255,255,0.5)');
+      cg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = cg;
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, cww / 2, cww / 5.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Round 1: shooting star every ~12s (thin pastel streak across upper sky)
+    if (time > nextMeteor) {
+      nextMeteor = time + 10 + Math.random() * 6;
+      meteor = { x: W * 0.15 + Math.random() * W * 0.6, y: 36 + Math.random() * 90, life: 1 };
+    }
+    if (meteor) {
+      meteor.life -= dt * 1.5;
+      meteor.x += 300 * dt;
+      meteor.y += 120 * dt;
+      if (meteor.life <= 0) { meteor = null; }
+      else {
+        var ma = Math.max(0, meteor.life);
+        var mg = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x - 72, meteor.y - 30);
+        mg.addColorStop(0, 'rgba(255,250,235,' + (0.9 * ma).toFixed(3) + ')');
+        mg.addColorStop(1, 'rgba(255,250,235,0)');
+        ctx.save();
+        ctx.strokeStyle = mg;
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(meteor.x, meteor.y);
+        ctx.lineTo(meteor.x - 72, meteor.y - 30);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     // cool moon glow + glowing moon disc at high altitude
     if (sky.night > 0.5) {
       var mk = (sky.night - 0.5) * 2;
@@ -311,6 +390,15 @@
     ctx.fillStyle = 'rgba(255,235,200,0.35)';
     ctx.fillRect(0, H - GROUND + BH, W, 3);
 
+    // Round 1: warm glow ellipse under the tower base
+    var tgw = ctx.createRadialGradient(W / 2, H - GROUND + BH, 4, W / 2, H - GROUND + BH, 210);
+    tgw.addColorStop(0, 'rgba(255,214,150,0.28)');
+    tgw.addColorStop(1, 'rgba(255,214,150,0)');
+    ctx.fillStyle = tgw;
+    ctx.beginPath();
+    ctx.ellipse(W / 2, H - GROUND + BH, 210, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+
     // placed blocks
     for (var i = 0; i < blocks.length; i++) {
       var y = screenY(i);
@@ -358,9 +446,25 @@
       ctx.restore();
     }
 
+    // Round 1: landing dust puffs (soft, fade in ~400ms)
+    ctx.save();
+    for (var du = dusts.length - 1; du >= 0; du--) {
+      var dpu = dusts[du];
+      if (dpu.life <= 0) continue;
+      dpu.life -= dt;
+      dpu.x += dpu.vx * dt;
+      dpu.y += dpu.vy * dt;
+      dpu.vy += 120 * dt;
+      var da = Math.max(0, dpu.life / dpu.max) * 0.5;
+      ctx.fillStyle = 'rgba(255,242,224,' + da.toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(dpu.x, dpu.y, 3 + 4 * (1 - da * 2), 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
     // missed block tumbling
-    if (missed) {
-      missed.t += dt;
+    if (missed) {      missed.t += dt;
       missed.vy += 900 * dt;
       missed.y += missed.vy * dt;
       missed.rot += missed.vr * dt;
