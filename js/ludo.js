@@ -48,7 +48,9 @@ function isSafe(color, steps) {
 
 /* ---------- state ---------- */
 var players, turn, dice, sixes, movable, phase, finishes;
-var humanColor = 'red', humanCount = 1;
+var humanColor = 'red', gameMode = 'ai'; // 'ai' = you vs 1 computer | 2 | 3 | 4 humans
+var humanCount = 1;
+var OPP = { red: 'yellow', yellow: 'red', green: 'blue', blue: 'green' };
 
 function aiTotal() { return players.filter(function (p) { return p.ai; }).length; }
 function pname(pl) { // display name for messages
@@ -62,14 +64,35 @@ function humanTurnMsg() {
 }
 
 function newGame() {
-  var order = [humanColor].concat(COLORS.filter(function (c) { return c !== humanColor; }));
+  var humans, total;
+  if (gameMode === 'ai') { humans = 1; total = 2; }
+  else { humans = total = parseInt(gameMode, 10) || 2; }
+  humanCount = humans;
+  // seat order: your color first, then the opposite color, then the rest
+  var order = [humanColor, OPP[humanColor]].concat(
+    COLORS.filter(function (c) { return c !== humanColor && c !== OPP[humanColor]; })
+  ).slice(0, total);
   players = order.map(function (c, i) {
-    return { color: c, seat: i, ai: i >= humanCount, tokens: [-1, -1, -1, -1] };
+    return { color: c, seat: i, ai: i >= humans, tokens: [-1, -1, -1, -1] };
   });
   turn = 0; sixes = 0; movable = []; phase = 'roll'; finishes = [];
+  buildPdots();
   renderAll();
   setMsg(humanTurnMsg());
   updateDiceBtn();
+}
+
+function buildPdots() {
+  var bar = document.getElementById('players-bar');
+  bar.innerHTML = '';
+  players.forEach(function (pl) {
+    var d = document.createElement('div');
+    d.className = 'pdot';
+    d.dataset.color = pl.color;
+    d.innerHTML = '<span class="swatch" style="background:' + HEX[pl.color] + '"></span>' +
+      '<span class="pname"></span><span class="phome">0/4</span>';
+    bar.appendChild(d);
+  });
 }
 
 function cur() { return players[turn]; }
@@ -171,8 +194,8 @@ function nextTurn() {
   movable = []; phase = 'roll'; sixes = 0;
   // skip finished players
   var guard = 0;
-  do { turn = (turn + 1) % 4; guard++; }
-  while (finishes.indexOf(players[turn].color) !== -1 && guard < 8);
+  do { turn = (turn + 1) % players.length; guard++; }
+  while (finishes.indexOf(players[turn].color) !== -1 && guard <= players.length);
   renderAll();
   updateDiceBtn();
   if (cur().ai) {
@@ -375,7 +398,7 @@ function updateDiceBtn() {
 document.getElementById('roll-btn').addEventListener('click', rollDice);
 document.getElementById('start-btn').addEventListener('click', function () {
   humanColor = document.querySelector('input[name="lcolor"]:checked').value;
-  humanCount = parseInt(document.querySelector('input[name="pcount"]:checked').value, 10) || 1;
+  gameMode = document.querySelector('input[name="pmode"]:checked').value;
   document.getElementById('setup').classList.remove('show');
   newGame();
 });
