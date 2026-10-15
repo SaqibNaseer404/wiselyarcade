@@ -22,8 +22,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=8">
+<style>
+/* Sidebar beside hero + ambient gameplay background */
+#ambient{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.15}
+header.site,main,footer.site{position:relative;z-index:1}
+@media(min-width:1024px){
+.hub-top .hub-right{min-width:0}
+.hub-top .side-games{margin-top:26px}
+.hub-right .hero-3d{border-radius:26px}
+}
+@media(max-width:1023px){
+.hub-top{display:flex;flex-direction:column}
+.hub-top .hub-right{display:contents}
+.hub-top .hero-3d{order:1}
+.hub-top .side-games{order:2}
+.hub-top .hub-main{order:3}
+}
+</style>
 </head>
 <body>
+<canvas id="ambient" aria-hidden="true"></canvas>
 
 <header class="site">
   <div class="wrap bar">
@@ -39,23 +57,10 @@
 </header>
 
 <main>
-  <div class="hero hero-3d">
-    <canvas id="hero3d" aria-hidden="true"></canvas>
-    <div class="hero-inner">
-      <h1>Wisely Arcade</h1>
-      <div><span class="tag">Play. Learn. Repeat.</span></div>
-      <p class="lead">A family-safe arcade where <strong>every game teaches you a life lesson</strong>. Pick your age, play free games right in your browser — no downloads, no accounts, no worries.</p>
-      <div class="hero-search">
-        <input id="game-search" type="search" placeholder="🔍 Search 10 games…" aria-label="Search games">
-      </div>
-      <div class="hero-stats">
-        <span>🎮 10 games</span><span>👨‍👩‍👧‍👦 3 age groups</span><span>💜 100% free</span>
-      </div>
-    </div>
-  </div>
+  
 
-  <div class="wrap hub">
-    <aside class="side-games">
+  <div class="wrap hub hub-top">
+<aside class="side-games">
       <h3>All games</h3>
       <nav>
       <span class="sg-group">Ages 5–9</span>
@@ -74,7 +79,22 @@
       <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
       </nav>
     </aside>
-    <div class="hub-main">
+<div class="hub-right">
+<div class="hero hero-3d">
+    <canvas id="hero3d" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <h1>Wisely Arcade</h1>
+      <div><span class="tag">Play. Learn. Repeat.</span></div>
+      <p class="lead">A family-safe arcade where <strong>every game teaches you a life lesson</strong>. Pick your age, play free games right in your browser — no downloads, no accounts, no worries.</p>
+      <div class="hero-search">
+        <input id="game-search" type="search" placeholder="🔍 Search 10 games…" aria-label="Search games">
+      </div>
+      <div class="hero-stats">
+        <span>🎮 10 games</span><span>👨‍👩‍👧‍👦 3 age groups</span><span>💜 100% free</span>
+      </div>
+    </div>
+  </div>
+<div class="hub-main">
     <div class="age-picker">
       <a class="age-btn age-kids" href="kids">Ages 5–9<small>Fun games for little learners</small></a>
       <a class="age-btn age-teens" href="teens">Ages 10–17<small>Challenges for sharp minds</small></a>
@@ -142,7 +162,8 @@
       </div>
     </section>
     </div>
-  </div>
+</div>
+</div>
 </main>
 
 <footer class="site">
@@ -236,5 +257,6 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
 }
 </script>
+<script src="js/ambient.js"></script>
 </body>
 </html>
