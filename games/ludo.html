@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Ludo — Free Online Ludo vs Computer | Wisely Arcade</title>
-<meta name="description" content="Play Ludo free online — 1 to 4 players on one device, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
+<meta name="description" content="Play Ludo free online — vs the computer or pass-and-play with up to 4 players, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -100,12 +100,7 @@
       <p class="tagline">The classic family race — solo vs the computer, or pass-and-play with friends.</p>
     </div>
 
-    <div class="lu-top" id="players-bar">
-      <div class="pdot" data-color="red"><span class="swatch" style="background:#ef4444"></span><span class="pname">Red</span><span class="phome">0/4</span></div>
-      <div class="pdot" data-color="green"><span class="swatch" style="background:#22c55e"></span><span class="pname">Green</span><span class="phome">0/4</span></div>
-      <div class="pdot" data-color="yellow"><span class="swatch" style="background:#eab308"></span><span class="pname">Yellow</span><span class="phome">0/4</span></div>
-      <div class="pdot" data-color="blue"><span class="swatch" style="background:#3b82f6"></span><span class="pname">Blue</span><span class="phome">0/4</span></div>
-    </div>
+    <div class="lu-top" id="players-bar"></div>
 
     <div class="lu-top">
       <div id="dice">⚅</div>
@@ -121,7 +116,7 @@
 
     <div class="howto">
       <h2>How to Play</h2>
-      <p>Classic Ludo for 1–4 players on one device — play solo against the computer, or pass and play with friends and family. Empty seats are played by the computer. Roll a <strong>6</strong> to bring a token out of your base, race all four tokens around the board and up your home stretch. Land on an opponent (off a star square) to send them back to base. Rolling 6, capturing, or bringing a token home earns another roll — but three 6s in a row skips your turn!</p>
+      <p>Classic Ludo — <strong>Vs Computer</strong> for a quick 1v1, or <strong>2–4 Players</strong> pass-and-play with friends and family on one device. Roll a <strong>6</strong> to bring a token out of your base, race all four tokens around the board and up your home stretch. Land on an opponent (off a star square) to send them back to base. Rolling 6, capturing, or bringing a token home earns another roll — but three 6s in a row skips your turn!</p>
       <ul>
         <li><strong>☆ star squares</strong> are safe — nobody can capture you there.</li>
         <li>You need the <strong>exact roll</strong> to enter home.</li>
@@ -152,14 +147,15 @@
   <div class="lu-card">
     <div style="font-size:3rem">🎲</div>
     <h2>Ludo</h2>
-    <p>Pick your color and how many friends are playing with you — empty seats are played by the computer. Pass the device to the next player on their turn!</p>
-    <div style="font-weight:800;color:#5b4f70">Players</div>
+    <p>Pick your color and your game mode.</p>
+    <div style="font-weight:800;color:#5b4f70">Game mode</div>
     <div class="opt-row">
-      <input type="radio" name="pcount" id="pc-1" value="1" checked><label for="pc-1">1</label>
-      <input type="radio" name="pcount" id="pc-2" value="2"><label for="pc-2">2</label>
-      <input type="radio" name="pcount" id="pc-3" value="3"><label for="pc-3">3</label>
-      <input type="radio" name="pcount" id="pc-4" value="4"><label for="pc-4">4</label>
+      <input type="radio" name="pmode" id="pm-ai" value="ai" checked><label for="pm-ai">🤖 Vs Computer</label>
+      <input type="radio" name="pmode" id="pm-2" value="2"><label for="pm-2">👥 2 Players</label>
+      <input type="radio" name="pmode" id="pm-3" value="3"><label for="pm-3">👥 3 Players</label>
+      <input type="radio" name="pmode" id="pm-4" value="4"><label for="pm-4">👥 4 Players</label>
     </div>
+    <p style="font-size:.85rem">Vs Computer: just you vs 1 computer. 2–4 Players: pass-and-play with friends on this device.</p>
     <div style="font-weight:800;color:#5b4f70">Your color (Player 1)</div>
     <div class="color-pick">
       <input type="radio" name="lcolor" id="lc-r" value="red" checked><label for="lc-r" style="background:#ef4444" title="Red"></label>
@@ -196,6 +192,6 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/ludo.js?v=2"></script>
+<script src="../js/ludo.js?v=3"></script>
 </body>
 </html>
