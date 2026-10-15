@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Ludo — Free Online Ludo vs Computer | Wisely Arcade</title>
-<meta name="description" content="Play Ludo free online against 3 computer opponents — full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
+<meta name="description" content="Play Ludo free online — 1 to 4 players on one device, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -75,6 +75,11 @@
     border:4px solid transparent;box-shadow:0 4px 12px rgba(40,25,70,.25)}
   .color-pick input{display:none}
   .color-pick input:checked+label{border-color:#3b3449;transform:scale(1.12)}
+  .opt-row{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+  .opt-row label{background:#f1e9fb;border:2px solid transparent;border-radius:999px;
+    padding:8px 18px;font-weight:800;cursor:pointer;color:#5b4f70}
+  .opt-row input{display:none}
+  .opt-row input:checked+label{border-color:#7c5cd6;background:#e7dbff;color:#3b3449}
 </style>
 </head>
 <body>
@@ -92,14 +97,14 @@
     <div class="crumb"><a href="../">Home</a> › <a href="../kids">Kids</a> › Ludo</div>
     <div class="game-head">
       <h1>Ludo</h1>
-      <p class="tagline">The classic family race — you against three computer opponents.</p>
+      <p class="tagline">The classic family race — solo vs the computer, or pass-and-play with friends.</p>
     </div>
 
     <div class="lu-top" id="players-bar">
-      <div class="pdot" data-color="red"><span class="swatch" style="background:#ef4444"></span>Red<span class="phome">0/4</span></div>
-      <div class="pdot" data-color="green"><span class="swatch" style="background:#22c55e"></span>Green<span class="phome">0/4</span></div>
-      <div class="pdot" data-color="yellow"><span class="swatch" style="background:#eab308"></span>Yellow<span class="phome">0/4</span></div>
-      <div class="pdot" data-color="blue"><span class="swatch" style="background:#3b82f6"></span>Blue<span class="phome">0/4</span></div>
+      <div class="pdot" data-color="red"><span class="swatch" style="background:#ef4444"></span><span class="pname">Red</span><span class="phome">0/4</span></div>
+      <div class="pdot" data-color="green"><span class="swatch" style="background:#22c55e"></span><span class="pname">Green</span><span class="phome">0/4</span></div>
+      <div class="pdot" data-color="yellow"><span class="swatch" style="background:#eab308"></span><span class="pname">Yellow</span><span class="phome">0/4</span></div>
+      <div class="pdot" data-color="blue"><span class="swatch" style="background:#3b82f6"></span><span class="pname">Blue</span><span class="phome">0/4</span></div>
     </div>
 
     <div class="lu-top">
@@ -116,7 +121,7 @@
 
     <div class="howto">
       <h2>How to Play</h2>
-      <p>Classic Ludo against three computer players. Roll a <strong>6</strong> to bring a token out of your base, race all four tokens around the board and up your home stretch. Land on an opponent (off a star square) to send them back to base. Rolling 6, capturing, or bringing a token home earns another roll — but three 6s in a row skips your turn!</p>
+      <p>Classic Ludo for 1–4 players on one device — play solo against the computer, or pass and play with friends and family. Empty seats are played by the computer. Roll a <strong>6</strong> to bring a token out of your base, race all four tokens around the board and up your home stretch. Land on an opponent (off a star square) to send them back to base. Rolling 6, capturing, or bringing a token home earns another roll — but three 6s in a row skips your turn!</p>
       <ul>
         <li><strong>☆ star squares</strong> are safe — nobody can capture you there.</li>
         <li>You need the <strong>exact roll</strong> to enter home.</li>
@@ -147,8 +152,15 @@
   <div class="lu-card">
     <div style="font-size:3rem">🎲</div>
     <h2>Ludo</h2>
-    <p>Pick your color and race three computer opponents home. You can't control the dice — only how you play the roll.</p>
-    <div style="font-weight:800;color:#5b4f70">Your color</div>
+    <p>Pick your color and how many friends are playing with you — empty seats are played by the computer. Pass the device to the next player on their turn!</p>
+    <div style="font-weight:800;color:#5b4f70">Players</div>
+    <div class="opt-row">
+      <input type="radio" name="pcount" id="pc-1" value="1" checked><label for="pc-1">1</label>
+      <input type="radio" name="pcount" id="pc-2" value="2"><label for="pc-2">2</label>
+      <input type="radio" name="pcount" id="pc-3" value="3"><label for="pc-3">3</label>
+      <input type="radio" name="pcount" id="pc-4" value="4"><label for="pc-4">4</label>
+    </div>
+    <div style="font-weight:800;color:#5b4f70">Your color (Player 1)</div>
     <div class="color-pick">
       <input type="radio" name="lcolor" id="lc-r" value="red" checked><label for="lc-r" style="background:#ef4444" title="Red"></label>
       <input type="radio" name="lcolor" id="lc-g" value="green"><label for="lc-g" style="background:#22c55e" title="Green"></label>
