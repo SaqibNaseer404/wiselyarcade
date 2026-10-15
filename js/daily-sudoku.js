@@ -72,7 +72,27 @@
       'inset 0 2px 2px rgba(255,255,255,.85),inset 0 -2px 4px rgba(150,70,40,.28);}' +
     /* Pencil notes stay small and quiet */
     '.scell .notes{inset:3px}' +
-    '.scell .notes span{color:#7c8db0;text-shadow:0 1px 0 rgba(255,255,255,.7)}';
+    '.scell .notes span{color:#7c8db0;text-shadow:0 1px 0 rgba(255,255,255,.7)}' +
+    /* ---- Round 1 cinematic polish ---- */
+    /* Selected cell: pastel glow pulse (breathing) */
+    '.scell.sel{animation:sudoku-sel-pulse 1.8s ease-in-out infinite}' +
+    '@keyframes sudoku-sel-pulse{' +
+      '0%,100%{box-shadow:inset 0 0 0 3px #1d4ed8,inset 2px 2px 0 rgba(255,255,255,.9),' +
+        '0 0 14px 3px rgba(29,78,216,.55),0 1px 3px rgba(21,42,102,.4)}' +
+      '50%{box-shadow:inset 0 0 0 3px #7c6cf0,inset 2px 2px 0 rgba(255,255,255,.9),' +
+        '0 0 22px 6px rgba(150,140,245,.75),0 1px 3px rgba(21,42,102,.4)}}' +
+    /* Same-number cells: shimmer sweep */
+    '.scell.same{position:relative;overflow:hidden}' +
+    '.scell.same::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-60%;' +
+      'background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.65) 50%,rgba(255,255,255,0) 100%);' +
+      'animation:sudoku-shimmer 2.2s ease-in-out infinite;pointer-events:none}' +
+    '@keyframes sudoku-shimmer{0%{left:-60%}60%,100%{left:130%}}' +
+    /* Completed row/column/box: one-shot celebration glow */
+    '.scell.unit-done{animation:sudoku-unit-done .9s ease}' +
+    '@keyframes sudoku-unit-done{' +
+      '0%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 0 rgba(194,169,242,0)}' +
+      '40%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 18px 4px rgba(194,169,242,.85)}' +
+      '100%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 0 rgba(194,169,242,0)}}';
     var style = document.createElement('style');
     style.id = 'sudoku-3d-theme';
     style.appendChild(document.createTextNode(css));
@@ -234,6 +254,40 @@
     setTimeout(function () { cell.classList.remove('err'); }, 350);
   }
 
+  // ---- Round 1: one-shot celebration glow when a row/column/box completes ----
+  function cellCorrect(k) {
+    return given[k] ? true : (value[k] !== 0 && SOLUTION[k] === String(value[k]));
+  }
+  function unitCells(kind, i) {
+    var r = Math.floor(i / 9), c = i % 9, cells = [], k, dr, dc;
+    if (kind === 'row') { for (k = 0; k < 9; k++) cells.push(r * 9 + k); }
+    else if (kind === 'col') { for (k = 0; k < 9; k++) cells.push(k * 9 + c); }
+    else {
+      var br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+      for (dr = 0; dr < 3; dr++) for (dc = 0; dc < 3; dc++) cells.push((br + dr) * 9 + bc + dc);
+    }
+    return cells;
+  }
+  function celebrateUnits(i) {
+    ['row', 'col', 'box'].forEach(function (kind) {
+      var cells = unitCells(kind, i);
+      var complete = cells.every(function (k) { return cellCorrect(k); });
+      if (!complete) return;
+      cells.forEach(function (k, idx) {
+        var cell = cellEl(k);
+        cell.classList.add('unit-done');
+        cell.style.animationDelay = (idx * 45) + 'ms'; // ripple across the unit
+      });
+      setTimeout(function () {
+        cells.forEach(function (k) {
+          var cell = cellEl(k);
+          cell.classList.remove('unit-done');
+          cell.style.animationDelay = '';
+        });
+      }, 1300);
+    });
+  }
+
   // Remove note `n` from all peers of cell i (standard Sudoku helper).
   function clearPeerNotes(i, n) {
     for (var k = 0; k < 81; k++) {
@@ -266,6 +320,7 @@
       notes[i].clear();
       clearPeerNotes(i, n);
       paint();
+      celebrateUnits(i); // Round 1: celebration glow on completed row/col/box
       checkWin();
     } else {
       mistakes++;
