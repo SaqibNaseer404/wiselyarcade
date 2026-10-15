@@ -192,9 +192,13 @@
   }
 
   // ---------- effects ----------
+  function hexA(hex, a) { // Round 1: hex color + alpha -> rgba()
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + (n >> 16) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + Math.max(0, Math.min(1, a)).toFixed(3) + ')';
+  }
   function burst(x, y, ci) {
     var P = PALETTE[ci], i, a, sp;
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < 18; i++) {
       a = Math.random() * 6.283; sp = rand(60, 260);
       parts.push({
         x: x, y: y,
@@ -203,6 +207,8 @@
         col: Math.random() < 0.3 ? '#ffffff' : P.base
       });
     }
+    // Round 1: color-matched glow flash on every pop
+    rings.push({ x: x, y: y, life: 0, max: 0.32, col: P.base, flash: true });
   }
 
   function dropFloaters() {
@@ -245,6 +251,7 @@
     var cl = flood(pr, pc);
     if (cl.length >= 3) {
       var cx = 0, cy = 0, i;
+      var popCi = grid[cl[0][0]][cl[0][1]]; // Round 1: capture cluster color before clearing
       for (i = 0; i < cl.length; i++) {
         var bx = cellX(cl[i][0], cl[i][1]), by = cellY(cl[i][0]);
         cx += bx; cy += by;
@@ -255,7 +262,7 @@
       var gained = cl.length * 10;
       score += gained;
       popups.push({ x: cx, y: cy, text: '+' + gained, life: 0, max: 0.9 });
-      rings.push({ x: cx, y: cy, life: 0, max: 0.35 });
+      rings.push({ x: cx, y: cy, life: 0, max: 0.35, col: PALETTE[popCi].base });
       dropFloaters();
     }
     trimRows();
@@ -466,11 +473,25 @@
 
   function drawBG() {
     var g = ctx.createLinearGradient(0, 0, 0, H);
-    g.addColorStop(0, '#251c52');
-    g.addColorStop(0.55, '#161238');
-    g.addColorStop(1, '#0b091f');
+    g.addColorStop(0, '#2E2054');
+    g.addColorStop(0.55, '#181237');
+    g.addColorStop(1, '#0D0A26');
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, W, H);
+    // Round 1: soft pastel nebula glows (deep-plum base keeps bubble contrast)
+    var nebs = [
+      [W * 0.22, H * 0.24, 150, '194,169,242', 0.16],
+      [W * 0.82, H * 0.52, 170, '154,220,214', 0.13],
+      [W * 0.48, H * 0.82, 150, '246,179,194', 0.12]
+    ];
+    for (var ni = 0; ni < nebs.length; ni++) {
+      var nb = nebs[ni];
+      var ng = ctx.createRadialGradient(nb[0], nb[1], 0, nb[0], nb[1], nb[2]);
+      ng.addColorStop(0, 'rgba(' + nb[3] + ',' + nb[4] + ')');
+      ng.addColorStop(1, 'rgba(' + nb[3] + ',0)');
+      ctx.fillStyle = ng;
+      ctx.beginPath(); ctx.arc(nb[0], nb[1], nb[2], 0, 6.29); ctx.fill();
+    }
     var i, b, bg;
     for (i = 0; i < bgBubs.length; i++) {
       b = bgBubs[i];
@@ -521,24 +542,27 @@
     var x = CX + Math.cos(aim) * 54, y = CY + Math.sin(aim) * 54;
     var dx = Math.cos(aim), dy = Math.sin(aim);
     var travelled = 0, guard = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
     while (travelled < 330 && guard++ < 70) {
       x += dx * 10; y += dy * 10; travelled += 10;
       if (x - R < GX) { x = GX + R; dx = Math.abs(dx); }
       else if (x + R > W - GX) { x = W - GX - R; dx = -Math.abs(dx); }
       if (y < GY) break;
       if (nearBubble(x, y)) break;
+      // Round 1: shimmering aim dots
+      var shimmer = 0.35 + 0.25 * Math.sin(tGlobal * 6 + travelled * 0.045);
+      ctx.fillStyle = 'rgba(255,255,255,' + shimmer.toFixed(3) + ')';
       ctx.beginPath(); ctx.arc(x, y, 3, 0, 6.29); ctx.fill();
     }
   }
 
   function drawCannon() {
-    // glow pad under cannon
-    var gl = ctx.createRadialGradient(CX, CY, 8, CX, CY, 70);
-    gl.addColorStop(0, 'rgba(140,170,255,0.30)');
-    gl.addColorStop(1, 'rgba(140,170,255,0)');
+    // glow pad under cannon (Round 1: pastel lavender, breathing)
+    var gpulse = 0.26 + 0.10 * Math.sin(tGlobal * 2.4);
+    var gl = ctx.createRadialGradient(CX, CY, 8, CX, CY, 78);
+    gl.addColorStop(0, 'rgba(194,169,242,' + gpulse.toFixed(3) + ')');
+    gl.addColorStop(1, 'rgba(194,169,242,0)');
     ctx.fillStyle = gl;
-    ctx.beginPath(); ctx.arc(CX, CY, 70, 0, 6.29); ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, 78, 0, 6.29); ctx.fill();
     // rotating barrel
     ctx.save();
     ctx.translate(CX, CY);
@@ -611,9 +635,23 @@
     }
     for (i = 0; i < rings.length; i++) {
       var rg = rings[i], rk = 1 - rg.life / rg.max;
-      ctx.strokeStyle = 'rgba(255,255,255,' + (0.8 * rk).toFixed(3) + ')';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(rg.x, rg.y, 10 + 56 * (1 - rk), 0, 6.29); ctx.stroke();
+      var rcol = rg.col || '#ffffff';
+      if (rg.flash) {
+        // Round 1: expanding color-matched glow flash (additive)
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        var frad = 24 + 52 * (1 - rk);
+        var fg = ctx.createRadialGradient(rg.x, rg.y, 0, rg.x, rg.y, frad);
+        fg.addColorStop(0, hexA(rcol, 0.55 * rk));
+        fg.addColorStop(1, hexA(rcol, 0));
+        ctx.fillStyle = fg;
+        ctx.beginPath(); ctx.arc(rg.x, rg.y, frad, 0, 6.29); ctx.fill();
+        ctx.restore();
+      } else {
+        ctx.strokeStyle = hexA(rcol, 0.8 * rk);
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(rg.x, rg.y, 10 + 56 * (1 - rk), 0, 6.29); ctx.stroke();
+      }
     }
     ctx.textAlign = 'center';
     for (i = 0; i < popups.length; i++) {
