@@ -403,6 +403,7 @@
             popup('+' + pts + (bike.rot < 0 ? ' BACKFLIP!' : ' FRONTFLIP!'), bike.x, bike.y - 60);
           }
           if (preVy > 220) {
+            landDip = 0.12; // Round 1: subtle camera dip on firm landings
             for (var d = 0; d < 10; d++) {
               spawnPart(bike.x + (hash(d * 3.1) - 0.5) * 40, effGroundY(bike.x),
                 (hash(d * 7.7) - 0.5) * 220, -hash(d * 5.3) * 160,
@@ -502,11 +503,18 @@
   }
 
   function draw(cam) {
-    // sky with warm horizon
+    // Round 1: landing camera dip — subtle 120ms vertical dip (visual only)
+    var dipY = 0;
+    if (landDip > 0) dipY = Math.sin((1 - landDip / 0.12) * Math.PI) * 7;
+    ctx.save();
+    ctx.translate(0, dipY);
+
+    // sky with warm horizon (Round 1: deepened, still pastel)
     var sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#5FA8E8');
-    sky.addColorStop(0.65, '#BFE3FA');
-    sky.addColorStop(1, '#F2E3C2');
+    sky.addColorStop(0, '#4F9FDE');
+    sky.addColorStop(0.55, '#AED8F7');
+    sky.addColorStop(0.8, '#F6DCB6');
+    sky.addColorStop(1, '#F3CD9E');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
 
@@ -537,7 +545,8 @@
       ctx.fill();
     }
 
-    // far mountain silhouettes (two layers)
+    // far mountain silhouettes (three layers — Round 1 adds the farthest, lightest)
+    mountainLayer(cam, 0.06, 262, '#C7DBEF');
     mountainLayer(cam, 0.12, 300, '#A9C4DE');
     mountainLayer(cam, 0.25, 345, '#8CAED2');
 
@@ -638,6 +647,7 @@
       ctx.font = '800 17px Nunito, sans-serif';
       ctx.fillText(z.label, z.x + z.w / 2, ZONE_Y + 35);
     }
+    ctx.restore(); // Round 1: end landing-dip transform
   }
 
   function mountainLayer(cam, par, baseY, color) {
@@ -914,6 +924,15 @@
         ctx.lineTo(wx + Math.cos(a) * 10, wy + Math.sin(a) * 10);
         ctx.stroke();
       }
+      // Round 1: motion-blur arc on fast wheel spin
+      var wSpd = Math.abs(bike.vx);
+      if (wSpd > 220) {
+        ctx.strokeStyle = 'rgba(200,208,218,' + Math.min(0.45, (wSpd - 220) / 700).toFixed(3) + ')';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(wx, wy, WR - 5, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     }
 
     // frame with gradient + highlight
@@ -986,6 +1005,7 @@
   // ---------- Main loop ----------
   var last = performance.now();
   var dustT = 0, exhT = 0;
+  var landDip = 0; // Round 1: landing camera-dip timer (visual only, seconds)
   function frame(now) {
     var dt = Math.min(0.033, (now - last) / 1000);
     last = now;
@@ -1030,6 +1050,7 @@
       pt.x += pt.vx * dt;
       pt.y += pt.vy * dt;
     }
+    if (landDip > 0) landDip -= dt;
 
     camX = bike.x - 260;
     var maxCam = L.len + 320 - W;
