@@ -67,3 +67,15 @@
     })(inputs[s]);
   }
 })();
+
+// Load the trending tracker (play counts + homepage "Trending now" shelf).
+(function () {
+  try {
+    var cs = document.currentScript;
+    var base = cs && cs.src ? cs.src.slice(0, cs.src.lastIndexOf('/') + 1) : '';
+    var s = document.createElement('script');
+    s.src = base + 'trending.js?v=1';
+    s.defer = true;
+    document.head.appendChild(s);
+  } catch (e) {}
+})();
