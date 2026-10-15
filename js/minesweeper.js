@@ -88,8 +88,8 @@
   }
 
   function newBoard() {
-    var d = DIFFS[diff];
-    rows = d.rows; cols = d.cols; mineCount = d.mines; T = d.tile;
+    confetti.length = 0; // Round 1: clear win confetti on new board
+    var d = DIFFS[diff];    rows = d.rows; cols = d.cols; mineCount = d.mines; T = d.tile;
     canvas.width = cols * T + PAD * 2;
     canvas.height = rows * T + PAD * 2;
     board = [];
@@ -182,6 +182,7 @@
     if (cell.r) return;
     cell.f = !cell.f;
     flagCount += cell.f ? 1 : -1;
+    if (cell.f) flagPops.push({ r: r, c: c, t0: nowMs }); // Round 1: flag bounce
     updateHUD();
   }
 
@@ -203,6 +204,21 @@
       best[diff] = elapsed;
       isBest = true;
       try { localStorage.setItem('wisely_minesweeper_best_' + diff, String(elapsed)); } catch (e) {}
+    }
+    // Round 1: pastel confetti burst on win
+    var CONF_COLS = ['#C2A9F2', '#9ADCD6', '#F6B3C2', '#FFDF9E', '#BFE3FA'];
+    for (var cf = 0; cf < 90; cf++) {
+      confetti.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * 140,
+        vx: (Math.random() - 0.5) * 70,
+        vy: 90 + Math.random() * 170,
+        rot: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 9,
+        life: 2.2 + Math.random() * 1.4,
+        c: CONF_COLS[cf % CONF_COLS.length],
+        w: 5 + Math.random() * 5
+      });
     }
     updateHUD();
     overTitle.textContent = 'You win!';
@@ -363,6 +379,12 @@
   function draw() {
     var bw = cols * T, bh = rows * T, r, c, x, y, cell;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Round 1: soft pastel aura behind the board panel
+    var pa = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, 40, canvas.width / 2, canvas.height / 2, canvas.width * 0.72);
+    pa.addColorStop(0, 'rgba(194,169,242,0.22)');
+    pa.addColorStop(1, 'rgba(194,169,242,0)');
+    ctx.fillStyle = pa;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     // board panel
     var pg = ctx.createLinearGradient(0, 0, 0, canvas.height);
     pg.addColorStop(0, '#35436a');
@@ -379,7 +401,34 @@
         cell = board[r][c];
         if (!cell.r) {
           tile3D(x, y, T);
-          if (cell.f) drawFlag(x, y, T);
+          // Round 1: hovered tile — brightened bevel + soft pastel glow
+          if (hoverCell && hoverCell.r === r && hoverCell.c === c && state === 'playing') {
+            ctx.save();
+            ctx.shadowColor = 'rgba(194,169,242,0.85)';
+            ctx.shadowBlur = 14;
+            ctx.fillStyle = 'rgba(255,255,255,0.30)';
+            rr(x, y, T, T, 6); ctx.fill();
+            ctx.restore();
+          }
+          if (cell.f) {
+            // Round 1: tiny bounce when a flag is placed
+            var bScale = 1, fi;
+            for (fi = flagPops.length - 1; fi >= 0; fi--) {
+              var fp = flagPops[fi];
+              if (fp.r === r && fp.c === c) {
+                var fk = (nowMs - fp.t0) / 240;
+                if (fk >= 1) flagPops.splice(fi, 1);
+                else bScale = 1 + 0.35 * Math.sin(fk * Math.PI);
+                break;
+              }
+            }
+            ctx.save();
+            ctx.translate(x + T / 2, y + T / 2);
+            ctx.scale(bScale, bScale);
+            ctx.translate(-(x + T / 2), -(y + T / 2));
+            drawFlag(x, y, T);
+            ctx.restore();
+          }
         } else {
           tilePressed(x, y, T);
           if (cell.m) drawMine(x, y, T, !!(exploded && exploded.r === r && exploded.c === c));
@@ -388,12 +437,36 @@
         }
       }
     }
+    // Round 1: win confetti (pastel, over the board)
+    for (var cfi = 0; cfi < confetti.length; cfi++) {
+      var cfp = confetti[cfi];
+      ctx.save();
+      ctx.translate(cfp.x, cfp.y);
+      ctx.rotate(cfp.rot);
+      ctx.globalAlpha = Math.min(1, cfp.life);
+      ctx.fillStyle = cfp.c;
+      ctx.fillRect(-cfp.w / 2, -cfp.w / 4, cfp.w, cfp.w / 2);
+      ctx.restore();
+    }
   }
 
   // ---------- main loop ----------
+  var lastFrameT = 0;
   function frame(ts) {
     requestAnimationFrame(frame);
     nowMs = ts || 0;
+    var fdt = lastFrameT ? Math.min(0.05, (nowMs - lastFrameT) / 1000) : 0.016;
+    lastFrameT = nowMs;
+    // Round 1: win-confetti physics
+    for (var ci = confetti.length - 1; ci >= 0; ci--) {
+      var cp = confetti[ci];
+      cp.life -= fdt;
+      if (cp.life <= 0) { confetti.splice(ci, 1); continue; }
+      cp.x += cp.vx * fdt;
+      cp.y += cp.vy * fdt;
+      cp.vy += 60 * fdt;
+      cp.rot += cp.vr * fdt;
+    }
     if (timerOn) elTime.textContent = fmt((nowMs - startStamp) / 1000);
     draw();
   }
@@ -410,6 +483,10 @@
   }
 
   var pDown = null, pTimer = null, pHandled = false, pStartX = 0, pStartY = 0;
+  // Round 1: hover + flag-bounce + confetti state (visual only)
+  var hoverCell = null;
+  var flagPops = [];
+  var confetti = [];
 
   canvas.addEventListener('pointerdown', function (e) {
     var cell = cellFromEvent(e);
@@ -449,6 +526,12 @@
   canvas.addEventListener('pointerup', endPress);
   canvas.addEventListener('pointercancel', function () { endPress(null); });
   canvas.addEventListener('pointerleave', function () { endPress(null); });
+
+  // Round 1: hover highlight for tiles (desktop mouse only; visual)
+  canvas.addEventListener('pointermove', function (e) {
+    if (e.pointerType === 'mouse') hoverCell = cellFromEvent(e);
+  });
+  canvas.addEventListener('pointerleave', function () { hoverCell = null; });
 
   canvas.addEventListener('contextmenu', function (e) {
     e.preventDefault();
