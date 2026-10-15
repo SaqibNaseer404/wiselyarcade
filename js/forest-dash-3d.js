@@ -68,6 +68,40 @@
   scene.background = new THREE.Color(0xd4e9f5);
   scene.fog = new THREE.Fog(0xd4e9f5, 55, 240);
 
+  /* ---- Round 1: gradient sky dome (pastel dawn) + glow texture helper ---- */
+  function makeGlowTexture(inner, outer) {
+    var c = document.createElement('canvas');
+    c.width = c.height = 128;
+    var x = c.getContext('2d');
+    var g = x.createRadialGradient(64, 64, 4, 64, 64, 64);
+    g.addColorStop(0, inner);
+    g.addColorStop(1, outer);
+    x.fillStyle = g;
+    x.fillRect(0, 0, 128, 128);
+    return new THREE.CanvasTexture(c);
+  }
+  var skyDomeMat = (function () {
+    var sc = document.createElement('canvas');
+    sc.width = 2; sc.height = 256;
+    var sx = sc.getContext('2d');
+    var g = sx.createLinearGradient(0, 0, 0, 256);
+    g.addColorStop(0.00, '#6FA8E8'); // zenith: sky blue
+    g.addColorStop(0.45, '#B9A8F0'); // lavender
+    g.addColorStop(0.72, '#F6B8C6'); // blush
+    g.addColorStop(0.90, '#FFDCAE'); // peach horizon
+    g.addColorStop(1.00, '#FFEFD2');
+    sx.fillStyle = g;
+    sx.fillRect(0, 0, 2, 256);
+    return new THREE.MeshBasicMaterial({
+      map: new THREE.CanvasTexture(sc),
+      side: THREE.BackSide, fog: false, depthWrite: false
+    });
+  })();
+  var skyDome = new THREE.Mesh(new THREE.SphereGeometry(420, 24, 16), skyDomeMat);
+  skyDome.renderOrder = -10;
+  skyDome.frustumCulled = false;
+  scene.add(skyDome);
+
   var camera = new THREE.PerspectiveCamera(58, 2, 0.1, 500);
   camera.position.set(0, 4.4, 8.2);
   camera.lookAt(0, 1.4, -10);
@@ -168,6 +202,15 @@
   var sunDisc = new THREE.Mesh(new THREE.CircleGeometry(7, 24), M.sunDisc);
   sunDisc.position.set(38, 34, -160);
   scene.add(sunDisc);
+  // Round 1: additive sun glow sprite
+  var sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: makeGlowTexture('rgba(255,240,200,1)', 'rgba(255,240,200,0)'),
+    blending: THREE.AdditiveBlending, fog: false, depthWrite: false,
+    transparent: true, opacity: 0.9
+  }));
+  sunGlow.position.copy(sunDisc.position);
+  sunGlow.scale.set(52, 52, 1);
+  scene.add(sunGlow);
 
   var clouds = [];
   for (var ci = 0; ci < 7; ci++) {
@@ -325,11 +368,33 @@
   }));
   scene.add(dust);
 
+  /* ---- Round 1: ambient glow fireflies (additive points, gentle sine drift) ---- */
+  var FLY_N = 26;
+  var flyGeo = new THREE.BufferGeometry();
+  var flyPos = new Float32Array(FLY_N * 3);
+  var flySeed = [];
+  for (var ffi = 0; ffi < FLY_N; ffi++) {
+    flyPos[ffi * 3] = (Math.random() - 0.5) * 18;
+    flyPos[ffi * 3 + 1] = 0.8 + Math.random() * 4.5;
+    flyPos[ffi * 3 + 2] = -55 + Math.random() * 60;
+    flySeed.push(Math.random() * 6.28);
+  }
+  flyGeo.setAttribute('position', new THREE.BufferAttribute(flyPos, 3));
+  var flyPts = new THREE.Points(flyGeo, new THREE.PointsMaterial({
+    color: 0xffe27a, size: 0.42, transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    map: makeGlowTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)')
+  }));
+  flyPts.frustumCulled = false;
+  scene.add(flyPts);
+
   function applyTheme(cfg) {
     scene.fog.color.setHex(cfg.fog);
     scene.fog.near = cfg.fogNear;
     scene.fog.far = cfg.fogFar;
     scene.background.setHex(cfg.fog);
+    // Round 1: tint the sky dome toward the level mood (gradient stays visible)
+    skyDomeMat.color.setHex(cfg.fog).lerp(new THREE.Color(0xffffff), 0.55);
     M.grass.color.setHex(cfg.grass);
     for (var n = 0; n < nearTrees.length; n++) nearTrees[n].visible = n < cfg.near;
     for (var f = 0; f < farTrees.length; f++) farTrees[f].visible = f < cfg.far;
@@ -706,6 +771,17 @@
         if (dp[j3 + 1] < 0.3) dp[j3 + 1] = 7;
       }
       dustGeo.attributes.position.needsUpdate = true;
+      // Round 1: ambient fireflies — gentle sine drift + scroll with the world
+      var fp = flyGeo.attributes.position.array;
+      for (i = 0; i < FLY_N; i++) {
+        var f3 = i * 3;
+        fp[f3] += Math.sin(flySeed[i] + runT * 0.9) * dt * 0.5;
+        fp[f3 + 1] += Math.cos(flySeed[i] * 1.3 + runT * 0.7) * dt * 0.3;
+        fp[f3 + 2] += scrollDz * 0.85;
+        if (fp[f3 + 2] > 10) { fp[f3 + 2] = -55; fp[f3] = (Math.random() - 0.5) * 18; fp[f3 + 1] = 0.8 + Math.random() * 4.5; }
+      }
+      flyGeo.attributes.position.needsUpdate = true;
+      flyPts.material.opacity = 0.6 + 0.3 * Math.sin(runT * 2.2);
 
       for (i = 0; i < hurdles.length; i++) {
         o = hurdles[i];
