@@ -337,7 +337,7 @@ section.block p.sub{color:var(--muted);margin:0 0 18px}
   box-shadow:var(--shadow-lift);
   border-bottom:4px solid var(--line);
   padding:20px;margin:20px auto;
-  max-width:520px;
+  max-width:760px;
 }
 .stats{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
 .stat{
@@ -361,6 +361,7 @@ section.block p.sub{color:var(--muted);margin:0 0 18px}
 .overlay h2{margin:0;font-size:1.8rem;text-shadow:0 3px 8px rgba(0,0,0,.35)}
 .overlay p{margin:0;opacity:.92}
 .stage{position:relative}
+.game-area .stage canvas{width:100%;height:auto;display:block}
 
 /* ---------- Memory Match ---------- */
 .mboard{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
