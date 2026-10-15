@@ -48,6 +48,16 @@
     return { l: '#F2A93B', b: '#D98A12', d: '#8A5604', t: '#FFFFFF' }; // super tiles beyond 2048
   }
 
+  // Round 1: pastel outer glow per high tier (visual only)
+  function tierGlow(v) {
+    if (v >= 2048) return '0 0 22px rgba(255,170,60,.90)';
+    if (v >= 1024) return '0 0 18px rgba(255,223,158,.70)';
+    if (v >= 512) return '0 0 16px rgba(246,179,194,.60)';
+    if (v >= 256) return '0 0 14px rgba(154,220,214,.55)';
+    if (v >= 128) return '0 0 12px rgba(194,169,242,.55)';
+    return null;
+  }
+
   // Glossy candy-3D surface: white specular bloom top-left over a
   // light-to-dark diagonal bevel gradient.
   function tileGloss(style) {
@@ -98,13 +108,12 @@
     el.style.textShadow = colors.t === '#FFFFFF' ?
       '0 2px 4px rgba(0,0,0,.35)' : '0 1px 0 rgba(255,255,255,.55)';
     el.textContent = tile.value;
-    el.style.boxShadow = tileShadow(tile.value >= 2048 ?
-      '0 0 22px rgba(255,170,60,.90)' : null);
+    el.style.boxShadow = tileShadow(tierGlow(tile.value));
     el._tile = tile;
     placeTile(el, tile);
     if (pop) {
       var animClass = mergePop ? 'merge-pop' : 'pop';
-      var animMs = mergePop ? 260 : 200;
+      var animMs = mergePop ? 520 : 200; // Round 1: let the ring flash finish
       el.classList.add(animClass);
       setTimeout(function () { el.classList.remove(animClass); }, animMs);
     }
@@ -143,6 +152,11 @@
 
   function updateScores() {
     scoreEl.textContent = score;
+    if (score > 0) { // Round 1: tick-up bump on score gain (visual only)
+      scoreEl.classList.remove('tick-bump');
+      void scoreEl.offsetWidth;
+      scoreEl.classList.add('tick-bump');
+    }
     if (score > best) {
       best = score;
       try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
