@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Ludo — Free Online Ludo vs Computer | Wisely Arcade</title>
+<meta name="description" content="Play Ludo free online against 3 computer opponents — full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=9">
+<style>
+  .lu-wrap{max-width:760px;margin:0 auto}
+  .lu-top{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+  #dice{font-size:3.4rem;line-height:1;filter:drop-shadow(0 8px 14px rgba(122,96,178,.35));
+    background:rgba(255,255,255,.85);border-radius:20px;width:84px;height:84px;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+  #dice.shake{animation:lshake .4s ease}
+  @keyframes lshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg) scale(1.08)}
+    50%{transform:rotate(14deg) scale(1.12)}75%{transform:rotate(-8deg)}}
+  #roll-btn.ready{animation:lpulse 1.4s ease-in-out infinite}
+  @keyframes lpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  #msg{font-weight:800;color:#5b4f70;text-align:center;min-height:1.6em;margin:6px 0 12px}
+  #ludo-board{position:relative;width:min(94vw,560px);aspect-ratio:1;margin:0 auto;
+    display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);
+    border-radius:20px;overflow:hidden;border:6px solid rgba(255,255,255,.95);
+    box-shadow:0 24px 60px rgba(122,96,178,.3);background:#e8e2f2}
+  .lcell{border:1px solid rgba(120,100,160,.14);display:flex;align-items:center;
+    justify-content:center;font-size:clamp(.4rem,1.6vw,.8rem);color:rgba(90,70,130,.55)}
+  .lcell.track{background:#fff}
+  .lcell.base-inner{background:rgba(255,255,255,.85) !important}
+  .base-red{background:#f6b8b8}.base-green{background:#b5e8c8}
+  .base-yellow{background:#f5e6a8}.base-blue{background:#b8cdf5}
+  .start-red{background:#ef4444 !important;color:#fff}.start-green{background:#22c55e !important;color:#fff}
+  .start-yellow{background:#eab308 !important;color:#fff}.start-blue{background:#3b82f6 !important;color:#fff}
+  .stretch-red{background:#f6b8b8 !important}.stretch-green{background:#b5e8c8 !important}
+  .stretch-yellow{background:#f5e6a8 !important}.stretch-blue{background:#b8cdf5 !important}
+  .center-c{background:linear-gradient(135deg,#f6b8b8,#b5e8c8,#f5e6a8,#b8cdf5) !important}
+  #tokens{position:absolute;inset:0;pointer-events:none}
+  .token{position:absolute;width:5.4%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);
+    border:2px solid #fff;box-shadow:0 3px 8px rgba(40,25,70,.4);pointer-events:none;z-index:2}
+  .tok-red{background:radial-gradient(circle at 35% 30%,#ffb3b3,#ef4444 70%)}
+  .tok-green{background:radial-gradient(circle at 35% 30%,#b8f0cd,#22c55e 70%)}
+  .tok-yellow{background:radial-gradient(circle at 35% 30%,#fdf0b0,#eab308 70%)}
+  .tok-blue{background:radial-gradient(circle at 35% 30%,#c3d6fb,#3b82f6 70%)}
+  .token.movable{pointer-events:auto;cursor:pointer;animation:lpulse 1s ease-in-out infinite;
+    outline:3px solid #fff;z-index:3}
+  .pdot{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);
+    border:2px solid transparent;border-radius:999px;padding:6px 14px;font-weight:800;color:#5b4f70}
+  .pdot .swatch{width:16px;height:16px;border-radius:50%;border:2px solid #fff;
+    box-shadow:0 2px 5px rgba(40,25,70,.3)}
+  .pdot.active{border-color:#7c5cd6;background:#fff}
+  .pdot .phome{font-size:.8rem;color:#8a7ba3}
+  .lu-overlay{position:fixed;inset:0;background:rgba(80,60,120,.45);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:18px}
+  .lu-overlay.show{display:flex}
+  .lu-card{background:rgba(255,255,255,.94);border-radius:24px;padding:30px 28px;max-width:430px;
+    width:100%;text-align:center;box-shadow:0 30px 70px rgba(60,40,100,.35)}
+  .lu-card h2{margin:0 0 6px;color:#3b3449}
+  .lu-card p{color:#6d6480}
+  .color-pick{display:flex;gap:10px;justify-content:center;margin:14px 0 20px}
+  .color-pick label{width:52px;height:52px;border-radius:50%;cursor:pointer;
+    border:4px solid transparent;box-shadow:0 4px 12px rgba(40,25,70,.25)}
+  .color-pick input{display:none}
+  .color-pick input:checked+label{border-color:#3b3449;transform:scale(1.12)}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap head">
+    <a class="brand" href="../"><span class="logo-dot"></span> Wisely Arcade</a>
+    <nav class="main">
+      <a href="../">Home</a><a href="../kids">Kids</a><a href="../teens">Teens</a><a href="../adults">Adults</a><a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap lu-wrap">
+    <div class="crumb"><a href="../">Home</a> › <a href="../kids">Kids</a> › Ludo</div>
+    <div class="game-head">
+      <h1>Ludo</h1>
+      <p class="tagline">The classic family race — you against three computer opponents.</p>
+    </div>
+
+    <div class="lu-top" id="players-bar">
+      <div class="pdot" data-color="red"><span class="swatch" style="background:#ef4444"></span>Red<span class="phome">0/4</span></div>
+      <div class="pdot" data-color="green"><span class="swatch" style="background:#22c55e"></span>Green<span class="phome">0/4</span></div>
+      <div class="pdot" data-color="yellow"><span class="swatch" style="background:#eab308"></span>Yellow<span class="phome">0/4</span></div>
+      <div class="pdot" data-color="blue"><span class="swatch" style="background:#3b82f6"></span>Blue<span class="phome">0/4</span></div>
+    </div>
+
+    <div class="lu-top">
+      <div id="dice">⚅</div>
+      <button class="btn" id="roll-btn">🎲 Roll dice</button>
+    </div>
+    <div id="msg">Pick your color to begin!</div>
+
+    <div id="ludo-board" aria-label="Ludo board"></div>
+
+    <div class="btn-row" style="justify-content:center;margin-top:14px">
+      <button class="btn ghost" id="panel-new">New game</button>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>Classic Ludo against three computer players. Roll a <strong>6</strong> to bring a token out of your base, race all four tokens around the board and up your home stretch. Land on an opponent (off a star square) to send them back to base. Rolling 6, capturing, or bringing a token home earns another roll — but three 6s in a row skips your turn!</p>
+      <ul>
+        <li><strong>☆ star squares</strong> are safe — nobody can capture you there.</li>
+        <li>You need the <strong>exact roll</strong> to enter home.</li>
+        <li>Tap a <strong>glowing token</strong> to move it.</li>
+      </ul>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap the dice button, then tap a glowing token.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>You can't control the dice</h2>
+      <p>In Ludo, nobody chooses their roll — the dice do what the dice do. Winners aren't the luckiest players; they're the ones who make the smartest move with whatever number they got.</p>
+      <p>Life rolls its own dice too: surprises, setbacks, lucky breaks. You can't control the roll — but you always control <em>how you play it</em>. Play your number well.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<div class="lu-overlay show" id="setup">
+  <div class="lu-card">
+    <div style="font-size:3rem">🎲</div>
+    <h2>Ludo</h2>
+    <p>Pick your color and race three computer opponents home. You can't control the dice — only how you play the roll.</p>
+    <div style="font-weight:800;color:#5b4f70">Your color</div>
+    <div class="color-pick">
+      <input type="radio" name="lcolor" id="lc-r" value="red" checked><label for="lc-r" style="background:#ef4444" title="Red"></label>
+      <input type="radio" name="lcolor" id="lc-g" value="green"><label for="lc-g" style="background:#22c55e" title="Green"></label>
+      <input type="radio" name="lcolor" id="lc-y" value="yellow"><label for="lc-y" style="background:#eab308" title="Yellow"></label>
+      <input type="radio" name="lcolor" id="lc-b" value="blue"><label for="lc-b" style="background:#3b82f6" title="Blue"></label>
+    </div>
+    <button class="btn" id="start-btn">Start game</button>
+  </div>
+</div>
+
+<div class="lu-overlay" id="gameover">
+  <div class="lu-card">
+    <div style="font-size:3rem">🏁</div>
+    <h2 id="end-title">Game over</h2>
+    <p id="end-msg"></p>
+    <p style="font-size:.9rem"><em>You can't control the dice — only how you play the roll.</em></p>
+    <button class="btn" id="new-btn">Play again</button>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/ludo.js?v=1"></script>
+</body>
+</html>

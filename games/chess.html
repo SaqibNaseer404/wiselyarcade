@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Chess — Free Online Chess vs Computer | Wisely Arcade</title>
+<meta name="description" content="Play Chess free online against the computer — full rules, three difficulty levels, no download, no sign-up. Every move has a consequence: think before you act. Family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=9">
+<style>
+  .ch-wrap{max-width:1020px;margin:0 auto}
+  .ch-layout{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+  #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(92vw,520px);
+    aspect-ratio:1;border-radius:18px;overflow:hidden;
+    box-shadow:0 24px 60px rgba(122,96,178,.3), inset 0 2px 0 #fff;
+    border:6px solid rgba(255,255,255,.9);touch-action:manipulation}
+  .sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .sq.light{background:#f3e9f7}.sq.dark{background:#b79ae0}
+  .sq .pc{font-size:clamp(1.7rem,6.5vw,2.9rem);line-height:1;user-select:none;pointer-events:none;
+    filter:drop-shadow(0 3px 3px rgba(60,40,90,.35))}
+  .sq .pc.w{color:#ffffff;text-shadow:0 0 3px #4a3566,0 2px 4px rgba(60,40,90,.5)}
+  .sq .pc.b{color:#3b2a5e}
+  .sq.sel{outline:3px solid #7c5cd6;outline-offset:-3px}
+  .sq.move::after{content:"";position:absolute;width:26%;height:26%;border-radius:50%;
+    background:rgba(124,92,214,.45)}
+  .sq.takes::after{content:"";position:absolute;inset:6%;border-radius:50%;
+    border:4px solid rgba(214,92,124,.65)}
+  .sq.check{background:#f2a0b5 !important}
+  .ch-side{flex:1;min-width:250px;max-width:340px;display:flex;flex-direction:column;gap:12px}
+  .ch-panel{background:rgba(255,255,255,.78);backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.95);border-radius:18px;padding:16px 18px;
+    box-shadow:0 12px 30px rgba(122,96,178,.18), inset 0 2px 0 #fff}
+  #status{font-weight:900;font-size:1.05rem;color:#3b3449}
+  #matdiff{font-weight:800;color:#7c5cd6;font-size:.9rem}
+  .cap-row{font-size:1.35rem;min-height:1.6em;letter-spacing:2px}
+  #moves{max-height:150px;overflow-y:auto;font-size:.88rem;color:#5b4f70;font-weight:700;
+    display:flex;flex-direction:column;gap:2px}
+  .ch-overlay{position:fixed;inset:0;background:rgba(80,60,120,.45);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:50;padding:18px}
+  .ch-overlay.show{display:flex}
+  .ch-card{background:rgba(255,255,255,.94);border-radius:24px;padding:30px 28px;max-width:430px;
+    width:100%;text-align:center;box-shadow:0 30px 70px rgba(60,40,100,.35)}
+  .ch-card h2{margin:0 0 6px;color:#3b3449}
+  .ch-card p{color:#6d6480}
+  .opt-row{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
+  .opt-row label{background:#f1e9fb;border:2px solid transparent;border-radius:999px;
+    padding:8px 16px;font-weight:800;cursor:pointer;color:#5b4f70}
+  .opt-row input{display:none}
+  .opt-row input:checked+label{border-color:#7c5cd6;background:#e7dbff;color:#3b3449}
+  #promo .ch-card{max-width:340px}
+  #promo .opt-row button{font-size:2.4rem;background:#f1e9fb;border:2px solid transparent;
+    border-radius:16px;padding:8px 14px;cursor:pointer}
+  #promo .opt-row button:hover{border-color:#7c5cd6}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap head">
+    <a class="brand" href="../"><span class="logo-dot"></span> Wisely Arcade</a>
+    <nav class="main">
+      <a href="../">Home</a><a href="../kids">Kids</a><a href="../teens">Teens</a><a href="../adults">Adults</a><a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap ch-wrap">
+    <div class="crumb"><a href="../">Home</a> › <a href="../teens">Teens &amp; Adults</a> › Chess</div>
+    <div class="game-head">
+      <h1>Chess</h1>
+      <p class="tagline">The royal game — outthink the computer, one careful move at a time.</p>
+    </div>
+
+    <div class="ch-layout">
+      <div id="board" role="grid" aria-label="Chess board"></div>
+      <div class="ch-side">
+        <div class="ch-panel">
+          <div id="status">Choose your side to begin</div>
+          <div id="matdiff"></div>
+        </div>
+        <div class="ch-panel">
+          <div style="font-weight:800;color:#5b4f70;font-size:.85rem;margin-bottom:4px">Captured by you</div>
+          <div class="cap-row" id="cap-w"></div>
+          <div style="font-weight:800;color:#5b4f70;font-size:.85rem;margin-bottom:4px">Captured by computer</div>
+          <div class="cap-row" id="cap-b"></div>
+        </div>
+        <div class="ch-panel">
+          <div style="font-weight:800;color:#5b4f70;font-size:.85rem;margin-bottom:6px">Moves</div>
+          <div id="moves"></div>
+        </div>
+        <div class="btn-row" style="justify-content:center">
+          <button class="btn ghost" id="panel-new">New game</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>Full classic chess against the computer — castling, en passant, and promotion all work. Pick your side and difficulty, then tap one of your pieces to see its legal moves (green dots), and tap a highlighted square to move.</p>
+      <ul>
+        <li><strong>Easy</strong> — a relaxed opponent that sometimes blunders. Great for learning.</li>
+        <li><strong>Medium</strong> — thinks two moves ahead. A real challenge.</li>
+        <li><strong>Hard</strong> — thinks three moves ahead. Bring your best.</li>
+      </ul>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap a piece, then tap a highlighted square. That's it.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Every move has a consequence</h2>
+      <p>In chess, you can't take a move back — the piece stays where you put it, and the whole board changes because of it. Life works the same way: every choice, big or small, moves something on your board.</p>
+      <p>So the habit chess builds is the habit winners use everywhere: pause, look ahead two or three moves, and <em>then</em> act. Think before you move — on the board, and off it.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+      <a class="btn ghost" href="../adults">← More games for ages 18+</a>
+    </div>
+  </div>
+</main>
+
+<div class="ch-overlay show" id="setup">
+  <div class="ch-card">
+    <div style="font-size:3rem">♞</div>
+    <h2>Chess</h2>
+    <p>Outthink the computer. Every move has a consequence — think before you act.</p>
+    <div style="font-weight:800;color:#5b4f70">Your side</div>
+    <div class="opt-row">
+      <input type="radio" name="color" id="c-w" value="w" checked><label for="c-w">♔ White</label>
+      <input type="radio" name="color" id="c-b" value="b"><label for="c-b">♚ Black</label>
+      <input type="radio" name="color" id="c-r" value="random"><label for="c-r">🎲 Random</label>
+    </div>
+    <div style="font-weight:800;color:#5b4f70">Difficulty</div>
+    <div class="opt-row">
+      <input type="radio" name="diff" id="d-e" value="easy" checked><label for="d-e">Easy</label>
+      <input type="radio" name="diff" id="d-m" value="medium"><label for="d-m">Medium</label>
+      <input type="radio" name="diff" id="d-h" value="hard"><label for="d-h">Hard</label>
+    </div>
+    <button class="btn" id="start-btn">Start game</button>
+  </div>
+</div>
+
+<div class="ch-overlay" id="promo">
+  <div class="ch-card">
+    <h2>Promote to</h2>
+    <div class="opt-row">
+      <button data-p="q">♛</button><button data-p="r">♜</button><button data-p="b">♝</button><button data-p="n">♞</button>
+    </div>
+  </div>
+</div>
+
+<div class="ch-overlay" id="gameover">
+  <div class="ch-card">
+    <div style="font-size:3rem">🏁</div>
+    <h2 id="end-title">Game over</h2>
+    <p id="end-msg"></p>
+    <p style="font-size:.9rem"><em>Every move has a consequence — think before you act.</em></p>
+    <button class="btn" id="new-btn">Play again</button>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/chess.js?v=1"></script>
+</body>
+</html>
