@@ -367,7 +367,7 @@ function renderAll() {
     if (pl) {
       dots[d].querySelector('.phome').textContent = pl.tokens.filter(function (t) { return t === 56; }).length + '/4';
       var nm = dots[d].querySelector('.pname');
-      if (nm) nm.textContent = (pl.ai ? '🤖' : (humanCount === 1 ? 'You' : 'P' + (pl.seat + 1))) + ' · ' + CNAME[pl.color];
+      if (nm) nm.textContent = (pl.ai ? '🤖 Computer' : (humanCount === 1 ? 'You' : 'P' + (pl.seat + 1))) + ' · ' + CNAME[pl.color];
     }
   }
 }
