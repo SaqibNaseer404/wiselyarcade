@@ -1,6 +1,10 @@
-/* Forest Dash 3D — real-time 3D endless runner (Three.js).
+/* Forest Dash 3D v5 — real-time 3D endless runner (Three.js).
    A dense, realistic green forest: layered tree walls, canopy overhead,
    light dust in the air, ferns and undergrowth, distant treeline.
+   v5 "showcase" pass: art-direction upgrade (detailed runner, richer trees,
+   textured ground/path, falling leaves, glow accents) with AUTO QUALITY
+   SCALING — pixel ratio, shadows and particles adapt to the device so weak
+   phones stay smooth. Gameplay, hitboxes and scoring are byte-identical to v4.
    Levels: each mountain reached unlocks a deeper, darker, faster forest.
    Fog is kept light so hurdles stay readable even at full speed.
    Lesson: keep going — every obstacle passes. */
@@ -23,6 +27,22 @@
   var best = 0;
   try { best = parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (e) {}
   showBest(best);
+
+  /* ---------------- v5: auto quality scaling — weak phones stay smooth ----------------
+     High-graphics look comes from art direction (lighting, color, texture), not
+     raw GPU power. The pipeline stays light: we scale pixel ratio, shadow
+     resolution and particle counts to the device. No post-processing anywhere. */
+  var IS_MOBILE = /Mobi|Android|iPhone|iPad|Mobile/i.test(navigator.userAgent || '') ||
+                  (window.innerWidth || 420) < 700;
+  var CORES = navigator.hardwareConcurrency || 4;
+  var QT = (IS_MOBILE || CORES <= 2) ? 'low' : ((window.devicePixelRatio || 1) > 2 && CORES >= 8 ? 'high' : 'med');
+  var Q_PIXEL_RATIO = QT === 'high' ? Math.min(window.devicePixelRatio || 1, 2)
+                    : QT === 'med'  ? Math.min(window.devicePixelRatio || 1, 1.5) : 1;
+  var Q_SHADOW = QT === 'high' ? 2048 : QT === 'med' ? 1024 : 512;
+  var Q_AA = QT !== 'low';
+  var Q_DUST = QT === 'high' ? 130 : QT === 'med' ? 90 : 50;
+  var Q_FLIES = QT === 'high' ? 26 : QT === 'med' ? 18 : 10;
+  var Q_LEAVES = QT === 'high' ? 42 : QT === 'med' ? 24 : 0;
 
   if (!window.THREE) {
     startBox.querySelector('p').textContent = 'Sorry — your browser could not load the 3D engine. Try a recent Chrome, Safari, or Firefox.';
@@ -54,13 +74,13 @@
   /* ---------------- Renderer / scene / camera ---------------- */
   var renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: Q_AA });
   } catch (e) {
     startBox.querySelector('p').textContent = 'Sorry — 3D could not start on this device.';
     document.getElementById('f-play').style.display = 'none';
     return;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  renderer.setPixelRatio(Q_PIXEL_RATIO);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -79,6 +99,24 @@
     x.fillStyle = g;
     x.fillRect(0, 0, 128, 128);
     return new THREE.CanvasTexture(c);
+  }
+  /* v5: subtle speckle texture — flat colors become "dirt" and "grass".
+     One 256x256 canvas, tiled; far cheaper than real textures. */
+  function makeNoiseTexture(base, speckA, speckB, count) {
+    var c = document.createElement('canvas');
+    c.width = c.height = 256;
+    var x = c.getContext('2d');
+    x.fillStyle = base;
+    x.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < (count || 900); i++) {
+      x.fillStyle = Math.random() < 0.5 ? speckA : speckB;
+      x.globalAlpha = 0.22 + Math.random() * 0.3;
+      var s = 1 + Math.random() * 3;
+      x.fillRect(Math.random() * 256, Math.random() * 256, s, s);
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
   }
   var skyDomeMat = (function () {
     var sc = document.createElement('canvas');
@@ -112,7 +150,7 @@
   var sun = new THREE.DirectionalLight(0xffecc8, 1.0);
   sun.position.set(16, 30, 12);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(Q_SHADOW, Q_SHADOW);
   sun.shadow.camera.left = -18; sun.shadow.camera.right = 18;
   sun.shadow.camera.top = 18; sun.shadow.camera.bottom = -32;
   sun.shadow.camera.far = 100;
@@ -120,6 +158,11 @@
   var fill = new THREE.DirectionalLight(0xbcd8ff, 0.25); // cool bounce from the sky
   fill.position.set(-12, 18, -6);
   scene.add(fill);
+  // v5: soft rim light from behind-left — gives the runner and trees edge
+  // definition (the "high-graphics" look) for almost zero GPU cost
+  var rim = new THREE.DirectionalLight(0xa8ccff, 0.35);
+  rim.position.set(-8, 10, -20);
+  scene.add(rim);
 
   function resize() {
     var w = canvas.clientWidth || 420;
@@ -131,10 +174,18 @@
   window.addEventListener('resize', resize);
 
   /* ---------------- Rich, realistic materials ---------------- */
+  // v5: ground and path get subtle canvas speckle textures (tiled) instead of
+  // flat colors — the single biggest "high graphics" win for ~zero GPU cost.
+  // Grass texture is luminance-only (near-white) so the per-level color tint
+  // in applyTheme keeps working exactly as before.
+  var grassTex = makeNoiseTexture('#ffffff', '#dfe8df', '#f4faf4', 1100);
+  grassTex.repeat.set(30, 30);
+  var pathTex = makeNoiseTexture('#d9b47c', '#c49a63', '#e8c78f', 800);
+  pathTex.repeat.set(2, 42);
   var M = {
-    grass: new THREE.MeshLambertMaterial({ color: 0x69b45e }),
+    grass: new THREE.MeshLambertMaterial({ color: 0xffffff, map: grassTex }),
     grassDark: new THREE.MeshLambertMaterial({ color: 0x4c8f43 }),
-    path: new THREE.MeshLambertMaterial({ color: 0xd9b47c }),
+    path: new THREE.MeshLambertMaterial({ color: 0xffffff, map: pathTex }),
     pathEdge: new THREE.MeshLambertMaterial({ color: 0xc49a63 }),
     trunk: new THREE.MeshLambertMaterial({ color: 0x7a5233 }),
     trunkDark: new THREE.MeshLambertMaterial({ color: 0x5d3d24 }),
@@ -160,7 +211,13 @@
     skin: new THREE.MeshLambertMaterial({ color: 0xf2c49b }),
     shirt: new THREE.MeshLambertMaterial({ color: 0x2fbfae }),
     shorts: new THREE.MeshLambertMaterial({ color: 0x3b4a6b }),
-    cap: new THREE.MeshLambertMaterial({ color: 0xf2789f })
+    cap: new THREE.MeshLambertMaterial({ color: 0xf2789f }),
+    // v5 additions: sneakers, backpack, unlit warning stripes (pop at speed)
+    shoe: new THREE.MeshLambertMaterial({ color: 0xf5f5f5 }),
+    shoeAccent: new THREE.MeshLambertMaterial({ color: 0x2fbfae }),
+    pack: new THREE.MeshLambertMaterial({ color: 0xff9f43 }),
+    packDark: new THREE.MeshLambertMaterial({ color: 0xe07b28 }),
+    warn: new THREE.MeshBasicMaterial({ color: 0xffd23f })
   };
   var PINES = [M.pine, M.pine2, M.pine3];
   var LEAVES = [M.leaf, M.leaf2, M.leafLit];
@@ -202,24 +259,26 @@
   var sunDisc = new THREE.Mesh(new THREE.CircleGeometry(7, 24), M.sunDisc);
   sunDisc.position.set(38, 34, -160);
   scene.add(sunDisc);
-  // Round 1: additive sun glow sprite
-  var sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: makeGlowTexture('rgba(255,240,200,1)', 'rgba(255,240,200,0)'),
-    blending: THREE.AdditiveBlending, fog: false, depthWrite: false,
-    transparent: true, opacity: 0.9
-  }));
-  sunGlow.position.copy(sunDisc.position);
-  sunGlow.scale.set(52, 52, 1);
-  scene.add(sunGlow);
+  // Round 1: additive sun glow sprite (skipped on low tier — one less overdraw)
+  if (QT !== 'low') {
+    var sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: makeGlowTexture('rgba(255,240,200,1)', 'rgba(255,240,200,0)'),
+      blending: THREE.AdditiveBlending, fog: false, depthWrite: false,
+      transparent: true, opacity: 0.9
+    }));
+    sunGlow.position.copy(sunDisc.position);
+    sunGlow.scale.set(52, 52, 1);
+    scene.add(sunGlow);
+  }
 
   var clouds = [];
   for (var ci = 0; ci < 7; ci++) {
     var cg = new THREE.Group();
-    for (var cj = 0; cj < 3; cj++) {
+    for (var cj = 0; cj < 4; cj++) {
       var puff = new THREE.Mesh(G.sphere, M.cloud);
       puff.castShadow = false;
       puff.scale.set(2.6 + Math.random() * 2, 1.5 + Math.random(), 1.6);
-      puff.position.set(cj * 2.4 - 2.4 + Math.random(), Math.random() * 0.6, Math.random());
+      puff.position.set(cj * 2.1 - 3.1 + Math.random(), Math.random() * 0.6, Math.random());
       cg.add(puff);
     }
     cg.position.set((Math.random() - 0.5) * 90, 15 + Math.random() * 9, -40 - Math.random() * 90);
@@ -234,6 +293,9 @@
   var mBase2 = mesh(G.cone, M.rockDark, 34, 48, 34); mBase2.position.set(34, 24, 8); mountain.add(mBase2);
   var mSnow2 = mesh(G.cone, M.snow, 12, 16, 12); mSnow2.position.set(34, 44, 8); mountain.add(mSnow2);
   var mBase3 = mesh(G.cone, M.rockDark, 26, 36, 26); mBase3.position.set(-32, 18, 10); mountain.add(mBase3);
+  // v5: rock strata bands — layered look, two extra cones, zero animation cost
+  var mStrata = mesh(G.cone, M.rockDark, 44, 9, 44, false); mStrata.position.y = 52; mountain.add(mStrata);
+  var mStrata2 = mesh(G.cone, M.rock, 52, 7, 52, false); mStrata2.position.y = 34; mountain.add(mStrata2);
   var MTN_FAR = -170, MTN_NEAR = -36;
   mountain.position.set(-6, 0, MTN_FAR);
   scene.add(mountain);
@@ -252,14 +314,21 @@
 
   function makePine(detail) {
     var g = new THREE.Group();
+    // v5: root flare at the base — trees feel planted, not floating
+    var flare = mesh(G.cyl, M.trunkDark, 0.95, 0.55, 0.95, detail);
+    flare.position.y = 0.27;
+    g.add(flare);
     var trunk = mesh(G.cyl, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.6, 2.0, 0.6, detail);
     trunk.position.y = 1.0;
     g.add(trunk);
     var pm = PINES[(Math.random() * PINES.length) | 0];
     var c1 = mesh(G.cone, pm, 3.6, 3.2, 3.6, detail); c1.position.y = 3.1; g.add(c1);
     var c2 = mesh(G.cone, pm, 2.7, 2.7, 2.7, detail); c2.position.y = 4.9; g.add(c2);
+    // v5: extra mid layer — fuller, more "high-graphics" silhouette
+    var c25 = mesh(G.cone, pm, 2.25, 2.3, 2.25, detail); c25.position.y = 6.3; g.add(c25);
+    var c3 = mesh(G.cone, M.pineTip, 1.7, 2.1, 1.7, detail); c3.position.y = 7.6; g.add(c3);
     if (detail) {
-      var c3 = mesh(G.cone, M.pineTip, 1.7, 2.1, 1.7, true); c3.position.y = 6.5; g.add(c3);
+      var tip = mesh(G.cone, M.pineTip, 1.0, 1.4, 1.0, true); tip.position.y = 8.8; g.add(tip);
     }
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
@@ -351,7 +420,7 @@
   }
 
   /* ---------------- Dust motes drifting in the light ---------------- */
-  var DUST_N = 130;
+  var DUST_N = Q_DUST;
   var dustGeo = new THREE.BufferGeometry();
   var dustPos = new Float32Array(DUST_N * 3);
   var dustSeed = [];
@@ -369,7 +438,7 @@
   scene.add(dust);
 
   /* ---- Round 1: ambient glow fireflies (additive points, gentle sine drift) ---- */
-  var FLY_N = 26;
+  var FLY_N = Q_FLIES;
   var flyGeo = new THREE.BufferGeometry();
   var flyPos = new Float32Array(FLY_N * 3);
   var flySeed = [];
@@ -387,6 +456,26 @@
   }));
   flyPts.frustumCulled = false;
   scene.add(flyPts);
+
+  /* ---- v5: falling leaves — pooled points drifting down through the light ----
+     Skipped entirely on low tier (Q_LEAVES = 0): one less system for weak GPUs. */
+  var LEAF_N = Q_LEAVES, leafGeo = null, leafPts = null, leafSeed = [];
+  if (LEAF_N > 0) {
+    leafGeo = new THREE.BufferGeometry();
+    var leafPos = new Float32Array(LEAF_N * 3);
+    for (var li = 0; li < LEAF_N; li++) {
+      leafPos[li * 3] = (Math.random() - 0.5) * 22;
+      leafPos[li * 3 + 1] = Math.random() * 9;
+      leafPos[li * 3 + 2] = -60 + Math.random() * 70;
+      leafSeed.push(Math.random() * 6.28);
+    }
+    leafGeo.setAttribute('position', new THREE.BufferAttribute(leafPos, 3));
+    leafPts = new THREE.Points(leafGeo, new THREE.PointsMaterial({
+      color: 0x86c96b, size: 0.34, transparent: true, opacity: 0.9, depthWrite: false
+    }));
+    leafPts.frustumCulled = false;
+    scene.add(leafPts);
+  }
 
   function applyTheme(cfg) {
     scene.fog.color.setHex(cfg.fog);
@@ -424,10 +513,30 @@
     legL = new THREE.Mesh(legGeo, M.shorts); legL.position.set(-0.16, hipY, 0); legL.castShadow = true;
     legR = new THREE.Mesh(legGeo, M.shorts); legR.position.set(0.16, hipY, 0); legR.castShadow = true;
     player.add(legL); player.add(legR);
+    // v5: chunky sneakers ride on the legs so they swing with the run cycle
+    var shoeGeo = new THREE.BoxGeometry(0.27, 0.17, 0.44);
+    shoeGeo.translate(0, -0.085, 0.07);
+    var shoeStripeGeo = new THREE.BoxGeometry(0.28, 0.06, 0.2);
+    [legL, legR].forEach(function (leg) {
+      var shoe = new THREE.Mesh(shoeGeo, M.shoe);
+      shoe.position.set(0, -0.72, 0);
+      shoe.castShadow = true;
+      leg.add(shoe);
+      var stripe = new THREE.Mesh(shoeStripeGeo, M.shoeAccent);
+      stripe.position.set(0, -0.68, 0.02);
+      leg.add(stripe);
+    });
 
     torsoG = new THREE.Group();
     var torso = mesh(G.box, M.shirt, 0.6, 0.68, 0.34); torso.position.y = 0.34;
     torsoG.add(torso);
+    // v5: little backpack — visible to the camera since the runner faces away
+    var pack = mesh(G.box, M.pack, 0.42, 0.5, 0.24);
+    pack.position.set(0, 0.38, -0.3);
+    torsoG.add(pack);
+    var packTop = mesh(G.box, M.packDark, 0.44, 0.12, 0.26);
+    packTop.position.set(0, 0.62, -0.3);
+    torsoG.add(packTop);
     torsoG.position.y = hipY;
     player.add(torsoG);
 
@@ -464,9 +573,10 @@
       ring.position.set(i * 1.06, 0.36, 0);
       g.add(ring);
     }
-    // warning stripes so it reads at speed
-    var stripe = mesh(G.box, M.cap, 0.18, 0.7, 0.7);
+    // v5: unlit warning stripes — stay bright and readable at full speed
+    var stripe = mesh(G.box, M.warn, 0.18, 0.7, 0.7);
     stripe.position.y = 0.36;
+    stripe.castShadow = false;
     g.add(stripe);
     g.userData = { type: 'log' };
     return g;
@@ -501,6 +611,11 @@
     var moss = mesh(G.sphere, M.bush, 1.6, 0.5, 0.8, false);
     moss.position.y = 2.3;
     g.add(moss);
+    // v5: warning stripe across the wall face — readable at speed
+    var wStripe = mesh(G.box, M.warn, 2.24, 0.28, 0.06);
+    wStripe.position.set(0, 1.0, 0.46);
+    wStripe.castShadow = false;
+    g.add(wStripe);
     g.userData = { type: 'wall' };
     return g;
   }
@@ -533,12 +648,21 @@
   }
 
   /* ---------------- Fireflies ---------------- */
+  // v5: shared halo sprite — collectibles glow like premium pickups
+  var flyHaloMat = new THREE.SpriteMaterial({
+    map: makeGlowTexture('rgba(255,235,150,1)', 'rgba(255,235,150,0)'),
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    transparent: true, opacity: 0.85
+  });
   var flies = [];
   for (var fi = 0; fi < 14; fi++) {
     var f = new THREE.Mesh(G.sphere, M.fly);
     f.castShadow = false;
     f.scale.set(0.3, 0.3, 0.3);
     f.visible = false;
+    var halo = new THREE.Sprite(flyHaloMat);
+    halo.scale.set(1.5, 1.5, 1);
+    f.add(halo);
     scene.add(f);
     flies.push({ m: f, active: false, ph: Math.random() * 6 });
   }
@@ -782,6 +906,22 @@
       }
       flyGeo.attributes.position.needsUpdate = true;
       flyPts.material.opacity = 0.6 + 0.3 * Math.sin(runT * 2.2);
+      // v5: falling leaves — drift down, sway, scroll with the world
+      if (leafPts) {
+        var lp = leafGeo.attributes.position.array;
+        for (i = 0; i < LEAF_N; i++) {
+          var l3 = i * 3;
+          lp[l3] += Math.sin(leafSeed[i] + runT * 1.4) * dt * 0.9;
+          lp[l3 + 1] -= dt * (0.9 + 0.5 * Math.sin(leafSeed[i] * 2.0));
+          lp[l3 + 2] += scrollDz * 0.9;
+          if (lp[l3 + 1] < 0.2 || lp[l3 + 2] > 10) {
+            lp[l3] = (Math.random() - 0.5) * 22;
+            lp[l3 + 1] = 7 + Math.random() * 2.5;
+            lp[l3 + 2] = -60 + Math.random() * 20;
+          }
+        }
+        leafGeo.attributes.position.needsUpdate = true;
+      }
 
       for (i = 0; i < hurdles.length; i++) {
         o = hurdles[i];
