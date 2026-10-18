@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css?v=9">
+<link rel="stylesheet" href="css/suggest.css?v=1">
 </head>
 <body>
 
@@ -69,11 +70,13 @@
       <a href="games/2048-merge"><img src="images/thumbs/2048-merge.jpg" alt="2048 Merge"><span>2048 Merge</span></a>
       <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
       <a href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess"><span>Chess</span></a>
+      <a href="games/apex-gp"><img src="images/thumbs/apex-gp.jpg" alt="Apex GP"><span>Apex GP</span></a>
       <span class="sg-group">Ages 18+</span>
       <a href="games/daily-sudoku"><img src="images/thumbs/daily-sudoku.jpg" alt="Daily Sudoku"><span>Daily Sudoku</span></a>
       <a href="games/minesweeper"><img src="images/thumbs/minesweeper.jpg" alt="Minesweeper"><span>Minesweeper</span></a>
       <a href="games/mind-meter"><img src="images/thumbs/mind-meter.jpg" alt="Mind Meter"><span>Mind Meter</span></a>
       <a href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess"><span>Chess</span></a>
+      <a href="games/apex-gp"><img src="images/thumbs/apex-gp.jpg" alt="Apex GP"><span>Apex GP</span></a>
       </nav>
     </aside>
     <div class="hub-main">
@@ -145,6 +148,7 @@
           <a class="shelf-card" href="games/trail-stunts"><img src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts — free online game" loading="lazy"><span class="shelf-name">Trail Stunts</span></a>
           <a class="shelf-card" href="games/forest-dash"><img src="images/thumbs/forest-dash.jpg" alt="Forest Dash — free online game" loading="lazy"><span class="shelf-name">Forest Dash</span></a>
           <a class="shelf-card" href="games/tower-stack"><img src="images/thumbs/tower-stack.jpg" alt="Tower Stack — free online game" loading="lazy"><span class="shelf-name">Tower Stack</span></a>
+          <a class="shelf-card" href="games/apex-gp"><img src="images/thumbs/apex-gp.jpg" alt="Apex GP — free online game" loading="lazy"><span class="shelf-name">Apex GP</span></a>
         </div>
       </div>
       <div class="collection">
@@ -153,6 +157,23 @@
           <a class="shelf-card" href="games/ludo"><img src="images/thumbs/ludo.jpg" alt="Ludo — free online game" loading="lazy"><span class="shelf-name">Ludo</span></a>
           <a class="shelf-card" href="games/memory-match"><img src="images/thumbs/memory-match.jpg" alt="Animal Memory Match — free online game" loading="lazy"><span class="shelf-name">Animal Memory Match</span></a>
           <a class="shelf-card" href="games/chess"><img src="images/thumbs/chess.jpg" alt="Chess — free online game" loading="lazy"><span class="shelf-name">Chess</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" id="suggest-section">
+      <div class="suggest-box">
+        <h2>&#128161; What should we build next?</h2>
+        <p class="sub">Every game here teaches a real lesson &mdash; and your idea could be the next one. Tell us what you&rsquo;d love to play.</p>
+        <form id="suggest-form">
+          <input id="suggest-idea" type="text" maxlength="120" placeholder="e.g. a marble maze that teaches patience" aria-label="Your game idea" autocomplete="off" required>
+          <input id="suggest-name" type="text" maxlength="40" placeholder="Your name (optional)" aria-label="Your name, optional" autocomplete="off">
+          <button class="btn" type="submit">&#9993;&#65039; Send my idea</button>
+          <p class="suggest-note">Opens your email app with the idea pre-written &mdash; just press send. It&rsquo;s also saved on this device so you can see it again. Nothing is tracked or sent anywhere else.</p>
+        </form>
+        <div id="my-ideas" style="display:none">
+          <h3>Your ideas</h3>
+          <div id="my-ideas-list"></div>
         </div>
       </div>
     </section>
@@ -174,6 +195,7 @@
         <div class="card"><img class="thumb" src="images/thumbs/tower-stack.jpg" alt="Tower Stack — free online game"><span class="pill">Ages 10–17</span><h3>Tower Stack</h3><p>Drop each block true — how high can you build?</p><div class="btn-row"><a class="btn ghost" href="games/tower-stack">Play</a></div></div>
         <div class="card coming"><span class="pill soon">Coming soon</span><h3>Rocket Dash</h3><p>Fly far — every fall teaches you something.</p></div>
         <div class="card"><img class="thumb" src="images/thumbs/trail-stunts.jpg" alt="Trail Stunts — free online game"><span class="pill">Ages 10–17</span><h3>Trail Stunts</h3><p>Flip your dirt bike over wild hills — balance beats speed.</p><div class="btn-row"><a class="btn ghost" href="games/trail-stunts">Play</a></div></div>
+        <div class="card"><img class="thumb" src="images/thumbs/apex-gp.jpg" alt="Apex GP — free online game"><span class="pill">Ages 10–17</span><h3>Apex GP</h3><p>Real 3D moto racing — 10 levels, upgrades, 5 rivals.</p><div class="btn-row"><a class="btn ghost" href="games/apex-gp">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/2048-merge.jpg" alt="2048 Merge — free online game"><span class="pill">Ages 10–17</span><h3>2048 Merge</h3><p>Small smart steps add up to big wins.</p><div class="btn-row"><a class="btn ghost" href="games/2048-merge">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/mind-meter.jpg" alt="Mind Meter — free online game"><span class="pill">Ages 10–17 · 18+</span><h3>Mind Meter</h3><p>A 3D IQ challenge — how high can your meter go?</p><div class="btn-row"><a class="btn ghost" href="games/mind-meter">Play</a></div></div>
         <div class="card"><img class="thumb" src="images/thumbs/chess.jpg" alt="Chess — free online game"><span class="pill">Ages 10–17 · 18+</span><h3>Chess</h3><p>Full classic chess vs the computer — three difficulties.</p><div class="btn-row"><a class="btn ghost" href="games/chess">Play</a></div></div>
@@ -209,6 +231,7 @@
 
 <script src="js/main.js"></script>
 <script src="js/recommend.js"></script>
+<script src="js/suggest.js"></script>
 <script src="js/three.min.js"></script>
 <script>
 /* 3D hero: floating pastel shapes drifting behind the headline. */
