@@ -27,7 +27,9 @@
     { slug: 'ludo',          name: 'Ludo',                 ages: ['kids'], seed: 10,
       lesson: "You can't control the dice — only how you play the roll." },
     { slug: 'chess',         name: 'Chess',                ages: ['teens', 'adults'], seed: 10,
-      lesson: 'Every move has a consequence — think before you act.' }
+      lesson: 'Every move has a consequence — think before you act.' },
+    { slug: 'apex-gp',       name: 'Apex GP',              ages: ['teens'], seed: 30,
+      lesson: 'Smooth is fast — control beats raw speed.' }
   ];
 
   var path = location.pathname;
