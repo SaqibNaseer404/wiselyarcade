@@ -16,12 +16,11 @@
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>2048 Merge — Free Online 2048 Puzzle Game | Wisely Arcade</title>
-<link rel="canonical" href="https://wiselyarcade.com/games/2048-merge">
 <meta name="description" content="Play 2048 Merge free online — the famous 2048 puzzle game. Slide the tiles, merge matching numbers, and chase the 2048 tile. No download, no sign-up.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=10">
+<link rel="stylesheet" href="../css/style.css?v=9">
 <style>
   #b2048-board{position:relative;width:100%;max-width:440px;aspect-ratio:1/1;margin:0 auto;border-radius:12px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:default;background:radial-gradient(circle at 50% 28%,#EFFAF8 0%,#D8EEEA 70%,#C4E2DD 100%);box-shadow:inset 0 3px 12px rgba(11,59,57,.20),inset 0 -2px 6px rgba(255,255,255,.55),0 12px 30px rgba(11,59,57,.14)}
   .b2048-cell{position:absolute;border-radius:8px;background:#BCD9D4;box-shadow:inset 0 2px 5px rgba(11,59,57,.14)}
@@ -31,6 +30,7 @@
   .b2048-tile.merge-pop{animation:b2048-merge-pop .26s ease}
   @keyframes b2048-pop{0%{transform:scale(.35);opacity:0}100%{transform:scale(1);opacity:1}}
   @keyframes b2048-merge-pop{0%{transform:scale(.60);opacity:.6}55%{transform:scale(1.22);opacity:1}100%{transform:scale(1);opacity:1}}
+  .game-area{max-width:880px}
 </style>
 </head>
 <body>
@@ -127,7 +127,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/2048-merge.js?v=2"></script>
+<script src="../js/2048-merge.js"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
