@@ -386,9 +386,11 @@
     r.speed -= r.speed * 0.28 * dt; // drag
     if (nitroOn) r.nitro = Math.max(0, r.nitro - dt / (5 + st.nitroPower));
     else r.nitro = Math.min(1, r.nitro + dt / 9);
-    // steering
-    var steer = (input.left ? 1 : 0) - (input.right ? 1 : 0);
-    r.latV = (r.latV || 0) + steer * 3.4 * dt * Math.min(1, r.speed / 20);
+    // steering (smoothed: ramps like an analog stick, no more jerky taps)
+    var steerT = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+    r.steerSm = (r.steerSm || 0) + (steerT - (r.steerSm || 0)) * Math.min(1, dt * 7);
+    var steer = r.steerSm;
+    r.latV = (r.latV || 0) + steer * 3.0 * dt * Math.min(1, r.speed / 20);
     r.latV *= Math.pow(0.12, dt); // damping
     // centrifugal push
     var curv = trackCurve(r.s + r.speed * 0.45);
