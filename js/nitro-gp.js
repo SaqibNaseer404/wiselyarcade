@@ -392,7 +392,9 @@
     if (nitroOn) r.nitro = Math.max(0, r.nitro - dt / (5 + st.nitroPower));
     else r.nitro = Math.min(1, r.nitro + dt / 9);
     // steering
-    var steer = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+    var steerT = (input.left ? 1 : 0) - (input.right ? 1 : 0);
+    r.steerSm = (r.steerSm || 0) + (steerT - (r.steerSm || 0)) * Math.min(1, dt * 7);
+    var steer = r.steerSm;
     var hb = input.handbrake && r.speed > 12;
     r.latV = (r.latV || 0) + steer * 2.7 * (hb ? 1.7 : 1) * dt * Math.min(1, r.speed / 20);
     r.latV *= Math.pow(0.12, dt); // damping
