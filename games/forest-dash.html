@@ -16,12 +16,11 @@
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Forest Dash — Free Online Endless Runner Game | Wisely Arcade</title>
-<link rel="canonical" href="https://wiselyarcade.com/games/forest-dash">
 <meta name="description" content="Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=10">
+<link rel="stylesheet" href="../css/style.css?v=9">
 <style>
   #dash{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
   #f-toast{
@@ -32,6 +31,7 @@
     z-index:5;
   }
   #f-toast.show{opacity:1;transform:translate(-50%,0)}
+  .game-area{max-width:880px}
 </style>
 </head>
 <body>
@@ -130,7 +130,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/forest-dash-3d.js?v=5"></script>
+<script src="../js/forest-dash-3d.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
