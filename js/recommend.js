@@ -31,7 +31,9 @@
     { slug: 'apex-gp',       name: 'Apex GP',              ages: ['teens'], seed: 30,
       lesson: 'Smooth is fast — control beats raw speed.' },
     { slug: 'nitro-gp',      name: 'Nitro GP',             ages: ['teens'], seed: 31,
-      lesson: 'Smooth is fast — control beats raw speed.' }
+      lesson: 'Smooth is fast — control beats raw speed.' },
+    { slug: 'sky-gp',        name: 'Sky GP',               ages: ['teens'], seed: 32,
+      lesson: 'Aim high, but fly calm — panic crashes, patience lands.' }
   ];
 
   var path = location.pathname;
