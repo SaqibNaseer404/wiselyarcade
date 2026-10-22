@@ -20,11 +20,36 @@
 <meta name="description" content="Play Bubble Pop free online — the classic bubble shooter with glossy 3D bubbles! Aim the cannon, match 3 or more bubbles to pop them, and drop whole clusters for bonus points. A new row slides in every 6 shots. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   #bpop{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:crosshair}
   .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
 </style>
 </head>
 <body>
@@ -115,7 +140,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/bubble-pop.js?v=4"></script>
+<script src="../js/bubble-pop.js?v=5"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
