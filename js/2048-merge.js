@@ -16,21 +16,22 @@
   var winStatsEl = document.getElementById('m-win-stats');
   var overStatsEl = document.getElementById('m-over-stats');
 
-  // Glossy candy-3D palette: {l: light bevel, b: base, d: dark bevel, t: text}.
-  // Low values ramp through teal; 128+ ramp through orange, echoing the
-  // game's candy-gloss thumbnail.
+  // Premium jewel palette (v3 visual overhaul): {l: light bevel, b: base,
+  // d: dark bevel, t: text}. The classic warm 2048 progression, deepened —
+  // ivory and pale gold warm up through amber, orange and red, then the
+  // high tiers turn to radiant gold.
   var TILE_STYLE = {
-    2:    { l: '#F4FEFD', b: '#DFF8F6', d: '#A9E3E0', t: '#0B3B39' },
-    4:    { l: '#E9FBF9', b: '#C6F1EE', d: '#8BD9D5', t: '#0B3B39' },
-    8:    { l: '#D8F8F5', b: '#A5E8E4', d: '#5FCFC9', t: '#0B3B39' },
-    16:   { l: '#C4F2EF', b: '#83DED9', d: '#38BCB7', t: '#0B3B39' },
-    32:   { l: '#A9EAE6', b: '#5BD2CC', d: '#1FA8A3', t: '#FFFFFF' },
-    64:   { l: '#8AE0DA', b: '#38C3BC', d: '#0E7F7A', t: '#FFFFFF' },
-    128:  { l: '#FFEBCC', b: '#FFC46E', d: '#EE931E', t: '#FFFFFF' },
-    256:  { l: '#FFDFB0', b: '#FFAE45', d: '#E07F10', t: '#FFFFFF' },
-    512:  { l: '#FFD69C', b: '#FF9C2E', d: '#D06E0B', t: '#FFFFFF' },
-    1024: { l: '#FCC489', b: '#FB8B1E', d: '#C05F06', t: '#FFFFFF' },
-    2048: { l: '#FDB45C', b: '#F8770A', d: '#A84E03', t: '#FFFFFF' }
+    2:    { l: '#FFFBF0', b: '#F8ECD2', d: '#E2CC9C', t: '#7A5A10' },
+    4:    { l: '#FFF6DC', b: '#F6DC9F', d: '#D9B264', t: '#7A5A10' },
+    8:    { l: '#FFE9BC', b: '#F9BC60', d: '#DE951F', t: '#FFFFFF' },
+    16:   { l: '#FFDCAB', b: '#F79E4B', d: '#D6720F', t: '#FFFFFF' },
+    32:   { l: '#FFCFA8', b: '#F2704C', d: '#C94F27', t: '#FFFFFF' },
+    64:   { l: '#FFBFA6', b: '#F65E3B', d: '#C23A14', t: '#FFFFFF' },
+    128:  { l: '#FFF3C2', b: '#EECF6E', d: '#C49A28', t: '#FFFFFF' },
+    256:  { l: '#FFF0B4', b: '#EDCC61', d: '#B8931F', t: '#FFFFFF' },
+    512:  { l: '#FFEB9E', b: '#EDC850', d: '#AC861A', t: '#FFFFFF' },
+    1024: { l: '#FFE98C', b: '#EDC53F', d: '#9C7D12', t: '#FFFFFF' },
+    2048: { l: '#FFE873', b: '#EDC22E', d: '#8F7008', t: '#FFFFFF' }
   };
 
   var grid;        // SIZE x SIZE array of tile objects or null
@@ -45,30 +46,31 @@
 
   function tileColors(value) {
     if (TILE_STYLE[value]) return TILE_STYLE[value];
-    return { l: '#F2A93B', b: '#D98A12', d: '#8A5604', t: '#FFFFFF' }; // super tiles beyond 2048
+    return { l: '#FFE98A', b: '#E9B921', d: '#8A6D03', t: '#FFFFFF' }; // super tiles beyond 2048
   }
 
-  // Round 1: pastel outer glow per high tier (visual only)
+  // Warm radiant glow for the gold tiers (visual only)
   function tierGlow(v) {
-    if (v >= 2048) return '0 0 22px rgba(255,170,60,.90)';
-    if (v >= 1024) return '0 0 18px rgba(255,223,158,.70)';
-    if (v >= 512) return '0 0 16px rgba(246,179,194,.60)';
-    if (v >= 256) return '0 0 14px rgba(154,220,214,.55)';
-    if (v >= 128) return '0 0 12px rgba(194,169,242,.55)';
+    if (v >= 2048) return '0 0 28px rgba(255,200,50,.95)';
+    if (v >= 1024) return '0 0 21px rgba(255,208,80,.80)';
+    if (v >= 512) return '0 0 16px rgba(255,196,90,.55)';
+    if (v >= 256) return '0 0 13px rgba(255,180,70,.45)';
+    if (v >= 128) return '0 0 11px rgba(255,170,60,.40)';
     return null;
   }
 
-  // Glossy candy-3D surface: white specular bloom top-left over a
+  // Jewel surface: white specular bloom top-left over a rich
   // light-to-dark diagonal bevel gradient.
   function tileGloss(style) {
-    return 'radial-gradient(120% 90% at 28% 16%, rgba(255,255,255,.65) 0%, rgba(255,255,255,0) 52%),' +
-      'linear-gradient(160deg,' + style.l + ' 0%,' + style.b + ' 45%,' + style.d + ' 100%)';
+    return 'radial-gradient(120% 90% at 28% 16%, rgba(255,255,255,.70) 0%, rgba(255,255,255,0) 52%),' +
+      'linear-gradient(160deg,' + style.l + ' 0%,' + style.b + ' 42%,' + style.d + ' 100%)';
   }
 
-  // 3D relief shadows: light top edge, dark bottom edge, soft drop shadow.
-  // Optional extra glow (2048+) is layered in front.
+  // 3D relief shadows: light top edge, deep warm bottom edge, soft drop
+  // shadow tuned for the dark-glass board. Optional extra glow (128+)
+  // is layered in front.
   function tileShadow(glow) {
-    var base = 'inset 0 2px 3px rgba(255,255,255,.55),inset 0 -4px 7px rgba(0,0,0,.20),0 5px 10px rgba(11,59,57,.24)';
+    var base = 'inset 0 2px 3px rgba(255,255,255,.60),inset 0 -5px 8px rgba(74,42,0,.30),0 6px 12px rgba(3,8,20,.42)';
     return glow ? glow + ',' + base : base;
   }
 
@@ -345,6 +347,29 @@
   document.getElementById('m-keep').addEventListener('click', function () {
     winEl.classList.add('hidden');
   });
+
+  /* ---------- visual add-on: floating merge-score popups ----------
+     Render layer only: watches the score readout the game already
+     updates and floats a "+N" chip over the board when it rises.
+     Reads nothing from game state and changes nothing. */
+  var lastShownScore = 0;
+  function spawnScorePopup(amount) {
+    if (!boardEl || amount <= 0) return;
+    var el = document.createElement('div');
+    el.className = 'b2048-float' + (amount >= 128 ? ' big' : '');
+    el.textContent = '+' + amount;
+    boardEl.appendChild(el);
+    setTimeout(function () {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 1000);
+  }
+  if (window.MutationObserver && scoreEl) {
+    new MutationObserver(function () {
+      var v = parseInt(scoreEl.textContent, 10) || 0;
+      if (v > lastShownScore) spawnScorePopup(v - lastShownScore);
+      lastShownScore = v;
+    }).observe(scoreEl, { childList: true, characterData: true, subtree: true });
+  }
 
   /* ---------- init ---------- */
   try { best = parseInt(localStorage.getItem(BEST_KEY) || '0', 10) || 0; } catch (e) { best = 0; }
