@@ -118,11 +118,130 @@
     timerId = setTimeout(tick, stepMs());
   }
 
-  // ---- Glossy 3D candy look (visuals only; game logic untouched) ----
+  // ---- v3 visual overhaul: glossy ribbon snake with interpolated motion,
+  // deep neon arena, rich food + eat effects (visuals only; logic untouched) ----
 
-  // Board backdrop: deep radial gradient for depth, vignette edges,
-  // and a faint dot grid for texture.
-  function drawBoard() {
+  // Ambient star field (render-only; positions fixed at load).
+  var stars = [];
+  (function initStars() {
+    for (var i = 0; i < 46; i++) {
+      stars.push({
+        x: Math.random() * SIZE, y: Math.random() * SIZE,
+        r: 0.6 + Math.random() * 1.3,
+        ph: Math.random() * Math.PI * 2,
+        sp: 0.4 + Math.random() * 0.9
+      });
+    }
+  })();
+
+  // Interpolated (visual) snake positions in pixel space + eat FX state.
+  var visPts = null;      // [{x,y}] smoothed segment centres
+  var lastCells = null;   // grid snapshot from the previous draw
+  var lastScoreSeen = 0;
+  var eatWaveAt = -1;     // timestamp of last eat (travelling highlight)
+  var eatFx = [];         // expanding eat rings {x,y,t0}
+  var popups = [];        // floating score popups {x,y,t0,txt}
+
+  function cellCenter(c) { return { x: c.x * CELL + CELL / 2, y: c.y * CELL + CELL / 2 }; }
+
+  function snapVis() {
+    visPts = [];
+    lastCells = [];
+    for (var i = 0; i < snake.length; i++) {
+      visPts.push(cellCenter(snake[i]));
+      lastCells.push({ x: snake[i].x, y: snake[i].y });
+    }
+  }
+
+  // Advance the smoothed positions by one frame. A logic tick is detected by
+  // comparing the head cell against the previous draw's snapshot: on a normal
+  // move (or a grow) every new body cell equals the previous cell of the
+  // segment ahead of it, so we unshift a copy of the old head point and let
+  // each point chase the cell ahead — the classic slither. Anything else
+  // (reset, first frame) snaps straight to the grid. Logic state untouched.
+  function updateVis(dt) {
+    if (!visPts || !lastCells || visPts.length !== lastCells.length) { snapVis(); return; }
+    var i;
+    var headMoved = snake[0].x !== lastCells[0].x || snake[0].y !== lastCells[0].y;
+    if (headMoved) {
+      var shifted = snake.length === lastCells.length || snake.length === lastCells.length + 1;
+      if (shifted) {
+        for (i = 1; i < lastCells.length && i < snake.length; i++) {
+          if (snake[i].x !== lastCells[i - 1].x || snake[i].y !== lastCells[i - 1].y) { shifted = false; break; }
+        }
+      }
+      if (shifted) {
+        visPts.unshift({ x: visPts[0].x, y: visPts[0].y });
+        while (visPts.length > snake.length) visPts.pop();
+      } else {
+        snapVis();
+      }
+    } else if (snake.length !== lastCells.length) {
+      snapVis();
+    }
+    lastCells = [];
+    for (i = 0; i < snake.length; i++) lastCells.push({ x: snake[i].x, y: snake[i].y });
+    var k = 1 - Math.exp(-dt * 30);
+    for (i = 0; i < snake.length; i++) {
+      var t = cellCenter(snake[i]);
+      visPts[i].x += (t.x - visPts[i].x) * k;
+      visPts[i].y += (t.y - visPts[i].y) * k;
+    }
+  }
+
+  // Densify the smoothed segment centres into a smooth ribbon path
+  // (Catmull-Rom sampling, 2 samples per cell step). f: 0 head -> 1 tail.
+  function ribbonPoints() {
+    var pts = [];
+    var n = visPts.length;
+    if (n === 1) { pts.push({ x: visPts[0].x, y: visPts[0].y, f: 0 }); return pts; }
+    for (var i = 0; i < n - 1; i++) {
+      var p0 = visPts[Math.max(0, i - 1)], p1 = visPts[i];
+      var p2 = visPts[i + 1], p3 = visPts[Math.min(n - 1, i + 2)];
+      for (var s = 0; s < 2; s++) {
+        var t = s / 2, t2 = t * t, t3 = t2 * t;
+        pts.push({
+          x: 0.5 * ((2 * p1.x) + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+          y: 0.5 * ((2 * p1.y) + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3),
+          f: (i + t) / (n - 1)
+        });
+      }
+    }
+    pts.push({ x: visPts[n - 1].x, y: visPts[n - 1].y, f: 1 });
+    return pts;
+  }
+
+  function mix(a, b, f) { return Math.round(a + (b - a) * f); }
+
+  // Body palette drifts cyan (head) -> deep blue (tail).
+  function bodyColors(f) {
+    return {
+      light: 'rgb(' + mix(214, 191, f) + ',' + mix(246, 219, f) + ',' + mix(255, 254, f) + ')',
+      mid: 'rgb(' + mix(34, 37, f) + ',' + mix(211, 99, f) + ',' + mix(238, 235, f) + ')',
+      dark: 'rgb(' + mix(14, 30, f) + ',' + mix(116, 58, f) + ',' + mix(144, 138, f) + ')'
+    };
+  }
+
+  // Lightweight glossy scale orb for the ribbon (gradient sphere + glint).
+  function drawScaleOrb(x, y, r, c) {
+    var g = ctx.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+    g.addColorStop(0, c.light);
+    g.addColorStop(0.45, c.mid);
+    g.addColorStop(1, c.dark);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath();
+    ctx.ellipse(x - r * 0.34, y - r * 0.42, r * 0.3, r * 0.18, -0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Board backdrop: deep radial gradient, drifting twinkling stars, a grid
+  // that glows brighter toward the centre, a soft vignette pulse, and a
+  // neon frame with magenta corner accents.
+  function drawBoard(now) {
     var g = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.05,
                                      SIZE / 2, SIZE / 2, SIZE * 0.72);
     g.addColorStop(0, '#161d38');
@@ -131,18 +250,34 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, SIZE, SIZE);
 
-    ctx.fillStyle = 'rgba(120,160,255,0.07)';
-    var gx, gy;
-    for (gx = 0; gx < CELLS; gx++) {
-      for (gy = 0; gy < CELLS; gy++) {
-        ctx.beginPath();
-        ctx.arc(gx * CELL + CELL / 2, gy * CELL + CELL / 2, 1.1, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // Ambient stars: slow drift + twinkle.
+    ctx.save();
+    ctx.fillStyle = '#cfe4ff';
+    for (var si = 0; si < stars.length; si++) {
+      var st = stars[si];
+      var sx = (st.x + now * 0.004 * st.sp) % SIZE;
+      ctx.globalAlpha = 0.14 + 0.26 * (0.5 + 0.5 * Math.sin(now / 700 + st.ph));
+      ctx.beginPath();
+      ctx.arc(sx, st.y, st.r, 0, Math.PI * 2);
+      ctx.fill();
     }
+    ctx.restore();
+
+    // Grid lines, brighter near the centre for a sense of depth.
+    ctx.save();
+    ctx.lineWidth = 1;
+    for (var gl = 1; gl < CELLS; gl++) {
+      var gd = Math.abs(gl - CELLS / 2) / (CELLS / 2);
+      ctx.strokeStyle = 'rgba(110,150,255,' + (0.09 - 0.05 * gd).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.moveTo(gl * CELL + 0.5, 0); ctx.lineTo(gl * CELL + 0.5, SIZE);
+      ctx.moveTo(0, gl * CELL + 0.5); ctx.lineTo(SIZE, gl * CELL + 0.5);
+      ctx.stroke();
+    }
+    ctx.restore();
 
     // Slow pastel vignette pulse (keeps the dark board, softens the edge).
-    var vt = performance.now() / 1600;
+    var vt = now / 1600;
     var va = 0.10 + 0.05 * Math.sin(vt);
     var vg = ctx.createRadialGradient(SIZE / 2, SIZE / 2, SIZE * 0.34,
                                       SIZE / 2, SIZE / 2, SIZE * 0.74);
@@ -150,6 +285,29 @@
     vg.addColorStop(1, 'rgba(194,169,242,' + va.toFixed(3) + ')');
     ctx.fillStyle = vg;
     ctx.fillRect(0, 0, SIZE, SIZE);
+
+    // Neon frame + corner accents.
+    ctx.save();
+    ctx.strokeStyle = 'rgba(34,211,238,0.55)';
+    ctx.shadowColor = '#22d3ee';
+    ctx.shadowBlur = 14;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, SIZE - 2, SIZE - 2);
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = 'rgba(240,171,252,0.9)';
+    ctx.shadowColor = '#e879f9';
+    ctx.shadowBlur = 10;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    var L = 22, m = 4;
+    ctx.beginPath();
+    ctx.moveTo(m, m + L); ctx.lineTo(m, m); ctx.lineTo(m + L, m);
+    ctx.moveTo(SIZE - m - L, m); ctx.lineTo(SIZE - m, m); ctx.lineTo(SIZE - m, m + L);
+    ctx.moveTo(SIZE - m, SIZE - m - L); ctx.lineTo(SIZE - m, SIZE - m); ctx.lineTo(SIZE - m - L, SIZE - m);
+    ctx.moveTo(m + L, SIZE - m); ctx.lineTo(m, SIZE - m); ctx.lineTo(m, SIZE - m - L);
+    ctx.stroke();
+    ctx.restore();
   }
 
   // One glossy candy orb: soft grounding shadow, neon glow, radial-gradient
@@ -205,8 +363,9 @@
     ctx.restore();
   }
 
-  // Glossy 3D eyeball: white sphere, dark pupil, tiny glint.
-  function drawEye(x, y, r) {
+  // Glossy 3D eyeball: white sphere, dark pupil that looks toward the
+  // travel direction (lx, ly), tiny glint.
+  function drawEye(x, y, r, lx, ly) {
     ctx.save();
     ctx.shadowColor = 'rgba(0,0,0,0.6)';
     ctx.shadowBlur = 4;
@@ -220,24 +379,84 @@
     ctx.restore();
     ctx.fillStyle = '#0b1020';
     ctx.beginPath();
-    ctx.arc(x + r * 0.12, y + r * 0.1, r * 0.52, 0, Math.PI * 2);
+    ctx.arc(x + r * 0.12 + lx * r * 0.3, y + r * 0.1 + ly * r * 0.3, r * 0.52, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.beginPath();
-    ctx.arc(x - r * 0.16, y - r * 0.2, r * 0.2, 0, Math.PI * 2);
+    ctx.arc(x - r * 0.16 + lx * r * 0.3, y - r * 0.2 + ly * r * 0.3, r * 0.2, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  // Forked tongue: flicks out briefly every ~2.8s (render-only cycle).
+  function drawTongue(hx, hy, hr, now) {
+    var phase = now % 2800;
+    if (phase > 340) return;
+    var ext = Math.sin((phase / 340) * Math.PI);
+    var len = hr * 1.05 * ext;
+    if (len < 2) return;
+    var bx = hx + dir.x * hr * 0.82, by = hy + dir.y * hr * 0.82;
+    var tx = bx + dir.x * len, ty = by + dir.y * len;
+    var px = -dir.y, py = dir.x;
+    var fl = hr * 0.34;
+    ctx.save();
+    ctx.strokeStyle = '#ff5e7a';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = '#ff5e7a';
+    ctx.shadowBlur = 5;
+    ctx.beginPath();
+    ctx.moveTo(bx, by); ctx.lineTo(tx, ty);
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx + (dir.x * 0.7 + px * 0.5) * fl, ty + (dir.y * 0.7 + py * 0.5) * fl);
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx + (dir.x * 0.7 - px * 0.5) * fl, ty + (dir.y * 0.7 - py * 0.5) * fl);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Four-point sparkle star (food glint).
+  function drawSparkle(x, y, r, rot, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.fillStyle = '#fff7d6';
+    ctx.shadowColor = '#ffe9a8';
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.moveTo(0, -r);
+    ctx.quadraticCurveTo(r * 0.18, -r * 0.18, r, 0);
+    ctx.quadraticCurveTo(r * 0.18, r * 0.18, 0, r);
+    ctx.quadraticCurveTo(-r * 0.18, r * 0.18, -r, 0);
+    ctx.quadraticCurveTo(-r * 0.18, -r * 0.18, 0, -r);
+    ctx.fill();
+    ctx.restore();
   }
 
   function draw() {
     if (!snake || !food) return;
     ctx.clearRect(0, 0, SIZE, SIZE);
-    drawBoard();
 
     var now = performance.now();
     var dt = lastDrawT ? Math.min(0.05, (now - lastDrawT) / 1000) : 0.016;
     lastDrawT = now;
 
-    // Food: juicy glowing orb with a soft halo and a gentle pulse.
+    updateVis(dt);
+
+    // Eat detection (render-only): the score changed since the last draw.
+    if (score !== lastScoreSeen) {
+      if (score > lastScoreSeen && visPts && visPts.length) {
+        eatWaveAt = now;
+        eatFx.push({ x: visPts[0].x, y: visPts[0].y, t0: now });
+        popups.push({ x: visPts[0].x, y: visPts[0].y - CELL * 0.7, t0: now, txt: '+' + (score - lastScoreSeen) });
+      }
+      lastScoreSeen = score;
+    }
+
+    drawBoard(now);
+
+    // Food: juicy glowing orb with a soft halo, a gentle pulse, an
+    // expanding pulse ring and a slow sparkle.
     var fx = food.x * CELL + CELL / 2, fy = food.y * CELL + CELL / 2;
     var pulse = 1 + 0.16 * Math.sin(now / 300);
     var fr = CELL * 0.36 * pulse;
@@ -250,46 +469,141 @@
     ctx.arc(fx, fy, fr * 2.1, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
+    var ringPh = (now % 1200) / 1200;
+    ctx.save();
+    ctx.globalAlpha = 0.55 * (1 - ringPh);
+    ctx.strokeStyle = '#ff8a7a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(fx, fy, fr * (1.15 + ringPh * 0.9), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
     drawGlossyOrb(fx, fy, fr, '#ffd9d2', '#ff6b5e', '#b81f14', '#ff6b5e', 22);
+    drawSparkle(fx + fr * 0.85, fy - fr * 0.8, 5 + 1.6 * Math.sin(now / 260),
+                now / 900, 0.55 + 0.4 * Math.sin(now / 340));
 
-    // Snake: glossy orbs, neon green head + cyan body, tapering to the tail.
-    var n = snake.length;
-    for (var i = n - 1; i >= 0; i--) {
-      var s = snake[i];
-      var x = s.x * CELL + CELL / 2, y = s.y * CELL + CELL / 2;
-      if (i === 0) {
-        // Head: bigger glossy orb + directional 3D eyes.
-        var hr = CELL * 0.52;
-        drawGlossyOrb(x, y, hr, '#cfffb0', '#4ade80', '#15803d', '#4ade80', 18);
-        var px = -dir.y, py = dir.x; // perpendicular to travel direction
-        var fwd = hr * 0.5, side = hr * 0.42, er = hr * 0.34;
-        drawEye(x + dir.x * fwd + px * side, y + dir.y * fwd + py * side, er);
-        drawEye(x + dir.x * fwd - px * side, y + dir.y * fwd - py * side, er);
+    // ---- Snake: glossy ribbon over the interpolated positions ----
+    var pts = ribbonPoints();
+    var hx = visPts[0].x, hy = visPts[0].y;
+    var hr = CELL * 0.52;
+    var i, bp;
+
+    // Soft glow pooled on the floor under the head.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    var hg = ctx.createRadialGradient(hx, hy, 0, hx, hy, CELL * 1.6);
+    hg.addColorStop(0, 'rgba(74,222,128,0.20)');
+    hg.addColorStop(1, 'rgba(74,222,128,0)');
+    ctx.fillStyle = hg;
+    ctx.beginPath();
+    ctx.arc(hx, hy, CELL * 1.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Neon under-glow stroke along the whole ribbon.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = 'rgba(34,211,238,0.13)';
+    ctx.lineWidth = CELL * 1.02;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.shadowColor = '#22d3ee';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+    ctx.restore();
+
+    // Body scales, tail first, tapering toward the tail.
+    for (i = pts.length - 1; i >= 0; i--) {
+      bp = pts[i];
+      if (bp.f < 0.02) continue; // head drawn separately below
+      drawScaleOrb(bp.x, bp.y, CELL * (0.47 - 0.17 * bp.f), bodyColors(bp.f));
+    }
+
+    // Bright glossy spine along the body.
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = 'rgba(215,250,255,0.38)';
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+    ctx.restore();
+
+    // Eat highlight: a bright wave travelling head -> tail.
+    if (eatWaveAt > 0) {
+      var age = (now - eatWaveAt) / 550;
+      if (age >= 1) {
+        eatWaveAt = -1;
       } else {
-        var taper = n > 1 ? i / n : 0;
-        var r = CELL * 0.48 - taper * CELL * 0.14;
-        drawGlossyOrb(x, y, r, '#d6f6ff', '#22d3ee', '#0e7490', '#22d3ee', 12);
+        var front = age * (pts.length + 4);
+        ctx.save();
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = '#d9fbff';
+        for (i = 0; i < pts.length; i++) {
+          var inten = 1 - Math.abs(i - front) / 3;
+          if (inten <= 0) continue;
+          ctx.globalAlpha = 0.38 * inten;
+          ctx.beginPath();
+          ctx.arc(pts[i].x, pts[i].y, CELL * (0.47 - 0.17 * pts[i].f) * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
       }
     }
 
+    // Tongue (base tucked under the head), head, and looking eyes.
+    drawTongue(hx, hy, hr, now);
+    var headGlow = 18 + Math.min(16, (150 - stepMs()) * 0.2);
+    drawGlossyOrb(hx, hy, hr, '#cfffb0', '#4ade80', '#15803d', '#4ade80', headGlow);
+    var px = -dir.y, py = dir.x; // perpendicular to travel direction
+    var fwd = hr * 0.5, side = hr * 0.42, er = hr * 0.34;
+    drawEye(hx + dir.x * fwd + px * side, hy + dir.y * fwd + py * side, er, dir.x, dir.y);
+    drawEye(hx + dir.x * fwd - px * side, hy + dir.y * fwd - py * side, er, dir.x, dir.y);
+
     // Trail glow: fading pastel-cyan glow dots over the last 6 body segments.
+    var n = visPts.length;
     var glowN = Math.min(6, n - 1);
     if (glowN > 0) {
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
       for (var gi = 1; gi <= glowN; gi++) {
-        var gs = snake[gi];
-        var gxx = gs.x * CELL + CELL / 2, gyy = gs.y * CELL + CELL / 2;
+        var gs = visPts[gi];
         var ga = 0.20 * (1 - gi / (glowN + 1));
         var gr = CELL * 0.62;
-        var gg = ctx.createRadialGradient(gxx, gyy, 0, gxx, gyy, gr);
+        var gg = ctx.createRadialGradient(gs.x, gs.y, 0, gs.x, gs.y, gr);
         gg.addColorStop(0, 'rgba(154,220,214,' + ga.toFixed(3) + ')');
         gg.addColorStop(1, 'rgba(154,220,214,0)');
         ctx.fillStyle = gg;
         ctx.beginPath();
-        ctx.arc(gxx, gyy, gr, 0, Math.PI * 2);
+        ctx.arc(gs.x, gs.y, gr, 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.restore();
+    }
+
+    // Eat rings: one expanding ring per eat.
+    if (eatFx.length) {
+      ctx.save();
+      ctx.strokeStyle = '#ffb3ab';
+      ctx.lineWidth = 2;
+      var keepFx = [];
+      for (i = 0; i < eatFx.length; i++) {
+        var ef = eatFx[i];
+        var ea = (now - ef.t0) / 450;
+        if (ea >= 1) continue;
+        keepFx.push(ef);
+        ctx.globalAlpha = 0.7 * (1 - ea);
+        ctx.beginPath();
+        ctx.arc(ef.x, ef.y, CELL * 0.4 + ea * CELL * 1.3, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      eatFx = keepFx;
       ctx.restore();
     }
 
@@ -313,6 +627,28 @@
     }
     ctx.restore();
     ctx.globalAlpha = 1;
+
+    // Score popups: rise + fade in Barlow Condensed.
+    if (popups.length) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.font = '700 17px "Barlow Condensed","Nunito",sans-serif';
+      ctx.shadowColor = 'rgba(245,166,35,0.8)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#FFE9A8';
+      var keepP = [];
+      for (i = 0; i < popups.length; i++) {
+        var pp = popups[i];
+        var pa = (now - pp.t0) / 900;
+        if (pa >= 1) continue;
+        keepP.push(pp);
+        ctx.globalAlpha = 1 - pa;
+        ctx.fillText(pp.txt, pp.x, pp.y - pa * 26);
+      }
+      popups = keepP;
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
   }
 
   function start() {
