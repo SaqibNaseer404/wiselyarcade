@@ -20,16 +20,27 @@
 <meta name="description" content="Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   #dash{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+  /* v6: dark-glass pro UI (Apex GP treatment) — page-scoped overrides only */
+  .stats{gap:8px}
+  .stat{background:linear-gradient(180deg,rgba(9,14,11,.66),rgba(9,14,11,.5));border:1px solid rgba(255,255,255,.16);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.22);backdrop-filter:blur(8px);padding:8px 6px}
+  .stat span{color:#ffb02e;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:600;letter-spacing:2px}
+  .stat div{color:#fff;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:.03em}
+  .overlay{background:linear-gradient(165deg,rgba(7,12,9,.78),rgba(7,12,9,.9));backdrop-filter:blur(9px)}
+  .overlay h2{color:#fff;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .overlay p{color:#c9d6c9}
+  .btn{background:linear-gradient(180deg,#ffb02e,#f59e0b);color:#171106;border:none;box-shadow:0 6px 22px rgba(245,158,11,.35)}
+  .btn.ghost{background:rgba(9,14,11,.5);color:#e8f0e8;border:1px solid rgba(255,255,255,.28);box-shadow:none;backdrop-filter:blur(6px)}
+  .kbd{background:#131a15;color:#dbe8db;border:1px solid rgba(255,255,255,.22);border-bottom:2px solid rgba(255,255,255,.22)}
   #f-toast{
     position:absolute;top:12px;left:50%;transform:translate(-50%,-8px);
-    background:rgba(59,52,73,.92);color:#fff;font-weight:900;font-size:.95rem;
+    background:rgba(9,14,11,.88);border:1px solid rgba(255,176,46,.45);color:#fff;font-weight:800;font-size:.95rem;letter-spacing:.02em;
     padding:8px 18px;border-radius:999px;white-space:nowrap;
     opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;
-    z-index:5;
+    z-index:5;backdrop-filter:blur(6px);
   }
   #f-toast.show{opacity:1;transform:translate(-50%,0)}
   .game-area{max-width:880px}
@@ -131,7 +142,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/forest-dash-3d.js?v=5"></script>
+<script src="../js/forest-dash-3d.js?v=6"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
