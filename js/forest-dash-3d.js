@@ -1,10 +1,11 @@
-/* Forest Dash 3D v5 — real-time 3D endless runner (Three.js).
-   A dense, realistic green forest: layered tree walls, canopy overhead,
-   light dust in the air, ferns and undergrowth, distant treeline.
-   v5 "showcase" pass: art-direction upgrade (detailed runner, richer trees,
-   textured ground/path, falling leaves, glow accents) with AUTO QUALITY
-   SCALING — pixel ratio, shadows and particles adapt to the device so weak
-   phones stay smooth. Gameplay, hitboxes and scoring are byte-identical to v4.
+/* Forest Dash 3D v6 — real-time 3D endless runner (Three.js).
+   v6 "grown-up graphics" pass (Apex GP treatment): photo textures from
+   ambientCG (CC0) — dirt trail, bark, grass — ACES tone mapping + sRGB,
+   pines rebuilt from layered foliage blobs (no more cones), a two-segment
+   runner with knees/elbows, per-level sky grading from golden morning to
+   deep dusk, dust puffs at the runner's feet, dark-glass pro UI.
+   VISUALS ONLY: gameplay, hitboxes, scoring and speed curve are
+   byte-identical to v5.
    Levels: each mountain reached unlocks a deeper, darker, faster forest.
    Fog is kept light so hurdles stay readable even at full speed.
    Lesson: keep going — every obstacle passes. */
@@ -83,6 +84,12 @@
   renderer.setPixelRatio(Q_PIXEL_RATIO);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // v6: cinematic output — sRGB + ACES filmic tone mapping (Apex treatment)
+  if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
+  if (THREE.ACESFilmicToneMapping !== undefined) {
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+  }
 
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0xd4e9f5);
@@ -118,23 +125,38 @@
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     return t;
   }
-  var skyDomeMat = (function () {
+  /* v6: per-level sky gradients — the run arcs from golden morning to deep
+     dusk. One small canvas texture per level, swapped in applyTheme. */
+  function makeSkyTexture(stops) {
     var sc = document.createElement('canvas');
     sc.width = 2; sc.height = 256;
     var sx = sc.getContext('2d');
     var g = sx.createLinearGradient(0, 0, 0, 256);
-    g.addColorStop(0.00, '#6FA8E8'); // zenith: sky blue
-    g.addColorStop(0.45, '#B9A8F0'); // lavender
-    g.addColorStop(0.72, '#F6B8C6'); // blush
-    g.addColorStop(0.90, '#FFDCAE'); // peach horizon
-    g.addColorStop(1.00, '#FFEFD2');
+    for (var si = 0; si < stops.length; si++) g.addColorStop(stops[si][0], stops[si][1]);
     sx.fillStyle = g;
     sx.fillRect(0, 0, 2, 256);
-    return new THREE.MeshBasicMaterial({
-      map: new THREE.CanvasTexture(sc),
-      side: THREE.BackSide, fog: false, depthWrite: false
-    });
-  })();
+    var t = new THREE.CanvasTexture(sc);
+    if (THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
+    return t;
+  }
+  var SKY_TEX = [
+    makeSkyTexture([[0, '#3E74C4'], [0.42, '#79A9E4'], [0.7, '#BCD9F2'], [0.88, '#FFE2AC'], [1, '#FFF0D0']]),
+    makeSkyTexture([[0, '#3363B4'], [0.42, '#6C97D8'], [0.7, '#AECBEC'], [0.88, '#FFD9A0'], [1, '#FFE9C4']]),
+    makeSkyTexture([[0, '#2C4E8C'], [0.4, '#5E7CB0'], [0.68, '#C08F6E'], [0.88, '#FFAA5C'], [1, '#FFC98C']]),
+    makeSkyTexture([[0, '#1C2A50'], [0.4, '#3C4E78'], [0.68, '#6B5A74'], [0.88, '#D97E46'], [1, '#F2A35E']])
+  ];
+  /* v6: sun / light grade per level (visual only; index matches LEVELS) */
+  var SKY_GRADE = [
+    { sun: 0xffe9bb, sunI: 1.05, hemiI: 0.9,  disc: 0xffe9a3, flyGlow: 1.0 },
+    { sun: 0xffdf9e, sunI: 1.0,  hemiI: 0.85, disc: 0xffdf94, flyGlow: 1.15 },
+    { sun: 0xffb066, sunI: 0.95, hemiI: 0.72, disc: 0xffa64d, flyGlow: 1.5 },
+    { sun: 0xff8f52, sunI: 0.85, hemiI: 0.6,  disc: 0xff8a3d, flyGlow: 1.9 }
+  ];
+  var flyGlow = 1;
+  var skyDomeMat = new THREE.MeshBasicMaterial({
+    map: SKY_TEX[0],
+    side: THREE.BackSide, fog: false, depthWrite: false
+  });
   var skyDome = new THREE.Mesh(new THREE.SphereGeometry(420, 24, 16), skyDomeMat);
   skyDome.renderOrder = -10;
   skyDome.frustumCulled = false;
@@ -154,7 +176,10 @@
   sun.shadow.camera.left = -18; sun.shadow.camera.right = 18;
   sun.shadow.camera.top = 18; sun.shadow.camera.bottom = -32;
   sun.shadow.camera.far = 100;
+  sun.shadow.bias = -0.0004;
+  sun.shadow.normalBias = 0.03;
   scene.add(sun);
+  scene.add(sun.target); // v6: shadow camera tracks the runner
   var fill = new THREE.DirectionalLight(0xbcd8ff, 0.25); // cool bounce from the sky
   fill.position.set(-12, 18, -6);
   scene.add(fill);
@@ -182,43 +207,83 @@
   grassTex.repeat.set(30, 30);
   var pathTex = makeNoiseTexture('#d9b47c', '#c49a63', '#e8c78f', 800);
   pathTex.repeat.set(2, 42);
+  if (THREE.sRGBEncoding !== undefined) { grassTex.encoding = THREE.sRGBEncoding; pathTex.encoding = THREE.sRGBEncoding; }
+  /* v6: authored hex colors are sRGB — convert them to linear so the sRGB
+     output pass reproduces them faithfully instead of washing them out */
+  function std(o) {
+    if (o && typeof o.color === 'number') o.color = new THREE.Color(o.color).convertSRGBToLinear();
+    return new THREE.MeshStandardMaterial(o);
+  }
+  function lam(o) {
+    if (o && typeof o.color === 'number') o.color = new THREE.Color(o.color).convertSRGBToLinear();
+    return new THREE.MeshLambertMaterial(o);
+  }
   var M = {
-    grass: new THREE.MeshLambertMaterial({ color: 0xffffff, map: grassTex }),
-    grassDark: new THREE.MeshLambertMaterial({ color: 0x4c8f43 }),
-    path: new THREE.MeshLambertMaterial({ color: 0xffffff, map: pathTex }),
-    pathEdge: new THREE.MeshLambertMaterial({ color: 0xc49a63 }),
-    trunk: new THREE.MeshLambertMaterial({ color: 0x7a5233 }),
-    trunkDark: new THREE.MeshLambertMaterial({ color: 0x5d3d24 }),
-    pine: new THREE.MeshLambertMaterial({ color: 0x2c7a44 }),
-    pine2: new THREE.MeshLambertMaterial({ color: 0x35994e }),
-    pine3: new THREE.MeshLambertMaterial({ color: 0x256b3a }),
-    pineTip: new THREE.MeshLambertMaterial({ color: 0x45ad5b }),
-    leaf: new THREE.MeshLambertMaterial({ color: 0x3f9e4f }),
-    leaf2: new THREE.MeshLambertMaterial({ color: 0x2f8a42 }),
-    leafLit: new THREE.MeshLambertMaterial({ color: 0x55b95e }),
-    bush: new THREE.MeshLambertMaterial({ color: 0x3a8f47 }),
-    tuft: new THREE.MeshLambertMaterial({ color: 0x4da856 }),
-    fern: new THREE.MeshLambertMaterial({ color: 0x35853f }),
-    treeline: new THREE.MeshLambertMaterial({ color: 0x3d6e52 }),
-    rock: new THREE.MeshLambertMaterial({ color: 0x8d99a8 }),
-    rockDark: new THREE.MeshLambertMaterial({ color: 0x6f7a8c }),
-    snow: new THREE.MeshLambertMaterial({ color: 0xffffff }),
-    wood: new THREE.MeshLambertMaterial({ color: 0x9c6b43 }),
-    branch: new THREE.MeshLambertMaterial({ color: 0x7c4f30 }),
-    cloud: new THREE.MeshLambertMaterial({ color: 0xffffff, transparent: true, opacity: 0.92 }),
+    grass: std({ color: 0xffffff, map: grassTex, roughness: 1, metalness: 0 }),
+    grassDark: std({ color: 0x3f7d38, roughness: 1, metalness: 0 }),
+    path: std({ color: 0xffffff, map: pathTex, roughness: 1, metalness: 0 }),
+    pathEdge: std({ color: 0x9a7d58, map: pathTex, roughness: 1, metalness: 0 }),
+    trunk: std({ color: 0xffffff, roughness: 1, metalness: 0 }),
+    trunkDark: std({ color: 0xbcae9f, roughness: 1, metalness: 0 }),
+    pine: std({ color: 0x2c7a44, roughness: 1, metalness: 0, flatShading: true }),
+    pine2: std({ color: 0x35994e, roughness: 1, metalness: 0, flatShading: true }),
+    pine3: std({ color: 0x256b3a, roughness: 1, metalness: 0, flatShading: true }),
+    pineTip: std({ color: 0x45ad5b, roughness: 1, metalness: 0, flatShading: true }),
+    leaf: std({ color: 0x3f9e4f, roughness: 1, metalness: 0, flatShading: true }),
+    leaf2: std({ color: 0x2f8a42, roughness: 1, metalness: 0, flatShading: true }),
+    leafLit: std({ color: 0x55b95e, roughness: 1, metalness: 0, flatShading: true }),
+    bush: std({ color: 0x3a8f47, roughness: 1, metalness: 0, flatShading: true }),
+    tuft: std({ color: 0x4da856, roughness: 1, metalness: 0 }),
+    fern: std({ color: 0x35853f, roughness: 1, metalness: 0, side: THREE.DoubleSide }),
+    treeline: std({ color: 0x3d6e52, roughness: 1, metalness: 0, flatShading: true }),
+    rock: std({ color: 0x8d99a8, roughness: 0.95, metalness: 0, flatShading: true }),
+    rockDark: std({ color: 0x646e7e, roughness: 0.95, metalness: 0, flatShading: true }),
+    snow: std({ color: 0xffffff, roughness: 0.55, metalness: 0 }),
+    wood: std({ color: 0xd8c6b2, roughness: 1, metalness: 0 }),
+    branch: std({ color: 0xa08b76, roughness: 1, metalness: 0 }),
+    cloud: lam({ color: 0xffffff, transparent: true, opacity: 0.92 }),
     sunDisc: new THREE.MeshBasicMaterial({ color: 0xffe9a3, fog: false }),
     fly: new THREE.MeshBasicMaterial({ color: 0xffe066 }),
-    skin: new THREE.MeshLambertMaterial({ color: 0xf2c49b }),
-    shirt: new THREE.MeshLambertMaterial({ color: 0x2fbfae }),
-    shorts: new THREE.MeshLambertMaterial({ color: 0x3b4a6b }),
-    cap: new THREE.MeshLambertMaterial({ color: 0xf2789f }),
-    // v5 additions: sneakers, backpack, unlit warning stripes (pop at speed)
-    shoe: new THREE.MeshLambertMaterial({ color: 0xf5f5f5 }),
-    shoeAccent: new THREE.MeshLambertMaterial({ color: 0x2fbfae }),
-    pack: new THREE.MeshLambertMaterial({ color: 0xff9f43 }),
-    packDark: new THREE.MeshLambertMaterial({ color: 0xe07b28 }),
+    skin: std({ color: 0xf2c49b, roughness: 0.75, metalness: 0 }),
+    shirt: std({ color: 0x2fbfae, roughness: 0.85, metalness: 0 }),
+    shirtDark: std({ color: 0x25a292, roughness: 0.85, metalness: 0 }),
+    shorts: std({ color: 0x3b4a6b, roughness: 0.9, metalness: 0 }),
+    cap: std({ color: 0xf2789f, roughness: 0.7, metalness: 0 }),
+    hair: std({ color: 0x4a3423, roughness: 0.95, metalness: 0 }),
+    shoe: std({ color: 0xf5f5f5, roughness: 0.6, metalness: 0 }),
+    shoeAccent: std({ color: 0x2fbfae, roughness: 0.6, metalness: 0 }),
+    pack: std({ color: 0xff9f43, roughness: 0.85, metalness: 0 }),
+    packDark: std({ color: 0xe07b28, roughness: 0.85, metalness: 0 }),
+    shroomCap: std({ color: 0xd64541, roughness: 0.55, metalness: 0 }),
+    shroomStem: std({ color: 0xf3e6cf, roughness: 0.9, metalness: 0 }),
     warn: new THREE.MeshBasicMaterial({ color: 0xffd23f })
   };
+  /* v6: photo textures (ambientCG, CC0) swapped onto materials when loaded;
+     the canvas textures above stay as the instant fallback if a file 404s.
+     Grass reuses Apex GP's already-live grass textures. */
+  var _texLoader = new THREE.TextureLoader();
+  function loadPhoto(mat, colorFile, normalFile, rx, ry) {
+    _texLoader.load('../images/textures/' + colorFile, function (ctex) {
+      ctex.wrapS = ctex.wrapT = THREE.RepeatWrapping;
+      ctex.repeat.set(rx, ry); ctex.anisotropy = 4;
+      if (THREE.sRGBEncoding !== undefined) ctex.encoding = THREE.sRGBEncoding;
+      mat.map = ctex; mat.needsUpdate = true;
+      if (normalFile) _texLoader.load('../images/textures/' + normalFile, function (ntex) {
+        ntex.wrapS = ntex.wrapT = THREE.RepeatWrapping;
+        ntex.repeat.set(rx, ry); ntex.anisotropy = 4;
+        mat.normalMap = ntex;
+        mat.normalScale = new THREE.Vector2(1.0, 1.0);
+        mat.needsUpdate = true;
+      });
+    });
+  }
+  loadPhoto(M.grass, 'grass-color.jpg', 'grass-normal.jpg', 30, 30);
+  loadPhoto(M.path, 'forest-floor-color.jpg', 'forest-floor-normal.jpg', 2, 42);
+  loadPhoto(M.pathEdge, 'forest-floor-color.jpg', 'forest-floor-normal.jpg', 1, 42);
+  loadPhoto(M.trunk, 'bark-color.jpg', 'bark-normal.jpg', 1, 2);
+  loadPhoto(M.trunkDark, 'bark-color.jpg', 'bark-normal.jpg', 1, 2);
+  loadPhoto(M.wood, 'bark-color.jpg', 'bark-normal.jpg', 2, 1);
+  loadPhoto(M.branch, 'bark-color.jpg', 'bark-normal.jpg', 1, 1);
   var PINES = [M.pine, M.pine2, M.pine3];
   var LEAVES = [M.leaf, M.leaf2, M.leafLit];
   var G = {
@@ -226,7 +291,11 @@
     sphere: new THREE.SphereGeometry(0.5, 12, 10),
     cone: new THREE.ConeGeometry(0.5, 1, 9),
     cyl: new THREE.CylinderGeometry(0.5, 0.5, 1, 9),
-    circle: new THREE.CircleGeometry(0.5, 12)
+    circle: new THREE.CircleGeometry(0.5, 12),
+    ico: new THREE.IcosahedronGeometry(0.5, 1),
+    dodec: new THREE.DodecahedronGeometry(0.5, 0),
+    trunkGeo: new THREE.CylinderGeometry(0.3, 0.5, 1, 7),
+    plane: new THREE.PlaneGeometry(1, 1)
   };
   function mesh(geo, mat, sx, sy, sz, shadow) {
     var m = new THREE.Mesh(geo, mat);
@@ -303,7 +372,7 @@
   /* ---------------- Distant treeline (horizon depth) ---------------- */
   var treeline = [];
   for (var di = 0; di < 26; di++) {
-    var dt2 = mesh(G.cone, M.treeline, 7 + Math.random() * 6, 16 + Math.random() * 14, 7 + Math.random() * 6, false);
+    var dt2 = mesh(G.ico, M.treeline, 7 + Math.random() * 6, 16 + Math.random() * 14, 7 + Math.random() * 6, false);
     dt2.position.set(-70 + di * 5.6 + (Math.random() - 0.5) * 4, 6, -125 - Math.random() * 25);
     scene.add(dt2);
     treeline.push(dt2);
@@ -312,37 +381,63 @@
   /* ---------------- Forest walls: near detail + far depth ---------------- */
   var nearTrees = [], farTrees = [], bushes = [], tufts = [], canopy = [], patches = [];
 
+  /* v6: pines rebuilt — no more cones. Layered, drooping foliage tiers of
+     flat-shaded icosahedron blobs around a tapered bark trunk. */
   function makePine(detail) {
     var g = new THREE.Group();
-    // v5: root flare at the base — trees feel planted, not floating
     var flare = mesh(G.cyl, M.trunkDark, 0.95, 0.55, 0.95, detail);
     flare.position.y = 0.27;
     g.add(flare);
-    var trunk = mesh(G.cyl, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.6, 2.0, 0.6, detail);
-    trunk.position.y = 1.0;
+    var trunk = mesh(G.trunkGeo, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.72, 2.6, 0.72, detail);
+    trunk.position.y = 1.3;
     g.add(trunk);
     var pm = PINES[(Math.random() * PINES.length) | 0];
-    var c1 = mesh(G.cone, pm, 3.6, 3.2, 3.6, detail); c1.position.y = 3.1; g.add(c1);
-    var c2 = mesh(G.cone, pm, 2.7, 2.7, 2.7, detail); c2.position.y = 4.9; g.add(c2);
-    // v5: extra mid layer — fuller, more "high-graphics" silhouette
-    var c25 = mesh(G.cone, pm, 2.25, 2.3, 2.25, detail); c25.position.y = 6.3; g.add(c25);
-    var c3 = mesh(G.cone, M.pineTip, 1.7, 2.1, 1.7, detail); c3.position.y = 7.6; g.add(c3);
-    if (detail) {
-      var tip = mesh(G.cone, M.pineTip, 1.0, 1.4, 1.0, true); tip.position.y = 8.8; g.add(tip);
+    var pm2 = PINES[(Math.random() * PINES.length) | 0];
+    var tiers = detail ? 4 : 3;
+    var perTier = detail ? 3 : 1;
+    for (var t = 0; t < tiers; t++) {
+      var ty = 2.5 + t * 1.28;
+      var tr = 2.5 - t * 0.42;
+      var tm = t % 2 ? pm2 : pm;
+      var center = mesh(G.ico, tm, tr * 1.7, tr * 0.78, tr * 1.7, detail);
+      center.position.y = ty;
+      center.rotation.y = Math.random() * 3;
+      g.add(center);
+      for (var b = 0; b < perTier; b++) {
+        var ang = (b / perTier) * Math.PI * 2 + t * 1.1 + Math.random() * 0.7;
+        var sat = mesh(G.ico, tm, tr * 1.05, tr * 0.62, tr * 1.05, detail);
+        sat.position.set(Math.cos(ang) * tr * 0.62, ty - 0.22, Math.sin(ang) * tr * 0.62);
+        sat.rotation.y = Math.random() * 3;
+        g.add(sat);
+      }
     }
+    var tipB = mesh(G.ico, M.pineTip, 1.15, 1.5, 1.15, detail);
+    tipB.position.y = 2.5 + tiers * 1.28 + 0.35;
+    g.add(tipB);
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
   }
   function makeLeafy(detail) {
     var g = new THREE.Group();
-    var trunk = mesh(G.cyl, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.55, 2.2, 0.55, detail);
-    trunk.position.y = 1.1;
+    var flare = mesh(G.cyl, M.trunkDark, 0.85, 0.5, 0.85, detail);
+    flare.position.y = 0.25;
+    g.add(flare);
+    var trunk = mesh(G.trunkGeo, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.66, 2.4, 0.66, detail);
+    trunk.position.y = 1.2;
     g.add(trunk);
-    var lm = LEAVES[(Math.random() * LEAVES.length) | 0];
-    var b1 = mesh(G.sphere, lm, 3.8, 3.2, 3.8, detail); b1.position.y = 3.6; g.add(b1);
-    var b2 = mesh(G.sphere, lm, 2.4, 2.1, 2.4, detail); b2.position.set(1.1, 4.9, 0.6); g.add(b2);
-    if (detail) {
-      var b3 = mesh(G.sphere, M.leafLit, 1.7, 1.5, 1.7, true); b3.position.set(-1.0, 5.3, -0.4); g.add(b3);
+    // v6: organic canopy — overlapping flat-shaded blobs with per-blob hue picks
+    var main = mesh(G.ico, LEAVES[(Math.random() * LEAVES.length) | 0], 3.9, 3.3, 3.9, detail);
+    main.position.y = 3.9;
+    main.rotation.y = Math.random() * 3;
+    g.add(main);
+    var blobs = detail ? 5 : 2;
+    for (var b = 0; b < blobs; b++) {
+      var ang = Math.random() * Math.PI * 2;
+      var rad = 1.1 + Math.random() * 0.9;
+      var bl = mesh(G.ico, LEAVES[(Math.random() * LEAVES.length) | 0], 1.6 + Math.random() * 1.1, 1.4 + Math.random() * 0.9, 1.6 + Math.random() * 1.1, detail);
+      bl.position.set(Math.cos(ang) * rad, 3.4 + Math.random() * 1.9, Math.sin(ang) * rad);
+      bl.rotation.y = Math.random() * 3;
+      g.add(bl);
     }
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
@@ -371,24 +466,88 @@
     scene.add(ft);
     farTrees.push(ft);
   }
-  // bushes
-  for (i = 0; i < 40; i++) {
-    var bu = mesh(G.sphere, Math.random() < 0.5 ? M.bush : M.leaf2, 1.7, 1.15, 1.7, false);
-    bu.position.set(forestX(4.0, 10.5), 0.5, -90 + Math.random() * 102);
+  // bushes — v6: clusters of foliage blobs, not single spheres
+  function makeBush() {
+    var g = new THREE.Group();
+    var n = 2 + ((Math.random() * 2) | 0);
+    for (var b = 0; b < n; b++) {
+      var bl = mesh(G.ico, Math.random() < 0.5 ? M.bush : M.leaf2, 1.5, 1.05, 1.5, false);
+      bl.position.set((Math.random() - 0.5) * 1.1, 0.45 + Math.random() * 0.25, (Math.random() - 0.5) * 1.1);
+      bl.rotation.y = Math.random() * 3;
+      g.add(bl);
+    }
     var bs = 0.8 + Math.random() * 1.0;
-    bu.scale.set(bs * 1.7, bs * 1.15, bs * 1.7);
+    g.scale.set(bs, bs, bs);
+    return g;
+  }
+  for (i = 0; i < 40; i++) {
+    var bu = makeBush();
+    bu.position.set(forestX(4.0, 10.5), 0, -90 + Math.random() * 102);
     scene.add(bu);
     bushes.push(bu);
   }
-  // grass tufts + ferns
+  /* v6: scattered rocks, fallen leaves on the path, mushrooms (pure decor —
+     recycled with the same scroll as the rest of the flora) */
+  var rocks = [], litter = [], shrooms = [];
+  for (i = 0; i < 22; i++) {
+    var rk = mesh(G.dodec, Math.random() < 0.5 ? M.rock : M.rockDark, 1, 0.8, 1, false);
+    var rs = 0.35 + Math.random() * 1.0;
+    rk.scale.set(rs, rs * 0.8, rs);
+    rk.position.set(forestX(3.9, 13), rs * 0.3, -90 + Math.random() * 102);
+    rk.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    scene.add(rk);
+    rocks.push(rk);
+  }
+  var LITTER_MATS = [0xd98e4a, 0xc96f35, 0xe0b34e, 0xb85c33].map(function (cc) { return lam({ color: cc }); });
+  for (i = 0; i < 30; i++) {
+    var lf = new THREE.Mesh(G.plane, LITTER_MATS[i % 4]);
+    var ls = 0.2 + Math.random() * 0.22;
+    lf.scale.set(ls, ls, 1);
+    lf.rotation.x = -Math.PI / 2;
+    lf.rotation.z = Math.random() * 3;
+    lf.position.set((Math.random() - 0.5) * 6.2, 0.035, -90 + Math.random() * 102);
+    scene.add(lf);
+    litter.push(lf);
+  }
+  for (i = 0; i < 12; i++) {
+    var sh = new THREE.Group();
+    var stem = mesh(G.cyl, M.shroomStem, 0.16, 0.3, 0.16, false);
+    stem.position.y = 0.15;
+    sh.add(stem);
+    var capM = mesh(G.sphere, M.shroomCap, 0.42, 0.26, 0.42, false);
+    capM.position.y = 0.32;
+    sh.add(capM);
+    sh.position.set(forestX(3.8, 9), 0, -90 + Math.random() * 102);
+    scene.add(sh);
+    shrooms.push(sh);
+  }
+  // grass tufts + ferns — v6: ferns are crossed leaf planes; tufts get flower pops
+  var FLOWER_MATS = [0xffd166, 0xff8fab, 0xffffff].map(function (cc) { return lam({ color: cc }); });
   for (i = 0; i < 60; i++) {
     var tg = new THREE.Group();
-    var tm = Math.random() < 0.6 ? M.tuft : M.fern;
-    for (var k = 0; k < 2; k++) {
-      var blade = mesh(G.cone, tm, 0.4, 1.0 + Math.random() * 0.6, 0.4, false);
-      blade.position.set((Math.random() - 0.5) * 0.6, 0.45, (Math.random() - 0.5) * 0.6);
-      blade.rotation.z = (Math.random() - 0.5) * 0.4;
-      tg.add(blade);
+    if (Math.random() < 0.4) {
+      for (var fp2 = 0; fp2 < 3; fp2++) {
+        var frond = new THREE.Mesh(G.plane, M.fern);
+        frond.scale.set(1.15, 0.85, 1);
+        frond.position.y = 0.36;
+        frond.rotation.set(-0.55, fp2 * Math.PI / 3, 0);
+        tg.add(frond);
+      }
+    } else {
+      for (var k = 0; k < 3; k++) {
+        var blade = mesh(G.cone, M.tuft, 0.36, 1.0 + Math.random() * 0.6, 0.36, false);
+        blade.position.set((Math.random() - 0.5) * 0.6, 0.45, (Math.random() - 0.5) * 0.6);
+        blade.rotation.z = (Math.random() - 0.5) * 0.45;
+        tg.add(blade);
+      }
+      if (Math.random() < 0.3) {
+        for (var fw = 0; fw < 2; fw++) {
+          var fl2 = new THREE.Mesh(G.sphere, FLOWER_MATS[(Math.random() * 3) | 0]);
+          fl2.scale.set(0.11, 0.11, 0.11);
+          fl2.position.set((Math.random() - 0.5) * 0.5, 0.55 + Math.random() * 0.3, (Math.random() - 0.5) * 0.5);
+          tg.add(fl2);
+        }
+      }
     }
     tg.position.set(forestX(3.6, 12), 0, -90 + Math.random() * 102);
     scene.add(tg);
@@ -410,7 +569,8 @@
     var cg2 = new THREE.Group();
     var cm = LEAVES[(Math.random() * LEAVES.length) | 0];
     for (var q2 = 0; q2 < 3; q2++) {
-      var cl = mesh(G.sphere, cm, 2.6, 1.8, 2.6, false);
+      var cl = mesh(G.ico, cm, 2.6, 1.8, 2.6, false);
+      cl.rotation.y = Math.random() * 3;
       cl.position.set((Math.random() - 0.5) * 3.4, (Math.random() - 0.5) * 1.2, (Math.random() - 0.5) * 3);
       cg2.add(cl);
     }
@@ -482,9 +642,23 @@
     scene.fog.near = cfg.fogNear;
     scene.fog.far = cfg.fogFar;
     scene.background.setHex(cfg.fog);
-    // Round 1: tint the sky dome toward the level mood (gradient stays visible)
-    skyDomeMat.color.setHex(cfg.fog).lerp(new THREE.Color(0xffffff), 0.55);
-    M.grass.color.setHex(cfg.grass);
+    // v6: swap in the level's sky gradient + light grade (golden -> deep dusk)
+    var ti = 0;
+    for (var li3 = 0; li3 < LEVELS.length; li3++) if (LEVELS[li3].fog === cfg.fog) ti = li3;
+    skyDomeMat.map = SKY_TEX[ti];
+    skyDomeMat.color.setHex(0xffffff);
+    skyDomeMat.needsUpdate = true;
+    var gr = SKY_GRADE[ti];
+    sun.color.setHex(gr.sun).convertSRGBToLinear();
+    sun.intensity = gr.sunI;
+    hemi.intensity = gr.hemiI;
+    M.sunDisc.color.setHex(gr.disc).convertSRGBToLinear();
+    flyGlow = gr.flyGlow;
+    flyPts.material.size = 0.42 + 0.12 * (flyGlow - 1);
+    // photo grass takes the level tint gently — lerped toward white so the
+    // photographic texture does not go muddy
+    M.grass.color.setHex(cfg.grass).lerp(new THREE.Color(0xffffff), 0.62);
+    M.grass.color.convertSRGBToLinear();
     for (var n = 0; n < nearTrees.length; n++) nearTrees[n].visible = n < cfg.near;
     for (var f = 0; f < farTrees.length; f++) farTrees[f].visible = f < cfg.far;
     for (var b = 0; b < bushes.length; b++) bushes[b].visible = b < cfg.bushes;
@@ -505,52 +679,107 @@
 
   /* ---------------- The runner ---------------- */
   var player = new THREE.Group();
-  var legL, legR, armL, armR, torsoG;
+  var legL, legR, armL, armR, torsoG, shinL, shinR, foreL, foreR;
   (function buildRunner() {
     var hipY = 0.78;
-    var legGeo = new THREE.BoxGeometry(0.24, 0.78, 0.26);
-    legGeo.translate(0, -0.39, 0);
-    legL = new THREE.Mesh(legGeo, M.shorts); legL.position.set(-0.16, hipY, 0); legL.castShadow = true;
-    legR = new THREE.Mesh(legGeo, M.shorts); legR.position.set(0.16, hipY, 0); legR.castShadow = true;
-    player.add(legL); player.add(legR);
-    // v5: chunky sneakers ride on the legs so they swing with the run cycle
-    var shoeGeo = new THREE.BoxGeometry(0.27, 0.17, 0.44);
-    shoeGeo.translate(0, -0.085, 0.07);
-    var shoeStripeGeo = new THREE.BoxGeometry(0.28, 0.06, 0.2);
-    [legL, legR].forEach(function (leg) {
-      var shoe = new THREE.Mesh(shoeGeo, M.shoe);
-      shoe.position.set(0, -0.72, 0);
-      shoe.castShadow = true;
-      leg.add(shoe);
-      var stripe = new THREE.Mesh(shoeStripeGeo, M.shoeAccent);
-      stripe.position.set(0, -0.68, 0.02);
-      leg.add(stripe);
-    });
+    /* v6: two-segment legs — thigh (shorts) + shin (skin) with a real knee;
+       chunky sneakers ride on the shins so they swing with the run cycle */
+    function buildLeg(sideX) {
+      var leg = new THREE.Group();
+      leg.position.set(sideX, hipY, 0);
+      var thigh = mesh(G.box, M.shorts, 0.25, 0.42, 0.27);
+      thigh.position.y = -0.21;
+      leg.add(thigh);
+      var shin = new THREE.Group();
+      shin.position.y = -0.42;
+      var shinM = mesh(G.box, M.skin, 0.2, 0.36, 0.22);
+      shinM.position.y = -0.18;
+      shin.add(shinM);
+      var sock = mesh(G.box, M.shoe, 0.21, 0.1, 0.23);
+      sock.position.y = -0.33;
+      shin.add(sock);
+      var shoe = mesh(G.box, M.shoe, 0.27, 0.15, 0.46);
+      shoe.position.set(0, -0.4, 0.06);
+      shin.add(shoe);
+      var sole = mesh(G.box, M.shoeAccent, 0.28, 0.05, 0.47);
+      sole.position.set(0, -0.47, 0.06);
+      shin.add(sole);
+      leg.add(shin);
+      player.add(leg);
+      return { leg: leg, shin: shin };
+    }
+    var bl = buildLeg(-0.16); legL = bl.leg; shinL = bl.shin;
+    var br = buildLeg(0.16); legR = br.leg; shinR = br.shin;
 
     torsoG = new THREE.Group();
     var torso = mesh(G.box, M.shirt, 0.6, 0.68, 0.34); torso.position.y = 0.34;
     torsoG.add(torso);
-    // v5: little backpack — visible to the camera since the runner faces away
-    var pack = mesh(G.box, M.pack, 0.42, 0.5, 0.24);
+    var chest = mesh(G.box, M.shirtDark, 0.62, 0.2, 0.36); chest.position.y = 0.52;
+    torsoG.add(chest);
+    // backpack: body, lid, bedroll, pocket and compression straps
+    var pack = mesh(G.box, M.pack, 0.44, 0.52, 0.24);
     pack.position.set(0, 0.38, -0.3);
     torsoG.add(pack);
-    var packTop = mesh(G.box, M.packDark, 0.44, 0.12, 0.26);
-    packTop.position.set(0, 0.62, -0.3);
+    var packTop = mesh(G.box, M.packDark, 0.46, 0.13, 0.26);
+    packTop.position.set(0, 0.66, -0.3);
     torsoG.add(packTop);
+    var roll = mesh(G.cyl, M.packDark, 0.2, 0.5, 0.2);
+    roll.rotation.z = Math.PI / 2;
+    roll.position.set(0, 0.79, -0.3);
+    torsoG.add(roll);
+    var pocket = mesh(G.box, M.packDark, 0.3, 0.26, 0.06);
+    pocket.position.set(0, 0.3, -0.44);
+    torsoG.add(pocket);
+    [-0.13, 0.13].forEach(function (sx2) {
+      var strap = mesh(G.box, M.packDark, 0.09, 0.56, 0.27);
+      strap.position.set(sx2, 0.38, -0.3);
+      torsoG.add(strap);
+    });
     torsoG.position.y = hipY;
     player.add(torsoG);
 
-    var armGeo = new THREE.BoxGeometry(0.19, 0.62, 0.2);
-    armGeo.translate(0, -0.31, 0);
-    armL = new THREE.Mesh(armGeo, M.shirt); armL.position.set(-0.41, hipY + 0.58, 0); armL.castShadow = true;
-    armR = new THREE.Mesh(armGeo, M.shirt); armR.position.set(0.41, hipY + 0.58, 0); armR.castShadow = true;
-    player.add(armL); player.add(armR);
+    /* v6: two-segment arms — sleeve + forearm + hand, elbows bent to run */
+    function buildArm(sideX) {
+      var arm = new THREE.Group();
+      arm.position.set(sideX, hipY + 0.58, 0);
+      var upper = mesh(G.box, M.shirt, 0.19, 0.34, 0.2);
+      upper.position.y = -0.17;
+      arm.add(upper);
+      var fore = new THREE.Group();
+      fore.position.y = -0.34;
+      var foreM = mesh(G.box, M.skin, 0.16, 0.3, 0.17);
+      foreM.position.y = -0.15;
+      fore.add(foreM);
+      var hand = mesh(G.sphere, M.skin, 0.17, 0.17, 0.17);
+      hand.position.y = -0.34;
+      fore.add(hand);
+      fore.rotation.x = -0.65;
+      arm.add(fore);
+      player.add(arm);
+      return { arm: arm, fore: fore };
+    }
+    var ba = buildArm(-0.41); armL = ba.arm; foreL = ba.fore;
+    var bb = buildArm(0.41); armR = bb.arm; foreR = bb.fore;
 
+    var neck = mesh(G.cyl, M.skin, 0.16, 0.14, 0.16); neck.position.y = hipY + 0.72;
+    player.add(neck);
     var head = mesh(G.sphere, M.skin, 0.56, 0.6, 0.56); head.position.y = hipY + 1.02;
     player.add(head);
-    var capTop = mesh(G.cyl, M.cap, 0.6, 0.22, 0.6); capTop.position.y = hipY + 1.28;
+    // hair mass under the cap + ponytail out the back (the camera's view)
+    var hair = mesh(G.sphere, M.hair, 0.58, 0.5, 0.58); hair.position.set(0, hipY + 1.1, -0.05);
+    player.add(hair);
+    var tail = mesh(G.cone, M.hair, 0.2, 0.5, 0.2); tail.position.set(0, hipY + 0.84, -0.3); tail.rotation.x = 0.5;
+    player.add(tail);
+    [-0.29, 0.29].forEach(function (ex) {
+      var ear = mesh(G.sphere, M.skin, 0.11, 0.13, 0.11);
+      ear.position.set(ex, hipY + 1.02, 0);
+      player.add(ear);
+    });
+    var capTop = mesh(G.cyl, M.cap, 0.6, 0.22, 0.6); capTop.position.y = hipY + 1.3;
     player.add(capTop);
-    var brim = mesh(G.box, M.cap, 0.5, 0.08, 0.4); brim.position.set(0, hipY + 1.2, 0.42);
+    var capBtn = mesh(G.sphere, M.cap, 0.1, 0.08, 0.1); capBtn.position.y = hipY + 1.43;
+    player.add(capBtn);
+    var brim = mesh(G.box, M.cap, 0.5, 0.08, 0.4); brim.position.set(0, hipY + 1.22, 0.42);
     player.add(brim);
 
     player.rotation.y = Math.PI; // face away from camera (running into the forest)
@@ -573,6 +802,14 @@
       ring.position.set(i * 1.06, 0.36, 0);
       g.add(ring);
     }
+    // v6: cut end caps on the log
+    [-1.11, 1.11].forEach(function (ex) {
+      var cap2 = new THREE.Mesh(G.circle, M.trunkDark);
+      cap2.scale.set(0.66, 0.66, 1);
+      cap2.position.set(ex, 0.36, 0);
+      cap2.rotation.y = ex > 0 ? Math.PI / 2 : -Math.PI / 2;
+      g.add(cap2);
+    });
     // v5: unlit warning stripes — stay bright and readable at full speed
     var stripe = mesh(G.box, M.warn, 0.18, 0.7, 0.7);
     stripe.position.y = 0.36;
@@ -592,7 +829,7 @@
     plank.position.y = 1.68;
     g.add(plank);
     for (var j = 0; j < 5; j++) {
-      var leaf = mesh(G.sphere, M.leaf, 0.75, 0.6, 0.75);
+      var leaf = mesh(G.ico, M.leaf, 0.75, 0.6, 0.75);
       leaf.position.set(-1.0 + j * 0.5, 2.02, (Math.random() - 0.5) * 0.3);
       g.add(leaf);
     }
@@ -608,7 +845,7 @@
     cap.position.y = 2.1;
     g.add(cap);
     // moss on top so it belongs to the forest
-    var moss = mesh(G.sphere, M.bush, 1.6, 0.5, 0.8, false);
+    var moss = mesh(G.ico, M.bush, 1.6, 0.5, 0.8, false);
     moss.position.y = 2.3;
     g.add(moss);
     // v5: warning stripe across the wall face — readable at speed
@@ -679,6 +916,62 @@
     }
   }
 
+  /* ---- v6: dust puffs at the runner's feet (soft sprites, pooled) ---- */
+  var PUFF_N = QT === 'high' ? 36 : QT === 'med' ? 24 : 0;
+  var puffs = [], puffTimer = 0;
+  if (PUFF_N > 0) {
+    var puffTex = makeGlowTexture('rgba(219,196,158,0.85)', 'rgba(219,196,158,0)');
+    for (var pi = 0; pi < PUFF_N; pi++) {
+      var sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: puffTex, transparent: true, opacity: 0, depthWrite: false
+      }));
+      sp.visible = false;
+      scene.add(sp);
+      puffs.push({ s: sp, life: 0, max: 1, vx: 0, vy: 0, vz: 0 });
+    }
+  }
+  function spawnPuff(x, y, z, big) {
+    for (var i2 = 0; i2 < puffs.length; i2++) {
+      var p = puffs[i2];
+      if (p.life > 0) continue;
+      p.life = p.max = big ? 0.7 : 0.45 + Math.random() * 0.2;
+      p.s.visible = true;
+      p.s.position.set(x + (Math.random() - 0.5) * 0.3, y, z + (Math.random() - 0.5) * 0.2);
+      var sc = big ? 0.55 : 0.3;
+      p.s.scale.set(sc, sc, 1);
+      p.vx = (Math.random() - 0.5) * 0.5;
+      p.vy = 0.7 + Math.random() * 0.5;
+      p.vz = 1.2 + Math.random() * 0.8;
+      return;
+    }
+  }
+  function puffBurst() {
+    for (var i3 = 0; i3 < 6; i3++) spawnPuff(player.position.x, 0.18, 0.25, true);
+  }
+  function updatePuffs(dt) {
+    if (!puffs.length) return;
+    if (state === 'playing' && grounded && sliding <= 0) {
+      puffTimer -= dt;
+      if (puffTimer <= 0) {
+        puffTimer = 0.07;
+        spawnPuff(player.position.x, 0.14, 0.3, false);
+      }
+    }
+    for (var i4 = 0; i4 < puffs.length; i4++) {
+      var p = puffs[i4];
+      if (p.life <= 0) continue;
+      p.life -= dt;
+      if (p.life <= 0) { p.s.visible = false; p.s.material.opacity = 0; continue; }
+      var k = 1 - p.life / p.max;
+      p.s.position.x += p.vx * dt;
+      p.s.position.y += p.vy * dt;
+      p.s.position.z += p.vz * dt;
+      var sc2 = p.s.scale.x + dt * 1.1;
+      p.s.scale.set(sc2, sc2, 1);
+      p.s.material.opacity = 0.34 * (1 - k);
+    }
+  }
+
   /* ---------------- Game state ---------------- */
   var state = 'ready'; // ready | playing | over
   var laneIdx = 1, targetX = 0;
@@ -705,7 +998,7 @@
     var i;
     for (i = 0; i < hurdles.length; i++) hurdles[i].visible = false;
     for (i = 0; i < flies.length; i++) { flies[i].active = false; flies[i].m.visible = false; }
-    var lists = [[nearTrees, 4.6, 9.5], [farTrees, 9.5, 17], [bushes, 4.0, 10.5], [tufts, 3.6, 12], [canopy, 2.5, 6.5], [patches, 3.5, 14]];
+    var lists = [[nearTrees, 4.6, 9.5], [farTrees, 9.5, 17], [bushes, 4.0, 10.5], [tufts, 3.6, 12], [canopy, 2.5, 6.5], [patches, 3.5, 14], [rocks, 3.9, 13], [litter, 0.2, 3.2], [shrooms, 3.8, 9]];
     for (var l = 0; l < lists.length; l++) {
       var arr = lists[l][0];
       for (i = 0; i < arr.length; i++) {
@@ -801,18 +1094,28 @@
   /* ---------------- Animation ---------------- */
   var clock = new THREE.Clock();
 
+  var landDip = 0;
   function animateRunner(dt) {
     runT += dt * (5 + speed * 0.45);
     var s = Math.sin(runT), c = Math.cos(runT);
     if (!grounded) { // tuck legs in the air
       legL.rotation.x = -0.9; legR.rotation.x = 0.5;
       armL.rotation.x = -2.2; armR.rotation.x = -2.2;
+      shinL.rotation.x = 1.0; shinR.rotation.x = 0.7; // v6: knees tuck in the air
+      foreL.rotation.x = -0.4; foreR.rotation.x = -0.4;
     } else if (sliding > 0) {
       legL.rotation.x = -1.2; legR.rotation.x = -1.2;
       armL.rotation.x = 0.6; armR.rotation.x = 0.6;
+      shinL.rotation.x = 0.15; shinR.rotation.x = 0.15;
+      foreL.rotation.x = -0.3; foreR.rotation.x = -0.3;
     } else {
       legL.rotation.x = s * 0.95; legR.rotation.x = -s * 0.95;
       armL.rotation.x = -s * 0.8; armR.rotation.x = s * 0.8;
+      // v6: knees bend as each leg swings back; forearms pump against the swing
+      shinL.rotation.x = Math.max(0, -s) * 0.95;
+      shinR.rotation.x = Math.max(0, s) * 0.95;
+      foreL.rotation.x = -0.65 - Math.max(0, s) * 0.35;
+      foreR.rotation.x = -0.65 - Math.max(0, -s) * 0.35;
     }
     // lane glide
     var px = player.position.x;
@@ -821,12 +1124,21 @@
     if (!grounded) {
       vy -= 26 * dt;
       py += vy * dt;
-      if (py <= 0) { py = 0; vy = 0; grounded = true; }
+      if (py <= 0) { py = 0; vy = 0; grounded = true; landDip = 1; puffBurst(); }
     }
     if (sliding > 0) sliding -= dt;
-    player.scale.set(1, sliding > 0 ? 0.62 : 1, 1);
-    player.position.y = py + (grounded && sliding <= 0 ? Math.abs(c) * 0.07 : 0);
-    torsoG.rotation.x = sliding > 0 ? -0.5 : 0.1;
+    if (landDip > 0) landDip = Math.max(0, landDip - dt * 5);
+    var squash = 1 - landDip * 0.1;
+    player.scale.set(1, (sliding > 0 ? 0.62 : 1) * squash, 1);
+    player.position.y = py + (grounded && sliding <= 0 ? Math.abs(c) * 0.07 : 0) - landDip * 0.06;
+    torsoG.rotation.x = sliding > 0 ? -0.5 : 0.1 + Math.min(0.1, speed * 0.004);
+    torsoG.rotation.z = (grounded && sliding <= 0) ? s * 0.045 : 0;
+    // v6: camera — gentle follow + sway; the shadow sun tracks the runner
+    camera.position.x = player.position.x * 0.38 + Math.sin(runT * 0.32) * 0.05;
+    camera.position.y = 4.4 + Math.sin(runT * 0.47) * 0.05 - landDip * 0.12;
+    camera.lookAt(player.position.x * 0.55, 1.4, -10);
+    sun.position.x = 16 + player.position.x;
+    sun.target.position.set(player.position.x, 0, -6);
   }
 
   function checkHit(h) {
@@ -850,7 +1162,7 @@
       score = Math.floor(dist) + flyCount * 25 + bonus;
 
       // subtle FOV kick with speed — sense of speed, hurdles stay readable
-      var targetFov = 58 + (speed - 9) * 0.4;
+      var targetFov = 58 + (speed - 9) * 0.55;
       if (Math.abs(camera.fov - targetFov) > 0.05) {
         camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 2);
         camera.updateProjectionMatrix();
@@ -877,6 +1189,9 @@
       recycleFlora(tufts, 3.6, 12);
       recycleFlora(canopy, 2.5, 6.5);
       recycleFlora(patches, 3.5, 14);
+      recycleFlora(rocks, 3.9, 13);
+      recycleFlora(litter, 0.2, 3.2);
+      recycleFlora(shrooms, 3.8, 9);
       var i, o;
       for (i = 0; i < clouds.length; i++) {
         o = clouds[i];
@@ -905,7 +1220,7 @@
         if (fp[f3 + 2] > 10) { fp[f3 + 2] = -55; fp[f3] = (Math.random() - 0.5) * 18; fp[f3 + 1] = 0.8 + Math.random() * 4.5; }
       }
       flyGeo.attributes.position.needsUpdate = true;
-      flyPts.material.opacity = 0.6 + 0.3 * Math.sin(runT * 2.2);
+      flyPts.material.opacity = Math.min(1, (0.6 + 0.3 * Math.sin(runT * 2.2)) * flyGlow);
       // v5: falling leaves — drift down, sway, scroll with the world
       if (leafPts) {
         var lp = leafGeo.attributes.position.array;
@@ -957,6 +1272,7 @@
       }
     }
 
+    updatePuffs(dt);
     animateRunner(dt);
     renderer.render(scene, camera);
   }
