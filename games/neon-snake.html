@@ -20,10 +20,38 @@
 <meta name="description" content="Play Neon Snake free online — the classic snake game with a glowing neon twist. Eat, grow, and don't get greedy. Keyboard + swipe controls, works on mobile.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
+  .hidden{display:none!important}
+  #snakeCanvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
   .game-area{max-width:880px}
+  /* v3 visual overhaul: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn,.btn.coral{
+    background:linear-gradient(180deg,#F6B73C,#E8890C);
+    border-bottom-color:#9A5B00;color:#231600;text-shadow:none;
+    box-shadow:0 8px 0 rgba(120,70,0,.18),0 16px 30px rgba(232,137,12,.35),inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.72);color:#F5C15C;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.25);text-shadow:none;
+  }
+  .kbd{background:linear-gradient(180deg,#2A3547,#171E2B);color:#F5C15C;border-bottom-color:#0B0F16}
 </style>
 </head>
 <body>
@@ -113,7 +141,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/neon-snake.js?v=2"></script>
+<script src="../js/neon-snake.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
