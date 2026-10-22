@@ -429,6 +429,106 @@
     if (shot) updateShot(dt);
   }
 
+  // ---------- visual polish helpers (Round 2: render-only, no game state) ----------
+  var visPrevShot = false, visRecoilAt = -9;
+  var sparkField = null;
+  function perfT() { return (typeof performance !== 'undefined' ? performance.now() : Date.now()) / 1000; }
+  function hexRgb(hex) {
+    var n = parseInt(hex.slice(1), 16);
+    return [n >> 16, (n >> 8) & 255, n & 255];
+  }
+  function mixHex(h1, h2, t) {
+    var a = hexRgb(h1), b = hexRgb(h2);
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * t) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * t) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * t) + ')';
+  }
+  function buildSparkField() {
+    sparkField = [];
+    var s = 1234567, i;
+    function lcg() { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; }
+    for (i = 0; i < 30; i++) {
+      sparkField.push({ x: lcg() * W, y: lcg() * H, r: 0.8 + lcg() * 1.6, ph: lcg() * 6.283, sp: 0.6 + lcg() * 1.4 });
+    }
+  }
+  // scale pulse for settled bubbles sitting next to a fresh pop (render offset only)
+  function popPulse(x, y) {
+    var s = 0, i, rg, dx, dy, d2, k;
+    for (i = 0; i < rings.length; i++) {
+      rg = rings[i];
+      if (rg.flash || rg.life >= rg.max) continue;
+      dx = rg.x - x; dy = rg.y - y; d2 = dx * dx + dy * dy;
+      if (d2 < 70 * 70) {
+        k = 1 - rg.life / rg.max;
+        s = Math.max(s, 0.09 * k * Math.sin(k * Math.PI));
+      }
+    }
+    return s;
+  }
+  function spawnMuzzleSparks(ci) {
+    var P = PALETTE[ci], mx = CX + Math.cos(aim) * 58, my = CY + Math.sin(aim) * 58, i, a, sp;
+    for (i = 0; i < 9; i++) {
+      a = aim + rand(-0.35, 0.35); sp = rand(90, 250);
+      parts.push({
+        x: mx, y: my,
+        vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+        life: 0, max: rand(0.3, 0.55), r: rand(1.4, 3),
+        col: Math.random() < 0.45 ? '#ffffff' : (Math.random() < 0.5 ? '#ffd166' : P.light)
+      });
+    }
+  }
+  function drawCeiling() {
+    var g = ctx.createLinearGradient(0, 0, 0, 12);
+    g.addColorStop(0, '#57648a');
+    g.addColorStop(0.45, '#333f5e');
+    g.addColorStop(1, '#1c2338');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, 12);
+    ctx.fillStyle = 'rgba(255,255,255,0.20)';
+    ctx.fillRect(0, 0, W, 1.5);
+    ctx.fillStyle = 'rgba(245,166,35,0.40)';
+    ctx.fillRect(0, 10.5, W, 1.5);
+    // rivets
+    for (var x = 20; x < W; x += 38) {
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath(); ctx.arc(x, 6, 2.4, 0, 6.29); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(x - 0.7, 5.3, 0.9, 0, 6.29); ctx.fill();
+    }
+    // soft shadow the bar casts onto the field
+    var sh = ctx.createLinearGradient(0, 12, 0, 30);
+    sh.addColorStop(0, 'rgba(0,0,0,0.25)');
+    sh.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sh;
+    ctx.fillRect(0, 12, W, 18);
+  }
+  function drawFrame() {
+    // glass side edges of the playfield
+    var sides = [[3, 1], [W - 9, -1]], i, x0, g;
+    for (i = 0; i < 2; i++) {
+      x0 = sides[i][0];
+      g = ctx.createLinearGradient(x0, 0, x0 + 6, 0);
+      if (sides[i][1] > 0) {
+        g.addColorStop(0, 'rgba(170,210,255,0)');
+        g.addColorStop(0.6, 'rgba(170,210,255,0.10)');
+        g.addColorStop(1, 'rgba(170,210,255,0.02)');
+      } else {
+        g.addColorStop(0, 'rgba(170,210,255,0.02)');
+        g.addColorStop(0.4, 'rgba(170,210,255,0.10)');
+        g.addColorStop(1, 'rgba(170,210,255,0)');
+      }
+      ctx.fillStyle = g;
+      ctx.fillRect(x0, 12, 6, DANGER_Y + 26);
+    }
+    // corner brackets
+    ctx.strokeStyle = 'rgba(255,255,255,0.38)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(8, 30); ctx.lineTo(8, 14); ctx.lineTo(24, 14);
+    ctx.moveTo(W - 24, 14); ctx.lineTo(W - 8, 14); ctx.lineTo(W - 8, 30);
+    ctx.stroke();
+  }
+
   // ---------- drawing ----------
   function rr(x, y, w, h, r) {
     r = Math.min(r, w / 2, h / 2);
@@ -446,28 +546,45 @@
     var P = PALETTE[ci];
     if (alpha !== undefined && alpha < 1) ctx.globalAlpha = alpha;
     // soft drop shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.beginPath();
     ctx.ellipse(x + r * 0.10, y + r * 0.52, r * 0.92, r * 0.40, 0, 0, 6.29);
     ctx.fill();
-    // glossy sphere body
+    // glossy sphere body — luminous core, deep edge (Round 2: 5-stop shade)
     var g = ctx.createRadialGradient(x - r * 0.38, y - r * 0.42, r * 0.06, x, y, r);
-    g.addColorStop(0, P.light);
-    g.addColorStop(0.45, P.base);
+    g.addColorStop(0, mixHex(P.light, '#ffffff', 0.35));
+    g.addColorStop(0.34, mixHex(P.light, P.base, 0.45));
+    g.addColorStop(0.62, P.base);
+    g.addColorStop(0.86, mixHex(P.base, P.dark, 0.55));
     g.addColorStop(1, P.dark);
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(x, y, r, 0, 6.29); ctx.fill();
+    // inner depth: dark crescent low inside the sphere
+    ctx.strokeStyle = 'rgba(0,0,0,0.20)';
+    ctx.lineWidth = r * 0.20;
+    ctx.beginPath(); ctx.arc(x, y, r * 0.84, Math.PI * 0.18, Math.PI * 0.82); ctx.stroke();
+    // rim light, upper-left (key light)
+    ctx.strokeStyle = hexA(P.light, 0.85);
+    ctx.lineWidth = Math.max(1.4, 1.8 * (scale || 1));
+    ctx.beginPath(); ctx.arc(x, y, r - 1.2, Math.PI * 1.04, Math.PI * 1.46); ctx.stroke();
     // bottom bounce-light rim
-    ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
     ctx.lineWidth = Math.max(1.5, 2 * (scale || 1));
     ctx.beginPath(); ctx.arc(x, y, r - 2, Math.PI * 0.28, Math.PI * 0.72); ctx.stroke();
-    // specular highlight
+    // specular highlight + crisp core
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
     ctx.beginPath();
     ctx.ellipse(x - r * 0.36, y - r * 0.44, r * 0.30, r * 0.19, -0.5, 0, 6.29);
     ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath(); ctx.arc(x - r * 0.38, y - r * 0.46, r * 0.085, 0, 6.29); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.beginPath(); ctx.arc(x + r * 0.30, y - r * 0.52, r * 0.10, 0, 6.29); ctx.fill();
+    // faint reflection streak, lower-right
+    ctx.fillStyle = 'rgba(255,255,255,0.16)';
+    ctx.beginPath();
+    ctx.ellipse(x + r * 0.40, y + r * 0.44, r * 0.34, r * 0.10, 0.6, 0, 6.29);
+    ctx.fill();
     if (alpha !== undefined && alpha < 1) ctx.globalAlpha = 1;
   }
 
@@ -503,6 +620,15 @@
       ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 6.29); ctx.fill();
       ctx.globalAlpha = 1;
     }
+    // Round 2: gentle twinkling sparkles in the deep backdrop
+    if (!sparkField) buildSparkField();
+    var st = perfT();
+    for (i = 0; i < sparkField.length; i++) {
+      var sp = sparkField[i];
+      var tw = 0.5 + 0.5 * Math.sin(st * sp.sp + sp.ph);
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.10 + 0.30 * tw).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(sp.x, sp.y, sp.r, 0, 6.29); ctx.fill();
+    }
     var v = ctx.createRadialGradient(W / 2, H / 2, 170, W / 2, H / 2, 470);
     v.addColorStop(0, 'rgba(0,0,0,0)');
     v.addColorStop(1, 'rgba(0,0,0,0.38)');
@@ -519,7 +645,7 @@
     ctx.beginPath(); ctx.moveTo(GX, DANGER_Y); ctx.lineTo(W - GX, DANGER_Y); ctx.stroke();
     ctx.setLineDash([]);
     ctx.fillStyle = 'rgba(255,120,120,' + (pulse + 0.25).toFixed(3) + ')';
-    ctx.font = '800 11px Nunito, sans-serif';
+    ctx.font = '600 12px "Barlow Condensed", Nunito, sans-serif';
     ctx.textAlign = 'right';
     ctx.fillText('DANGER', W - GX - 4, DANGER_Y - 6);
     ctx.textAlign = 'left';
@@ -548,10 +674,13 @@
       else if (x + R > W - GX) { x = W - GX - R; dx = -Math.abs(dx); }
       if (y < GY) break;
       if (nearBubble(x, y)) break;
-      // Round 1: shimmering aim dots
-      var shimmer = 0.35 + 0.25 * Math.sin(tGlobal * 6 + travelled * 0.045);
-      ctx.fillStyle = 'rgba(255,255,255,' + shimmer.toFixed(3) + ')';
-      ctx.beginPath(); ctx.arc(x, y, 3, 0, 6.29); ctx.fill();
+      // Round 2: elegant fading dotted arc — soft halo + bright core, tapering with distance
+      var fade = 1 - travelled / 380;
+      var shimmer = (0.30 + 0.22 * Math.sin(tGlobal * 6 + travelled * 0.045)) * fade;
+      ctx.fillStyle = 'rgba(160,210,255,' + (shimmer * 0.45).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(x, y, 5.2 * fade + 1.2, 0, 6.29); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.95, shimmer + 0.28 * fade).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(x, y, 1.5 + 1.7 * fade, 0, 6.29); ctx.fill();
     }
   }
 
@@ -563,9 +692,13 @@
     gl.addColorStop(1, 'rgba(194,169,242,0)');
     ctx.fillStyle = gl;
     ctx.beginPath(); ctx.arc(CX, CY, 78, 0, 6.29); ctx.fill();
+    // Round 2: recoil kick (visual only) — decays over ~0.16s after a shot spawns
+    var rk = Math.max(0, 1 - (perfT() - visRecoilAt) / 0.16);
+    rk = rk * rk;
+    var rox = -Math.cos(aim) * 4.5 * rk, roy = -Math.sin(aim) * 4.5 * rk;
     // rotating barrel
     ctx.save();
-    ctx.translate(CX, CY);
+    ctx.translate(CX + rox, CY + roy);
     ctx.rotate(aim + Math.PI / 2);
     var bw = 30, bl = 54;
     ctx.fillStyle = 'rgba(0,0,0,0.30)';
@@ -578,6 +711,14 @@
     rr(-bw / 2, -bl, bw, bl, 10); ctx.fill();
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     rr(-bw / 2 + 5, -bl + 6, 6, bl - 12, 3); ctx.fill();
+    // barrel bands + muzzle ring
+    ctx.fillStyle = 'rgba(20,26,40,0.45)';
+    ctx.fillRect(-bw / 2, -bl + 14, bw, 5);
+    ctx.fillRect(-bw / 2, -bl + 30, bw, 5);
+    ctx.fillStyle = '#8e9cb8';
+    rr(-bw / 2 - 2, -bl, bw + 4, 9, 4); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    rr(-bw / 2 + 3, -bl + 2, 6, 5, 2); ctx.fill();
     ctx.restore();
     // base dome
     var bg2 = ctx.createRadialGradient(CX - 12, CY - 14, 6, CX, CY, 44);
@@ -586,13 +727,36 @@
     bg2.addColorStop(1, '#232a3a');
     ctx.fillStyle = bg2;
     ctx.beginPath(); ctx.arc(CX, CY, 42, 0, 6.29); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.arc(CX, CY, 40.5, 0, 6.29); ctx.stroke();
     ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.beginPath(); ctx.arc(CX - 12, CY - 14, 10, 0, 6.29); ctx.fill();
+    // plinth bolts
+    for (var bi = 0; bi < 4; bi++) {
+      var ba = Math.PI * 0.25 + bi * Math.PI / 2;
+      var bx2 = CX + Math.cos(ba) * 33, by2 = CY + Math.sin(ba) * 33;
+      ctx.fillStyle = 'rgba(10,14,24,0.55)';
+      ctx.beginPath(); ctx.arc(bx2, by2, 2.6, 0, 6.29); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath(); ctx.arc(bx2 - 0.8, by2 - 0.8, 1, 0, 6.29); ctx.fill();
+    }
+    // pivot cap the barrel turns on
+    var pg = ctx.createRadialGradient(CX - 4, CY - 5, 2, CX, CY, 14);
+    pg.addColorStop(0, '#c7d2e6');
+    pg.addColorStop(0.6, '#67748f');
+    pg.addColorStop(1, '#2a3247');
+    ctx.fillStyle = pg;
+    ctx.beginPath(); ctx.arc(CX, CY, 13, 0, 6.29); ctx.fill();
+    ctx.fillStyle = 'rgba(15,20,32,0.7)';
+    ctx.beginPath(); ctx.arc(CX, CY, 3.4, 0, 6.29); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.65)';
+    ctx.beginPath(); ctx.arc(CX - 1.2, CY - 1.2, 1.2, 0, 6.29); ctx.fill();
     // loaded bubble at the muzzle
-    drawBubble(CX + Math.cos(aim) * 56, CY + Math.sin(aim) * 56, cur, 1);
+    drawBubble(CX + Math.cos(aim) * 56 + rox, CY + Math.sin(aim) * 56 + roy, cur, 1);
     // next-bubble preview
     ctx.fillStyle = 'rgba(255,255,255,0.65)';
-    ctx.font = '800 11px Nunito, sans-serif';
+    ctx.font = '600 12px "Barlow Condensed", Nunito, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('NEXT', CX - 74, CY + 26);
     drawBubble(CX - 74, CY - 2, nxt, 0.55);
@@ -600,13 +764,21 @@
   }
 
   function draw() {
+    // Round 2: detect a fresh shot (render-side) → recoil + muzzle sparkle
+    if (shot && !visPrevShot) { visRecoilAt = perfT(); spawnMuzzleSparks(shot.color); }
+    visPrevShot = !!shot;
     drawBG();
+    drawCeiling();
+    drawFrame();
     drawDanger();
     var r, c, i;
     for (r = 0; r < grid.length; r++)
       for (c = 0; c < rowLen(r); c++) {
         var v = getCell(r, c);
-        if (v >= 0) drawBubble(cellX(r, c), cellY(r), v, 1);
+        if (v >= 0) {
+          var bx3 = cellX(r, c), by3 = cellY(r);
+          drawBubble(bx3, by3, v, 1 + popPulse(bx3, by3));
+        }
       }
     drawGuide();
     drawCannon();
@@ -616,10 +788,22 @@
         ctx.fillStyle = 'rgba(255,255,255,' + (0.35 * k).toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(t.x, t.y, 3 + 5 * k, 0, 6.29); ctx.fill();
       }
+      // glow halo around the flying bubble
+      var sg = ctx.createRadialGradient(shot.x, shot.y, 0, shot.x, shot.y, R * 2.0);
+      sg.addColorStop(0, hexA(PALETTE[shot.color].base, 0.30));
+      sg.addColorStop(1, hexA(PALETTE[shot.color].base, 0));
+      ctx.fillStyle = sg;
+      ctx.beginPath(); ctx.arc(shot.x, shot.y, R * 2.0, 0, 6.29); ctx.fill();
       drawBubble(shot.x, shot.y, shot.color, 1);
     }
     for (i = 0; i < fallers.length; i++) {
       var f = fallers[i];
+      // glow trail so big chain drops read bigger
+      var fg2 = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, R * 1.9);
+      fg2.addColorStop(0, hexA(PALETTE[f.color].base, 0.22));
+      fg2.addColorStop(1, hexA(PALETTE[f.color].base, 0));
+      ctx.fillStyle = fg2;
+      ctx.beginPath(); ctx.arc(f.x, f.y, R * 1.9, 0, 6.29); ctx.fill();
       ctx.save();
       ctx.translate(f.x, f.y); ctx.rotate(f.rot);
       ctx.translate(-f.x, -f.y);
@@ -657,7 +841,7 @@
     for (i = 0; i < popups.length; i++) {
       var pu = popups[i], puk = 1 - pu.life / pu.max;
       ctx.fillStyle = 'rgba(255,255,255,' + (0.95 * puk).toFixed(3) + ')';
-      ctx.font = '800 20px Nunito, sans-serif';
+      ctx.font = '700 22px "Barlow Condensed", Nunito, sans-serif';
       ctx.strokeStyle = 'rgba(0,0,0,' + (0.5 * puk).toFixed(3) + ')';
       ctx.lineWidth = 4;
       ctx.strokeText(pu.text, pu.x, pu.y);
@@ -669,7 +853,7 @@
       var bk = Math.min(1, levelBanner / 0.5);
       ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(255,255,255,' + (0.95 * bk).toFixed(3) + ')';
-      ctx.font = '900 44px Nunito, sans-serif';
+      ctx.font = '700 48px "Barlow Condensed", Nunito, sans-serif';
       ctx.strokeStyle = 'rgba(20,10,60,' + (0.7 * bk).toFixed(3) + ')';
       ctx.lineWidth = 8;
       ctx.strokeText(bannerText, W / 2, H / 2);
@@ -682,7 +866,7 @@
       rr(W / 2 - 178, H / 2 - 118, 356, 122, 16); ctx.fill();
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
-      ctx.font = '800 24px Nunito, sans-serif';
+      ctx.font = '700 30px "Barlow Condensed", Nunito, sans-serif';
       ctx.fillText('Ready to pop?', W / 2, H / 2 - 74);
       ctx.font = '700 15px Nunito, sans-serif';
       ctx.fillText('Aim with mouse or finger — tap to shoot', W / 2, H / 2 - 42);
