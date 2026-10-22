@@ -496,6 +496,197 @@
     if (bike.x >= L.len) doFinish();
   }
 
+  // ---------- Visual upgrade: procedural textures (visual only) ----------
+  // Photo-style surface detail generated once on offscreen canvases and
+  // used as pattern fills. Pure decoration — no gameplay state touched.
+  var texReady = false, patDirt = null, patGrass = null, patWood = null;
+  function makeTile(size, painter) {
+    var c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    painter(c.getContext('2d'), size);
+    return c;
+  }
+  function initTextures() {
+    if (texReady) return;
+    texReady = true;
+    var dirtC = makeTile(256, function (g, s) {
+      g.fillStyle = '#8A5A2E'; g.fillRect(0, 0, s, s);
+      var i, x, y, r;
+      for (i = 0; i < 900; i++) { // soft earth blotches
+        x = hash(i * 1.37) * s; y = hash(i * 2.91) * s;
+        r = 6 + hash(i * 4.13) * 26;
+        g.fillStyle = hash(i * 5.77) > 0.5 ? 'rgba(112,72,34,0.20)' : 'rgba(164,116,66,0.18)';
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+      }
+      for (i = 0; i < 2600; i++) { // fine grain
+        x = hash(i * 7.31) * s; y = hash(i * 3.17) * s;
+        g.fillStyle = hash(i * 9.43) > 0.5 ? 'rgba(70,44,20,0.25)' : 'rgba(190,150,100,0.20)';
+        g.fillRect(x, y, 1.6, 1.6);
+      }
+      for (i = 0; i < 46; i++) { // pebbles with a lit top edge
+        x = hash(i * 11.3) * s; y = hash(i * 13.7) * s;
+        r = 1.6 + hash(i * 17.9) * 2.6;
+        g.fillStyle = '#6E5238';
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        g.fillStyle = 'rgba(230,205,170,0.55)';
+        g.beginPath(); g.arc(x - r * 0.3, y - r * 0.35, r * 0.45, 0, Math.PI * 2); g.fill();
+      }
+    });
+    patDirt = ctx.createPattern(dirtC, 'repeat');
+    var grassC = makeTile(128, function (g, s) {
+      g.fillStyle = '#3E9C4F'; g.fillRect(0, 0, s, s);
+      var i, x, y;
+      for (i = 0; i < 380; i++) {
+        x = hash(i * 2.53) * s; y = hash(i * 6.19) * s;
+        g.fillStyle = hash(i * 8.71) > 0.5 ? 'rgba(38,120,54,0.35)' : 'rgba(110,190,110,0.30)';
+        g.beginPath(); g.arc(x, y, 4 + hash(i * 4.37) * 10, 0, Math.PI * 2); g.fill();
+      }
+      g.lineWidth = 1.4;
+      for (i = 0; i < 700; i++) { // blade strokes
+        x = hash(i * 12.9) * s; y = hash(i * 5.53) * s;
+        g.strokeStyle = hash(i * 3.91) > 0.45 ? 'rgba(30,105,45,0.5)' : 'rgba(140,220,140,0.45)';
+        g.beginPath(); g.moveTo(x, y);
+        g.lineTo(x + (hash(i * 7.7) - 0.5) * 4, y - 4 - hash(i * 9.1) * 5); g.stroke();
+      }
+    });
+    patGrass = ctx.createPattern(grassC, 'repeat');
+    var woodC = makeTile(128, function (g, s) {
+      g.fillStyle = '#9C6B35'; g.fillRect(0, 0, s, s);
+      var y, i, x;
+      for (y = 0; y < s; y += 32) { // plank seams + lit edge
+        g.fillStyle = 'rgba(70,45,18,0.85)'; g.fillRect(0, y, s, 2.5);
+        g.fillStyle = 'rgba(255,225,170,0.20)'; g.fillRect(0, y + 2.5, s, 2);
+      }
+      g.lineWidth = 1.2;
+      for (i = 0; i < 130; i++) { // grain
+        y = hash(i * 4.61) * s; x = hash(i * 8.23) * s;
+        g.strokeStyle = 'rgba(90,58,24,0.30)';
+        g.beginPath(); g.moveTo(x, y);
+        g.bezierCurveTo(x + 14, y + 2, x + 30, y - 2, x + 48, y + 1);
+        g.stroke();
+      }
+      for (i = 0; i < 7; i++) { // knots
+        x = hash(i * 19.7) * s; y = hash(i * 23.3) * s;
+        g.strokeStyle = 'rgba(80,50,20,0.5)';
+        g.beginPath(); g.arc(x, y, 2 + hash(i * 29.1) * 2.5, 0, Math.PI * 2); g.stroke();
+      }
+    });
+    patWood = ctx.createPattern(woodC, 'repeat');
+  }
+  // Re-fill the current path with a world-locked pattern (the texture
+  // scrolls with the camera, not the screen). No-op without a pattern.
+  function patFill(pat, cam, alpha) {
+    if (!pat) return;
+    if (pat.setTransform) { try { pat.setTransform(new DOMMatrix().translate(-cam, 0)); } catch (e) {} }
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = pat;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Tire-track decals (visual only): short dark marks left on the surface.
+  var trackMarks = [];
+  function pushTrackMark(x, y) {
+    var lastM = trackMarks[trackMarks.length - 1];
+    if (lastM && Math.abs(lastM.x - x) < 9) return;
+    trackMarks.push({ x: x, y: y, a: 0.34 });
+    if (trackMarks.length > 140) trackMarks.shift();
+  }
+  function drawTrackMarks(cam) {
+    for (var i = trackMarks.length - 1; i >= 0; i--) {
+      var m = trackMarks[i];
+      m.a -= 0.0016;
+      if (m.a <= 0.02 || m.x < cam - 60) { trackMarks.splice(i, 1); continue; }
+      ctx.fillStyle = 'rgba(43,26,12,' + m.a.toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.ellipse(m.x - cam, m.y + 3, 8, 2.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // One detailed tree (conifer or broadleaf) standing at (sx, baseY).
+  function drawTree(sx, baseY, s, hsh) {
+    ctx.fillStyle = '#6B4A2C';
+    ctx.fillRect(sx - 2.2 * s, baseY - 16 * s, 4.4 * s, 16 * s);
+    ctx.fillStyle = 'rgba(255,220,170,0.25)';
+    ctx.fillRect(sx - 2.2 * s, baseY - 16 * s, 1.6 * s, 16 * s);
+    if (hsh > 0.62) {
+      var tiers = [[30, 0], [23, 12], [16, 24]];
+      for (var ti = 0; ti < 3; ti++) {
+        var tw = tiers[ti][0] * s, ty0 = baseY - 12 * s - tiers[ti][1] * s;
+        ctx.fillStyle = '#2E7D43';
+        ctx.beginPath();
+        ctx.moveTo(sx - tw / 2, ty0);
+        ctx.lineTo(sx, ty0 - 17 * s);
+        ctx.lineTo(sx + tw / 2, ty0);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'rgba(18,58,30,0.38)';
+        ctx.beginPath();
+        ctx.moveTo(sx, ty0 - 17 * s);
+        ctx.lineTo(sx + tw / 2, ty0);
+        ctx.lineTo(sx, ty0);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'rgba(190,240,170,0.30)';
+        ctx.beginPath();
+        ctx.moveTo(sx, ty0 - 17 * s);
+        ctx.lineTo(sx - tw * 0.18, ty0 - 6 * s);
+        ctx.lineTo(sx, ty0 - 5 * s);
+        ctx.closePath(); ctx.fill();
+      }
+    } else {
+      ctx.fillStyle = '#3E9C4F';
+      ctx.beginPath();
+      ctx.arc(sx, baseY - 27 * s, 13 * s, 0, Math.PI * 2);
+      ctx.arc(sx - 10 * s, baseY - 20 * s, 9 * s, 0, Math.PI * 2);
+      ctx.arc(sx + 10 * s, baseY - 20 * s, 9 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(24,84,40,0.40)';
+      ctx.beginPath();
+      ctx.arc(sx + 5 * s, baseY - 19 * s, 10 * s, 0, Math.PI * 2);
+      ctx.arc(sx + 11 * s, baseY - 16 * s, 7 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(190,240,170,0.50)';
+      ctx.beginPath();
+      ctx.arc(sx - 6 * s, baseY - 32 * s, 6 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // Near-camera grass tufts + rocks sweeping past (parallax 1.18).
+  function drawForeground(cam) {
+    var par = 1.18, stepF = 53;
+    var startF = Math.floor(cam * par / stepF) * stepF;
+    for (var fx = startF; fx < cam * par + W + stepF; fx += stepF) {
+      var fh = hash(fx * 2.71);
+      if (fh < 0.3) continue;
+      var sxF = fx - cam * par;
+      var baseF = H - 6 - hash(fx * 5.13) * 26;
+      if (fh > 0.84) {
+        ctx.fillStyle = 'rgba(94,88,82,0.85)';
+        ctx.beginPath();
+        ctx.ellipse(sxF, baseF, 11 + fh * 8, 6 + fh * 4, 0, Math.PI, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(205,198,190,0.5)';
+        ctx.beginPath();
+        ctx.ellipse(sxF - 3, baseF - 2, 5.5, 2.4, -0.4, Math.PI, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.strokeStyle = 'rgba(32,105,46,0.8)';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        for (var b = -2; b <= 2; b++) {
+          var bh2 = 15 + hash(fx * 7.7 + b * 3.3) * 18;
+          ctx.beginPath();
+          ctx.moveTo(sxF + b * 4, baseF + 4);
+          ctx.quadraticCurveTo(sxF + b * 5, baseF - bh2 * 0.6,
+            sxF + b * 7 + (hash(fx + b) - 0.5) * 6, baseF - bh2);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
   // ---------- Render ----------
   var clouds = [];
   for (var ci = 0; ci < 9; ci++) {
@@ -509,11 +700,12 @@
     ctx.save();
     ctx.translate(0, dipY);
 
-    // sky with warm horizon (Round 1: deepened, still pastel)
+    // sky with warm horizon (upgraded: deeper cinematic blue)
     var sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#4F9FDE');
-    sky.addColorStop(0.55, '#AED8F7');
-    sky.addColorStop(0.8, '#F6DCB6');
+    sky.addColorStop(0, '#2E6FB8');
+    sky.addColorStop(0.45, '#7FB6E8');
+    sky.addColorStop(0.75, '#CFE7F7');
+    sky.addColorStop(0.92, '#F6DCB6');
     sky.addColorStop(1, '#F3CD9E');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, W, H);
@@ -543,6 +735,17 @@
       ctx.arc(cx + 24 * cs, cy + 5 * cs, 17 * cs, 0, Math.PI * 2);
       ctx.arc(cx - 24 * cs, cy + 6 * cs, 16 * cs, 0, Math.PI * 2);
       ctx.fill();
+      // shaded undersides so clouds read as volume, not stickers
+      ctx.fillStyle = 'rgba(168,192,218,0.45)';
+      ctx.beginPath();
+      ctx.arc(cx, cy + 10 * cs, 19 * cs, 0, Math.PI * 2);
+      ctx.arc(cx + 23 * cs, cy + 13 * cs, 13 * cs, 0, Math.PI * 2);
+      ctx.arc(cx - 23 * cs, cy + 13 * cs, 12 * cs, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.beginPath();
+      ctx.arc(cx - 7 * cs, cy - 8 * cs, 13 * cs, 0, Math.PI * 2);
+      ctx.fill();
     }
 
     // far mountain silhouettes (three layers — Round 1 adds the farthest, lightest)
@@ -550,8 +753,11 @@
     mountainLayer(cam, 0.12, 300, '#A9C4DE');
     mountainLayer(cam, 0.25, 345, '#8CAED2');
 
-    // mid hills
-    ctx.fillStyle = '#A9DFAE';
+    // mid hills (upgraded: gradient depth + tree line on the ridge)
+    var hg = ctx.createLinearGradient(0, 290, 0, 440);
+    hg.addColorStop(0, '#93D69B');
+    hg.addColorStop(1, '#54945F');
+    ctx.fillStyle = hg;
     ctx.beginPath();
     ctx.moveTo(0, H);
     for (var hx = 0; hx <= W; hx += 14) {
@@ -561,6 +767,16 @@
     ctx.lineTo(W, H);
     ctx.closePath();
     ctx.fill();
+    // trees standing on the hill line (same parallax + curve as the hills)
+    var treeStep = 67;
+    var tStart = Math.floor(cam * 0.45 / treeStep) * treeStep;
+    for (var tx2 = tStart; tx2 < cam * 0.45 + W + treeStep; tx2 += treeStep) {
+      var th = hash(tx2 * 1.93);
+      if (th < 0.22) continue; // natural gaps in the tree line
+      var sxT = tx2 - cam * 0.45;
+      var syT = 352 - 42 * Math.sin(tx2 * 0.004 + 2) - 18 * Math.sin(tx2 * 0.011);
+      drawTree(sxT, syT + 8, 0.8 + hash(tx2 * 3.17) * 0.75, th);
+    }
 
     drawTerrain(cam);
 
@@ -574,6 +790,9 @@
     drawFlagPole(40 - cam, 'START', '#0EA5A4');
     // finish flag
     drawFinishFlag(L.len - cam);
+
+    // tire-track decals on the dirt (visual only)
+    drawTrackMarks(cam);
 
     // particles (world space)
     for (var pi2 = parts.length - 1; pi2 >= 0; pi2--) {
@@ -589,7 +808,7 @@
     // popups
     for (var pi = popups.length - 1; pi >= 0; pi--) {
       var pp = popups[pi];
-      ctx.font = '900 26px Nunito, sans-serif';
+      ctx.font = '700 30px "Barlow Condensed", Nunito, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillStyle = pp.color;
       ctx.strokeStyle = 'rgba(0,0,0,0.45)';
@@ -617,6 +836,9 @@
 
     drawBike(cam);
 
+    // near-camera foreground sweep (visual only)
+    drawForeground(cam);
+
     // hints
     ctx.textAlign = 'center';
     if (hintT > 0 && state === 'play') {
@@ -638,20 +860,22 @@
       var z = ZONES[zi];
       var active = touch[z.id] > 0;
       var zg = ctx.createLinearGradient(0, ZONE_Y, 0, ZONE_Y + ZONE_H);
-      if (active) { zg.addColorStop(0, 'rgba(14,165,164,0.75)'); zg.addColorStop(1, 'rgba(10,120,118,0.75)'); }
-      else { zg.addColorStop(0, 'rgba(20,40,60,0.38)'); zg.addColorStop(1, 'rgba(20,40,60,0.22)'); }
+      if (active) { zg.addColorStop(0, 'rgba(246,183,60,0.88)'); zg.addColorStop(1, 'rgba(214,120,20,0.88)'); }
+      else { zg.addColorStop(0, 'rgba(12,18,28,0.58)'); zg.addColorStop(1, 'rgba(12,18,28,0.40)'); }
       ctx.fillStyle = zg;
       roundRect(z.x, ZONE_Y, z.w, ZONE_H, 12);
       ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.font = '800 17px Nunito, sans-serif';
-      ctx.fillText(z.label, z.x + z.w / 2, ZONE_Y + 35);
+      ctx.strokeStyle = active ? 'rgba(255,220,150,0.9)' : 'rgba(255,255,255,0.28)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.fillStyle = active ? '#2A1800' : '#F5C15C';
+      ctx.font = '700 19px "Barlow Condensed", Nunito, sans-serif';
+      ctx.fillText(z.label, z.x + z.w / 2, ZONE_Y + 36);
     }
     ctx.restore(); // Round 1: end landing-dip transform
   }
 
   function mountainLayer(cam, par, baseY, color) {
-    ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(0, H);
     for (var x = 0; x <= W; x += 16) {
@@ -661,7 +885,25 @@
     }
     ctx.lineTo(W, H);
     ctx.closePath();
+    ctx.fillStyle = color;
     ctx.fill();
+    // vertical shading: lit tops fading to a deeper base (same path)
+    var mg = ctx.createLinearGradient(0, baseY - 90, 0, H);
+    mg.addColorStop(0, 'rgba(255,255,255,0.38)');
+    mg.addColorStop(0.35, 'rgba(255,255,255,0)');
+    mg.addColorStop(1, 'rgba(28,48,78,0.22)');
+    ctx.fillStyle = mg;
+    ctx.fill();
+    // sunlit crest line along the ridge
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var x2 = 0; x2 <= W; x2 += 16) {
+      var wx2 = x2 + cam * par;
+      var y2 = baseY - 55 * Math.abs(Math.sin(wx2 * 0.0035 + par * 9)) - 25 * Math.sin(wx2 * 0.009 + 1);
+      if (x2 === 0) ctx.moveTo(x2, y2); else ctx.lineTo(x2, y2);
+    }
+    ctx.stroke();
   }
 
   function drawTerrain(cam) {
@@ -678,6 +920,9 @@
     ctx.lineTo(x1 - cam, H);
     ctx.closePath();
     ctx.fill();
+    // photo-style dirt grain (procedural pattern, world-locked, same path)
+    initTextures();
+    patFill(patDirt, cam, 0.5);
     // dirt speckles (deterministic, no flicker)
     ctx.fillStyle = 'rgba(60,35,15,0.35)';
     for (var sx = x0; sx <= x1; sx += 22) {
@@ -691,9 +936,18 @@
         }
       }
     }
+    // worn racing line just under the surface
+    ctx.strokeStyle = 'rgba(52,32,14,0.30)';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    for (var tx3 = x0; tx3 <= x1; tx3 += 8) {
+      var px3 = tx3 - cam, py3 = terrainY(tx3, L) + 7;
+      if (tx3 === x0) ctx.moveTo(px3, py3); else ctx.lineTo(px3, py3);
+    }
+    ctx.stroke();
     // grass lip: thick base + individual blades
-    ctx.strokeStyle = '#3FA34D';
-    ctx.lineWidth = 10;
+    ctx.strokeStyle = '#2F9E44';
+    ctx.lineWidth = 11;
     ctx.lineCap = 'round';
     ctx.beginPath();
     for (var gx2 = x0; gx2 <= x1; gx2 += 8) {
@@ -701,6 +955,15 @@
       if (gx2 === x0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
     }
     ctx.stroke();
+    // grass texture pass over the lip (same path, world-locked pattern)
+    if (patGrass) {
+      if (patGrass.setTransform) { try { patGrass.setTransform(new DOMMatrix().translate(-cam, 0)); } catch (e) {} }
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.strokeStyle = patGrass;
+      ctx.stroke();
+      ctx.restore();
+    }
     for (var bx = x0; bx <= x1; bx += 15) {
       var bty = terrainY(bx, L);
       var bh = 7 + hash(bx * 1.71) * 8;
@@ -731,6 +994,17 @@
     ctx.lineTo(x1, y1 + 4);
     ctx.closePath();
     ctx.fill();
+    // wood grain over the wedge (same path, world-locked) + dark outline
+    initTextures();
+    patFill(patWood, cam, 0.45);
+    ctx.strokeStyle = 'rgba(60,38,16,0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, lipY);
+    ctx.lineTo(x1, y1 + 4);
+    ctx.closePath();
+    ctx.stroke();
     // plank seams along the slope
     ctx.strokeStyle = 'rgba(70,45,20,0.5)';
     ctx.lineWidth = 2;
@@ -764,6 +1038,11 @@
     if (x + hu.w < -40 || x > W + 40) return;
     var gy = terrainY(hu.x + hu.w / 2, L);
     var top = gy - hu.h;
+    // soft ground shadow so the hurdle sits in the scene
+    ctx.fillStyle = 'rgba(30,18,8,0.22)';
+    ctx.beginPath();
+    ctx.ellipse(x + hu.w / 2, gy + 4, hu.w * 0.85, 4.5, 0, 0, Math.PI * 2);
+    ctx.fill();
     // posts with wood gradient
     var pg = ctx.createLinearGradient(x, 0, x + hu.w, 0);
     pg.addColorStop(0, '#6E4A26');
@@ -887,44 +1166,67 @@
     ctx.translate(bx, by);
     ctx.rotate(bike.ang);
 
-    // wheels: radial-gradient tires, bright hubs, spinning spokes
+    // tire-track decals where the wheels touch (visual only)
+    if (state === 'play' && bike.onGround) {
+      var wpT = [wheelPos(-20, 12), wheelPos(20, 12)];
+      for (var ti2 = 0; ti2 < 2; ti2++) pushTrackMark(wpT[ti2].x, effGroundY(wpT[ti2].x));
+    }
+
+    // wheels: knobby tires, metal rims, spinning spokes
+    var spin = (bike.x * 0.05) % (Math.PI * 2);
     var wheelPts = [[-20, 12], [20, 12]];
     for (var i = 0; i < wheelPts.length; i++) {
       var wx = wheelPts[i][0], wy = wheelPts[i][1];
       var tg = ctx.createRadialGradient(wx - 4, wy - 4, 2, wx, wy, WR);
       tg.addColorStop(0, '#4A4A4A');
       tg.addColorStop(0.75, '#262626');
-      tg.addColorStop(1, '#141414');
+      tg.addColorStop(1, '#101010');
       ctx.fillStyle = tg;
       ctx.beginPath();
       ctx.arc(wx, wy, WR, 0, Math.PI * 2);
       ctx.fill();
-      // rim highlight
-      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
-      ctx.lineWidth = 2;
+      // knobby tread blocks rotating with the wheel
+      ctx.fillStyle = '#2E2E2E';
+      for (var tb = 0; tb < 10; tb++) {
+        var ta = spin + tb * Math.PI / 5;
+        ctx.save();
+        ctx.translate(wx + Math.cos(ta) * (WR - 1.6), wy + Math.sin(ta) * (WR - 1.6));
+        ctx.rotate(ta);
+        ctx.fillRect(-2.8, -2, 5.6, 4);
+        ctx.restore();
+      }
+      // sidewall ring + metal rim
+      ctx.strokeStyle = '#454545';
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
-      ctx.arc(wx, wy, WR - 2, Math.PI * 1.1, Math.PI * 1.6);
+      ctx.arc(wx, wy, WR - 4, 0, Math.PI * 2);
       ctx.stroke();
-      // hub
-      var hg = ctx.createRadialGradient(wx - 1, wy - 1, 1, wx, wy, 6);
-      hg.addColorStop(0, '#E8EDF2');
-      hg.addColorStop(1, '#8A94A0');
-      ctx.fillStyle = hg;
+      var rg = ctx.createRadialGradient(wx - 2, wy - 2, 1, wx, wy, 8);
+      rg.addColorStop(0, '#D7DEE6');
+      rg.addColorStop(1, '#7C8794');
+      ctx.fillStyle = rg;
       ctx.beginPath();
-      ctx.arc(wx, wy, 5, 0, Math.PI * 2);
+      ctx.arc(wx, wy, 7.6, 0, Math.PI * 2);
       ctx.fill();
       // spokes
       ctx.strokeStyle = '#B9C2CC';
-      ctx.lineWidth = 2;
-      var spin = (bike.x * 0.05) % (Math.PI * 2);
+      ctx.lineWidth = 1.8;
       for (var s = 0; s < 3; s++) {
         var a = spin + s * Math.PI / 3;
         ctx.beginPath();
-        ctx.moveTo(wx - Math.cos(a) * 10, wy - Math.sin(a) * 10);
-        ctx.lineTo(wx + Math.cos(a) * 10, wy + Math.sin(a) * 10);
+        ctx.moveTo(wx - Math.cos(a) * 7, wy - Math.sin(a) * 7);
+        ctx.lineTo(wx + Math.cos(a) * 7, wy + Math.sin(a) * 7);
         ctx.stroke();
       }
-      // Round 1: motion-blur arc on fast wheel spin
+      // hub
+      var hg = ctx.createRadialGradient(wx - 1, wy - 1, 1, wx, wy, 6);
+      hg.addColorStop(0, '#F2F5F8');
+      hg.addColorStop(1, '#8A94A0');
+      ctx.fillStyle = hg;
+      ctx.beginPath();
+      ctx.arc(wx, wy, 3, 0, Math.PI * 2);
+      ctx.fill();
+      // motion-blur arc on fast wheel spin
       var wSpd = Math.abs(bike.vx);
       if (wSpd > 220) {
         ctx.strokeStyle = 'rgba(200,208,218,' + Math.min(0.45, (wSpd - 220) / 700).toFixed(3) + ')';
@@ -935,68 +1237,184 @@
       }
     }
 
-    // frame with gradient + highlight
-    var fg = ctx.createLinearGradient(-20, -10, 20, 12);
-    fg.addColorStop(0, '#F4703C');
-    fg.addColorStop(1, '#C7431F');
-    ctx.strokeStyle = fg;
-    ctx.lineWidth = 7;
+    // --- chassis: swingarm, front forks, engine ---
+    ctx.strokeStyle = '#3A3F47';
+    ctx.lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.moveTo(-20, 12); ctx.lineTo(-2, -8); ctx.lineTo(20, 12);
-    ctx.moveTo(-2, -8); ctx.lineTo(14, -10);
+    ctx.moveTo(-20, 12); ctx.lineTo(-3, 1);
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.strokeStyle = '#565D66';
+    ctx.lineWidth = 4.5;
+    ctx.beginPath();
+    ctx.moveTo(20, 12); ctx.lineTo(22, -13);
+    ctx.stroke();
+    ctx.strokeStyle = '#C7CED6';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-18, 9); ctx.lineTo(-3, -9);
+    ctx.moveTo(20.5, 6); ctx.lineTo(21.8, -6);
     ctx.stroke();
-    // seat + handlebar
-    ctx.strokeStyle = '#333';
+    var eg = ctx.createLinearGradient(-8, 0, 8, 12);
+    eg.addColorStop(0, '#4A5058');
+    eg.addColorStop(1, '#22262C');
+    ctx.fillStyle = eg;
+    roundRect(-8, 0, 16, 11, 3);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.20)';
+    ctx.fillRect(-8, 1.5, 16, 2);
+
+    // --- bodywork: tank + shrouds, seat, fenders ---
+    var bg2 = ctx.createLinearGradient(-14, -12, 16, 2);
+    bg2.addColorStop(0, '#F4703C');
+    bg2.addColorStop(1, '#C2431D');
+    ctx.fillStyle = bg2;
+    ctx.beginPath();
+    ctx.moveTo(-13, -4);
+    ctx.lineTo(-4, -11);
+    ctx.lineTo(9, -12);
+    ctx.lineTo(15, -6);
+    ctx.lineTo(6, -1);
+    ctx.lineTo(-6, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.30)';
+    ctx.beginPath();
+    ctx.moveTo(-4, -11);
+    ctx.lineTo(9, -12);
+    ctx.lineTo(12, -8);
+    ctx.lineTo(0, -8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#1F2430';
     ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(-12, -12); ctx.lineTo(-2, -12);
-    ctx.moveTo(14, -10); ctx.lineTo(20, -18);
+    ctx.moveTo(-17, -8); ctx.lineTo(-3, -10);
     ctx.stroke();
+    // fenders hugging both wheels (body colour)
+    ctx.strokeStyle = '#D65427';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(-20, 12, WR + 3.5, Math.PI * 1.02, Math.PI * 1.62);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(20, 12, WR + 3.5, Math.PI * 1.08, Math.PI * 1.72);
+    ctx.stroke();
+    // exhaust pipe + muffler
+    ctx.strokeStyle = '#9AA3AD';
+    ctx.lineWidth = 3.6;
+    ctx.beginPath();
+    ctx.moveTo(2, 8); ctx.quadraticCurveTo(-8, 6, -15, -2);
+    ctx.stroke();
+    var mg2 = ctx.createLinearGradient(-24, -8, -10, -2);
+    mg2.addColorStop(0, '#5A616A');
+    mg2.addColorStop(0.5, '#C9D1D9');
+    mg2.addColorStop(1, '#79828C');
+    ctx.fillStyle = mg2;
+    roundRect(-25, -8.5, 13, 6, 3);
+    ctx.fill();
+    ctx.fillStyle = '#22262C';
+    ctx.fillRect(-25.5, -6.8, 2.6, 2.8);
+    // handlebar
+    ctx.strokeStyle = '#24282E';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(15, -10); ctx.lineTo(22, -15);
+    ctx.stroke();
+    // front number plate
+    ctx.fillStyle = '#F4F6F8';
+    roundRect(16.5, -15, 9, 11, 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(20,30,45,0.35)';
+    ctx.lineWidth = 1;
+    roundRect(16.5, -15, 9, 11, 2);
+    ctx.stroke();
+    ctx.fillStyle = '#C2431D';
+    ctx.font = '900 8px Nunito, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('1', 21, -6.5);
 
-    // rider: gradient jersey torso, legs, arms
-    var jg = ctx.createLinearGradient(0, -26, 0, -10);
+    // --- rider: layered kit, full-face helmet ---
+    // far leg (darker, behind the bodywork)
+    ctx.strokeStyle = '#14275E';
+    ctx.lineWidth = 5.5;
+    ctx.beginPath();
+    ctx.moveTo(-5, -11); ctx.lineTo(3, -2); ctx.lineTo(10, 4);
+    ctx.stroke();
+    // torso: gradient jersey + highlight seam
+    var jg = ctx.createLinearGradient(0, -27, 0, -10);
     jg.addColorStop(0, '#4B8BF5');
     jg.addColorStop(1, '#1D4ED8');
     ctx.strokeStyle = jg;
-    ctx.lineWidth = 7;
+    ctx.lineWidth = 8;
     ctx.beginPath();
-    ctx.moveTo(-6, -12); ctx.lineTo(6, -24);                    // torso
+    ctx.moveTo(-6, -12); ctx.lineTo(5, -25);
     ctx.stroke();
-    ctx.strokeStyle = '#173A8F';
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(-4.5, -14); ctx.lineTo(5.5, -24.5);
+    ctx.stroke();
+    // near leg: pants, shin, boot
+    ctx.strokeStyle = '#1E3A8A';
     ctx.lineWidth = 6;
     ctx.beginPath();
-    ctx.moveTo(-6, -12); ctx.lineTo(2, 2); ctx.lineTo(14, 4);   // legs
+    ctx.moveTo(-6, -12); ctx.lineTo(2, -2);
     ctx.stroke();
-    var ag = ctx.createLinearGradient(6, -26, 20, -16);
-    ag.addColorStop(0, '#F7B267');
-    ag.addColorStop(1, '#E08A3C');
-    ctx.strokeStyle = ag;
-    ctx.lineWidth = 5;
+    ctx.strokeStyle = '#162C66';
+    ctx.lineWidth = 5.5;
     ctx.beginPath();
-    ctx.moveTo(6, -24); ctx.lineTo(18, -18);                   // arms to handlebar
+    ctx.moveTo(2, -2); ctx.lineTo(8, 5);
     ctx.stroke();
-    // head with shaded helmet
-    ctx.fillStyle = '#FFD9B3';
-    ctx.beginPath();
-    ctx.arc(6, -32, 8, 0, Math.PI * 2);
+    ctx.fillStyle = '#22252B';
+    roundRect(5, 2.5, 10, 5, 2);
     ctx.fill();
-    var hgl = ctx.createLinearGradient(6, -41, 6, -25);
-    hgl.addColorStop(0, '#2DD4BF');
-    hgl.addColorStop(1, '#0B7C72');
-    ctx.fillStyle = hgl;
+    // arm: jersey sleeve, forearm, glove on the grip
+    ctx.strokeStyle = '#1D4ED8';
+    ctx.lineWidth = 5.5;
     ctx.beginPath();
-    ctx.arc(6, -33, 8, Math.PI, Math.PI * 2);
+    ctx.moveTo(5, -24); ctx.lineTo(13, -20);
+    ctx.stroke();
+    ctx.strokeStyle = '#E8A266';
+    ctx.lineWidth = 4.6;
+    ctx.beginPath();
+    ctx.moveTo(13, -20); ctx.lineTo(19, -16);
+    ctx.stroke();
+    ctx.fillStyle = '#22252B';
+    ctx.beginPath();
+    ctx.arc(20.5, -15.5, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    // helmet: full-face shell, dark visor, peak (head anchor matches physics)
+    var hg2 = ctx.createLinearGradient(6, -41, 6, -23);
+    hg2.addColorStop(0, '#2DD4BF');
+    hg2.addColorStop(1, '#0B7C72');
+    ctx.fillStyle = hg2;
+    ctx.beginPath();
+    ctx.arc(6, -32, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(6, -32, 9, 0, Math.PI * 2);
+    ctx.clip();
+    var vg = ctx.createLinearGradient(6, -37, 16, -30);
+    vg.addColorStop(0, '#0E2231');
+    vg.addColorStop(0.55, '#274B63');
+    vg.addColorStop(1, '#0E2231');
+    ctx.fillStyle = vg;
+    ctx.fillRect(4, -36.5, 13, 6.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillRect(7, -35.5, 4.5, 1.8);
+    ctx.restore();
+    ctx.fillStyle = '#0B7C72';
+    ctx.beginPath();
+    ctx.moveTo(9, -39);
+    ctx.lineTo(18, -35.5);
+    ctx.lineTo(9.5, -33.5);
+    ctx.closePath();
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.65)';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(6, -33, 5.5, Math.PI * 1.15, Math.PI * 1.55);
+    ctx.arc(6, -32, 7.6, Math.PI * 1.1, Math.PI * 1.5);
     ctx.stroke();
 
     ctx.restore();
