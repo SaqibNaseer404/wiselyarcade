@@ -9,90 +9,95 @@
   // beveled 3D tiles, specular highlights, embossed givens and chunky buttons.
   (function injectSudokuGloss() {
     var css =
-    /* Glossy 3D frame around the grid */
+    /* Premium machined board: dark walnut frame, warm paper cells (visuals only) */
     '.sboard{border:none;border-radius:16px;padding:10px;gap:2px;' +
-      'background:linear-gradient(150deg,#2b4fb8 0%,#1e3a8a 45%,#152a66 100%);' +
-      'box-shadow:0 18px 36px rgba(21,42,102,.45),0 4px 10px rgba(21,42,102,.35),' +
-      'inset 0 2px 2px rgba(255,255,255,.35),inset 0 -3px 6px rgba(0,0,0,.35);}' +
-    /* 3D beveled tiles: light top-left edge, dark bottom-right edge */
-    '.scell{border:none;margin:0;border-radius:7px;' +
-      'background:linear-gradient(145deg,#ffffff 0%,#f2f6fd 55%,#dfe8f8 100%);' +
-      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
-      '0 1px 2px rgba(21,42,102,.25);' +
-      'text-shadow:0 1px 0 rgba(255,255,255,.65);}' +
-    /* Thicker 3x3 box separators (inset shadows: no layout shift) */
-    '.scell.br{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
-      '0 1px 2px rgba(21,42,102,.25),inset -4px 0 0 0 rgba(21,42,102,.85)}' +
-    '.scell.bb{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
-      '0 1px 2px rgba(21,42,102,.25),inset 0 -4px 0 0 rgba(21,42,102,.85)}' +
-    '.scell.br.bb{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),' +
-      '0 1px 2px rgba(21,42,102,.25),inset -4px 0 0 0 rgba(21,42,102,.85),' +
-      'inset 0 -4px 0 0 rgba(21,42,102,.85)}' +
-    /* Given numbers: glossy embossed dark navy */
-    '.scell.given{color:#0f2743;font-weight:900;' +
-      'text-shadow:0 2px 0 rgba(255,255,255,.85),0 -1px 1px rgba(0,0,0,.28);}' +
-    /* Player digits: clean blue with soft depth */
-    '.scell:not(.given){color:#1d4ed8;font-weight:900;' +
-      'text-shadow:0 2px 0 rgba(255,255,255,.6),0 3px 4px rgba(29,78,216,.22);}' +
-    /* Selected cell: glowing 3D highlight ring */
-    '.scell.sel{background:linear-gradient(145deg,#f8fcff 0%,#e3edfd 60%,#cfe0fb 100%);' +
-      'box-shadow:inset 0 0 0 3px #1d4ed8,inset 2px 2px 0 rgba(255,255,255,.9),' +
-      '0 0 14px 3px rgba(29,78,216,.55),0 1px 3px rgba(21,42,102,.4);}' +
-    /* Same row/column/box: soft tint */
-    '.scell.peer{background:linear-gradient(145deg,#fdf6e8 0%,#fbf0d8 55%,#f5e3b8 100%);}' +
-    /* Cells with the same value: stronger glossy tint */
-    '.scell.same{background:linear-gradient(145deg,#fff3d1 0%,#ffe8a8 55%,#ffd97a 100%);' +
-      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(180,120,20,.3),' +
-      '0 0 8px rgba(255,190,60,.55);}' +
-    /* Wrong-entry flash: glossy red */
-    '.scell.err{background:linear-gradient(145deg,#fecaca 0%,#fca5a5 60%,#f87171 100%)!important;' +
-      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.7),inset 0 0 0 2px #b91c1c,' +
-      '0 0 12px rgba(185,28,28,.5);}' +
-    /* Number pad: chunky glossy 3D buttons */
+      'background:linear-gradient(155deg,#3a3128 0%,#241d16 55%,#171209 100%);' +
+      'box-shadow:0 22px 44px rgba(23,16,6,.45),0 4px 10px rgba(23,16,6,.30),' +
+      'inset 0 2px 2px rgba(255,235,190,.25),inset 0 -3px 6px rgba(0,0,0,.50);}' +
+    /* Paper cells: warm ivory, hairline ring, soft depth */
+    '.scell{border:none;margin:0;border-radius:5px;' +
+      'font-family:"Barlow Condensed",sans-serif;font-weight:600;' +
+      'font-size:clamp(1.15rem,5vw,1.7rem);' +
+      'background:linear-gradient(150deg,#fffdf4 0%,#faf3e0 60%,#f1e7cd 100%);' +
+      'box-shadow:inset 0 0 0 1px rgba(120,100,60,.18),inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 1px 2px rgba(20,14,4,.30);' +
+      'text-shadow:0 1px 0 rgba(255,255,255,.55);}' +
+    /* Strong 3x3 box separators (inset shadows: no layout shift) */
+    '.scell.br{box-shadow:inset 0 0 0 1px rgba(120,100,60,.18),inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 1px 2px rgba(20,14,4,.30),inset -4px 0 0 0 rgba(30,22,10,.88)}' +
+    '.scell.bb{box-shadow:inset 0 0 0 1px rgba(120,100,60,.18),inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 1px 2px rgba(20,14,4,.30),inset 0 -4px 0 0 rgba(30,22,10,.88)}' +
+    '.scell.br.bb{box-shadow:inset 0 0 0 1px rgba(120,100,60,.18),inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 1px 2px rgba(20,14,4,.30),inset -4px 0 0 0 rgba(30,22,10,.88),' +
+      'inset 0 -4px 0 0 rgba(30,22,10,.88)}' +
+    /* Given numbers: deep engraved ink */
+    '.scell.given{color:#22262d;font-weight:700;' +
+      'text-shadow:0 1px 0 rgba(255,255,255,.9),0 -1px 1px rgba(0,0,0,.20);}' +
+    /* Player digits: rich indigo ink */
+    '.scell:not(.given){color:#2f3fb4;font-weight:600;' +
+      'text-shadow:0 1px 0 rgba(255,255,255,.55),0 2px 3px rgba(47,63,180,.18);}' +
+    /* Selected cell: warm amber ring */
+    '.scell.sel{background:linear-gradient(150deg,#fff6da 0%,#ffeec0 60%,#ffe49a 100%);' +
+      'box-shadow:inset 0 0 0 3px #d9930d,inset 2px 2px 0 rgba(255,255,255,.9),' +
+      '0 0 16px 4px rgba(217,147,13,.50),0 1px 3px rgba(20,14,4,.35);}' +
+    /* Same row/column/box: soft warm wash */
+    '.scell.peer{background:linear-gradient(150deg,#fbf2d9 0%,#f6ead0 60%,#efe0ba 100%);}' +
+    /* Cells with the same value: gentle gold glow */
+    '.scell.same{background:linear-gradient(150deg,#ffedb5 0%,#ffe28f 55%,#ffd766 100%);' +
+      'box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(180,120,20,.30),' +
+      '0 0 9px rgba(230,170,40,.55);}' +
+    /* Wrong-entry flash: classy crimson */
+    '.scell.err{background:linear-gradient(150deg,#f9d7d2 0%,#f2b3ab 60%,#e88a80 100%)!important;' +
+      'color:#8f1d17;' +
+      'box-shadow:inset 0 0 0 2px #b3261e,inset 2px 2px 0 rgba(255,255,255,.6),' +
+      '0 0 12px rgba(179,38,30,.45);}' +
+    /* Number pad: chunky dark key tiles */
     '.pad{gap:10px}' +
-    '.pad button{border:none;border-radius:14px;padding:11px 0;position:relative;' +
-      'background:radial-gradient(circle at 30% 18%,#ffffff 0%,#eaf1fd 45%,#c9d8f5 100%);' +
-      'box-shadow:0 5px 0 #8fa6d4,0 10px 16px rgba(30,60,120,.30),' +
-      'inset 0 2px 2px rgba(255,255,255,.95),inset 0 -3px 5px rgba(90,120,190,.25);' +
-      'color:#16295e;font-weight:900;font-size:1.25rem;' +
-      'text-shadow:0 1px 0 rgba(255,255,255,.7);cursor:pointer;' +
+    '.pad button{border:none;border-radius:13px;padding:11px 0;position:relative;' +
+      'font-family:"Barlow Condensed",sans-serif;' +
+      'background:linear-gradient(165deg,#3a4152 0%,#262b36 55%,#1b1f27 100%);' +
+      'box-shadow:0 5px 0 #0d0f13,0 10px 16px rgba(15,12,4,.35),' +
+      'inset 0 2px 2px rgba(255,255,255,.28),inset 0 -3px 5px rgba(0,0,0,.40);' +
+      'color:#f5edd8;font-weight:700;font-size:1.45rem;letter-spacing:.02em;' +
+      'text-shadow:0 1px 2px rgba(0,0,0,.5);cursor:pointer;' +
       'transition:transform .06s ease,box-shadow .06s ease;}' +
-    '.pad button:hover{filter:brightness(1.04)}' +
+    '.pad button:hover{filter:brightness(1.08)}' +
     '.pad button:active{transform:translateY(4px);' +
-      'box-shadow:0 1px 0 #8fa6d4,0 3px 6px rgba(30,60,120,.28),' +
-      'inset 0 2px 2px rgba(255,255,255,.95),inset 0 -2px 4px rgba(90,120,190,.25);}' +
-    /* Erase tool button: coral gloss */
+      'box-shadow:0 1px 0 #0d0f13,0 3px 6px rgba(15,12,4,.32),' +
+      'inset 0 2px 2px rgba(255,255,255,.28),inset 0 -2px 4px rgba(0,0,0,.4);}' +
+    /* Pad key for the selected cell's number lights amber (.lit set by a page script) */
+    '.pad button.lit{background:linear-gradient(165deg,#ffd97a 0%,#f2b544 55%,#dd9413 100%);' +
+      'color:#33240a;text-shadow:0 1px 0 rgba(255,255,255,.5);' +
+      'box-shadow:0 5px 0 #9a6a12,0 10px 18px rgba(217,147,13,.45),' +
+      'inset 0 2px 2px rgba(255,255,255,.65),inset 0 -3px 5px rgba(150,95,10,.35);}' +
+    /* Erase tool: warm amber tile */
     '.pad button.tool{' +
-      'background:radial-gradient(circle at 30% 18%,#ffd9c9 0%,#ffb49a 45%,#ff8f6b 100%);' +
-      'box-shadow:0 5px 0 #c96a4b,0 10px 16px rgba(190,90,50,.32),' +
-      'inset 0 2px 2px rgba(255,255,255,.85),inset 0 -3px 5px rgba(150,70,40,.28);' +
-      'color:#5f2210;}' +
+      'background:linear-gradient(165deg,#f3d9a4 0%,#e5b95f 55%,#d29a35 100%);' +
+      'box-shadow:0 5px 0 #8a5f14,0 10px 16px rgba(150,100,20,.32),' +
+      'inset 0 2px 2px rgba(255,255,255,.7),inset 0 -3px 5px rgba(140,95,20,.3);' +
+      'color:#4a3208;font-size:1.05rem;}' +
     '.pad button.tool:active{transform:translateY(4px);' +
-      'box-shadow:0 1px 0 #c96a4b,0 3px 6px rgba(190,90,50,.3),' +
-      'inset 0 2px 2px rgba(255,255,255,.85),inset 0 -2px 4px rgba(150,70,40,.28);}' +
-    /* Pencil notes stay small and quiet */
+      'box-shadow:0 1px 0 #8a5f14,0 3px 6px rgba(150,100,20,.3),' +
+      'inset 0 2px 2px rgba(255,255,255,.7),inset 0 -2px 4px rgba(140,95,20,.3);}' +
+    /* Pencil notes: small slate digits */
     '.scell .notes{inset:3px}' +
-    '.scell .notes span{color:#7c8db0;text-shadow:0 1px 0 rgba(255,255,255,.7)}' +
-    /* ---- Round 1 cinematic polish ---- */
-    /* Selected cell: pastel glow pulse (breathing) */
+    '.scell .notes span{font-family:"Barlow Condensed",sans-serif;font-weight:600;' +
+      'color:#68707e;text-shadow:0 1px 0 rgba(255,255,255,.7)}' +
+    /* Selected cell: calm amber breathing pulse */
     '.scell.sel{animation:sudoku-sel-pulse 1.8s ease-in-out infinite}' +
     '@keyframes sudoku-sel-pulse{' +
-      '0%,100%{box-shadow:inset 0 0 0 3px #1d4ed8,inset 2px 2px 0 rgba(255,255,255,.9),' +
-        '0 0 14px 3px rgba(29,78,216,.55),0 1px 3px rgba(21,42,102,.4)}' +
-      '50%{box-shadow:inset 0 0 0 3px #7c6cf0,inset 2px 2px 0 rgba(255,255,255,.9),' +
-        '0 0 22px 6px rgba(150,140,245,.75),0 1px 3px rgba(21,42,102,.4)}}' +
-    /* Same-number cells: shimmer sweep */
+      '0%,100%{box-shadow:inset 0 0 0 3px #d9930d,inset 2px 2px 0 rgba(255,255,255,.9),' +
+        '0 0 14px 3px rgba(217,147,13,.45),0 1px 3px rgba(20,14,4,.35)}' +
+      '50%{box-shadow:inset 0 0 0 3px #e8a33d,inset 2px 2px 0 rgba(255,255,255,.9),' +
+        '0 0 22px 6px rgba(232,163,61,.65),0 1px 3px rgba(20,14,4,.35)}}' +
+    /* Same-number cells: soft shimmer sweep */
     '.scell.same{position:relative;overflow:hidden}' +
     '.scell.same::after{content:"";position:absolute;top:0;bottom:0;width:45%;left:-60%;' +
-      'background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.65) 50%,rgba(255,255,255,0) 100%);' +
+      'background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.45) 50%,rgba(255,255,255,0) 100%);' +
       'animation:sudoku-shimmer 2.2s ease-in-out infinite;pointer-events:none}' +
     '@keyframes sudoku-shimmer{0%{left:-60%}60%,100%{left:130%}}' +
-    /* Completed row/column/box: one-shot celebration glow */
+    /* Completed row/column/box: one-shot golden sweep */
     '.scell.unit-done{animation:sudoku-unit-done .9s ease}' +
     '@keyframes sudoku-unit-done{' +
-      '0%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 0 rgba(194,169,242,0)}' +
-      '40%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 18px 4px rgba(194,169,242,.85)}' +
-      '100%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.9),inset -2px -2px 3px rgba(30,58,138,.22),0 0 0 rgba(194,169,242,0)}}';
+      '0%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 0 0 rgba(233,180,60,0)}' +
+      '40%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 0 18px 4px rgba(233,180,60,.85)}' +
+      '100%{box-shadow:inset 2px 2px 0 rgba(255,255,255,.85),inset -2px -2px 3px rgba(120,95,40,.15),0 0 0 rgba(233,180,60,0)}}';
     var style = document.createElement('style');
     style.id = 'sudoku-3d-theme';
     style.appendChild(document.createTextNode(css));
