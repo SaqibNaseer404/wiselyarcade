@@ -20,52 +20,105 @@
 <meta name="description" content="Play Chess free online against the computer — full rules, three difficulty levels, no download, no sign-up. Every move has a consequence: think before you act. Family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=9">
 <style>
+  /* v2 visual overhaul: walnut & maple board, carved-look pieces, dark-glass panels */
   .ch-wrap{max-width:1020px;margin:0 auto}
   .ch-layout{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
-  #board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(92vw,520px);
-    aspect-ratio:1;border-radius:18px;overflow:hidden;
-    box-shadow:0 24px 60px rgba(122,96,178,.3), inset 0 2px 0 #fff;
-    border:6px solid rgba(255,255,255,.9);touch-action:manipulation}
+  #board{position:relative;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:min(92vw,520px);
+    aspect-ratio:1;border-radius:14px;overflow:hidden;background:#38220f;
+    box-shadow:0 30px 70px rgba(43,26,8,.5),0 6px 18px rgba(43,26,8,.35), inset 0 2px 0 rgba(255,222,170,.35);
+    border:14px solid #38220f;touch-action:manipulation}
   .sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}
-  .sq.light{background:#f3e9f7}.sq.dark{background:#b79ae0}
-  .sq .pc{font-size:clamp(1.7rem,6.5vw,2.9rem);line-height:1;user-select:none;pointer-events:none;
-    filter:drop-shadow(0 3px 3px rgba(60,40,90,.35))}
-  .sq .pc.w{color:#ffffff;text-shadow:0 0 3px #4a3566,0 2px 4px rgba(60,40,90,.5)}
-  .sq .pc.b{color:#3b2a5e}
-  .sq.sel{outline:3px solid #7c5cd6;outline-offset:-3px}
-  .sq.move::after{content:"";position:absolute;width:26%;height:26%;border-radius:50%;
-    background:rgba(124,92,214,.45)}
-  .sq.takes::after{content:"";position:absolute;inset:6%;border-radius:50%;
-    border:4px solid rgba(214,92,124,.65)}
-  .sq.check{background:#f2a0b5 !important}
+  .sq.light{background-color:#eedcae;background-image:
+    linear-gradient(155deg, rgba(255,248,224,.6), rgba(219,182,116,.18) 52%, rgba(196,156,92,.32)),
+    repeating-linear-gradient(94deg, rgba(146,102,48,.055) 0 3px, rgba(146,102,48,0) 3px 9px, rgba(120,80,34,.045) 9px 11px, rgba(120,80,34,0) 11px 18px);
+    box-shadow:inset 0 1px 0 rgba(255,252,238,.5), inset 0 -1px 0 rgba(120,80,30,.18)}
+  .sq.dark{background-color:#71492a;background-image:
+    linear-gradient(205deg, rgba(255,205,140,.13), rgba(43,25,11,.22) 55%, rgba(24,13,5,.42)),
+    repeating-linear-gradient(86deg, rgba(0,0,0,.075) 0 3px, rgba(0,0,0,0) 3px 8px, rgba(255,206,145,.05) 8px 10px, rgba(255,206,145,0) 10px 17px);
+    box-shadow:inset 0 1px 0 rgba(255,220,170,.22), inset 0 -1px 0 rgba(0,0,0,.35)}
+  #board .pc{font-size:clamp(1.7rem,6.5vw,2.9rem);line-height:1;user-select:none;pointer-events:none;
+    transition:transform .12s ease}
+  #board .pc.w{background:linear-gradient(180deg,#fffef9 0%,#f8edd3 40%,#ecd7a9 74%,#dbc084 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    -webkit-text-stroke:.6px rgba(90,62,18,.45);
+    filter:drop-shadow(0 3px 2px rgba(46,28,4,.5))}
+  #board .pc.b{background:linear-gradient(180deg,#6b543a 0%,#3a2a1b 42%,#20140b 76%,#120b06 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    -webkit-text-stroke:.6px rgba(0,0,0,.55);
+    filter:drop-shadow(0 3px 2px rgba(10,5,0,.55)) drop-shadow(0 -1px 1px rgba(255,216,155,.22))}
+  .sq.last{box-shadow:inset 0 0 0 2px rgba(245,166,35,.35), inset 0 0 22px rgba(245,166,35,.38)}
+  .sq.sel{box-shadow:inset 0 0 0 3px #f5a623, inset 0 0 18px rgba(245,166,35,.55)}
+  .sq.sel .pc{transform:translateY(-2px) scale(1.07)}
+  .sq.move::after{content:"";position:absolute;width:27%;height:27%;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, #ffd98c, #f5a623 68%, #d98a12);
+    box-shadow:0 1px 4px rgba(90,50,0,.45), inset 0 -2px 3px rgba(140,80,0,.45);opacity:.92}
+  .sq.takes::after{content:"";position:absolute;inset:5%;border-radius:50%;
+    border:4px solid rgba(224,64,60,.8);box-shadow:0 0 10px rgba(224,64,60,.45), inset 0 0 10px rgba(224,64,60,.3)}
+  .sq.check{background-color:#c93a35 !important;
+    background-image:radial-gradient(circle at 50% 42%, rgba(255,150,135,.95), rgba(224,64,60,.62) 58%, rgba(160,30,28,.35) 82%) !important}
+  .coord{position:absolute;font-family:"Barlow Condensed",sans-serif;font-weight:600;font-size:.62rem;
+    line-height:1;pointer-events:none;user-select:none;opacity:.85;z-index:2}
+  .coord.rk{top:3px;left:4px}
+  .coord.fl{bottom:3px;right:4px}
+  .sq.light .coord{color:#96682c}
+  .sq.dark .coord{color:#eacf9e}
   .ch-side{flex:1;min-width:250px;max-width:340px;display:flex;flex-direction:column;gap:12px}
-  .ch-panel{background:rgba(255,255,255,.78);backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.95);border-radius:18px;padding:16px 18px;
-    box-shadow:0 12px 30px rgba(122,96,178,.18), inset 0 2px 0 #fff}
-  #status{font-weight:900;font-size:1.05rem;color:#3b3449}
-  #matdiff{font-weight:800;color:#7c5cd6;font-size:.9rem}
-  .cap-row{font-size:1.35rem;min-height:1.6em;letter-spacing:2px}
-  #moves{max-height:150px;overflow-y:auto;font-size:.88rem;color:#5b4f70;font-weight:700;
+  .ch-panel{background:linear-gradient(165deg, rgba(26,21,36,.94), rgba(15,12,22,.96));
+    border:1px solid rgba(245,166,35,.28);border-radius:18px;padding:16px 18px;
+    box-shadow:0 16px 34px rgba(30,18,4,.35), inset 0 1px 0 rgba(255,226,170,.14);color:#e9e1cd}
+  .ch-panel div[style]{color:#d9b878 !important;font-family:"Barlow Condensed",sans-serif;
+    letter-spacing:.12em;text-transform:uppercase}
+  #status{font-weight:900;font-size:1.05rem;color:#f6efdd}
+  #status b{color:#ff9d8a}
+  #matdiff{font-family:"Barlow Condensed",sans-serif;font-weight:600;letter-spacing:.06em;
+    color:#f5a623;font-size:1rem}
+  .cap-row{font-size:1.35rem;min-height:1.6em;letter-spacing:2px;border-radius:10px;padding:3px 10px;
+    background:linear-gradient(180deg, rgba(24,38,32,.85), rgba(14,22,18,.9));
+    box-shadow:inset 0 2px 6px rgba(0,0,0,.55), inset 0 -1px 0 rgba(255,255,255,.06)}
+  #cap-w{color:#f7efdb;text-shadow:0 0 3px rgba(0,0,0,.9),0 2px 3px rgba(0,0,0,.8)}
+  #cap-b{color:#17100b;text-shadow:0 0 3px rgba(255,230,190,.4),0 -1px 1px rgba(255,240,210,.35),0 1px 2px rgba(0,0,0,.6)}
+  #moves{max-height:150px;overflow-y:auto;font-size:.95rem;color:#cfc4a6;font-weight:600;
+    font-family:"Barlow Condensed",sans-serif;letter-spacing:.04em;
     display:flex;flex-direction:column;gap:2px}
-  .ch-overlay{position:fixed;inset:0;background:rgba(80,60,120,.45);backdrop-filter:blur(6px);
+  .ch-overlay{position:fixed;inset:0;background:rgba(16,10,4,.55);backdrop-filter:blur(7px);
     display:none;align-items:center;justify-content:center;z-index:50;padding:18px}
   .ch-overlay.show{display:flex}
-  .ch-card{background:rgba(255,255,255,.94);border-radius:24px;padding:30px 28px;max-width:430px;
-    width:100%;text-align:center;box-shadow:0 30px 70px rgba(60,40,100,.35)}
-  .ch-card h2{margin:0 0 6px;color:#3b3449}
-  .ch-card p{color:#6d6480}
+  .ch-card{background:linear-gradient(170deg, rgba(31,25,40,.97), rgba(18,14,24,.98));
+    border:1px solid rgba(245,166,35,.35);border-radius:24px;padding:30px 28px;max-width:430px;
+    width:100%;text-align:center;color:#e9e1cd;
+    box-shadow:0 30px 70px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,226,170,.16)}
+  .ch-card h2{margin:0 0 6px;color:#f8f1de;font-family:"Barlow Condensed",sans-serif;
+    font-size:2rem;font-weight:700;letter-spacing:.04em}
+  .ch-card p{color:#b7ab90}
+  .ch-card div[style]{color:#d9b878 !important}
+  #setup .ch-card>div:first-child{
+    background:linear-gradient(180deg,#ffe9b0,#f5a623 70%,#c87f0a);
+    -webkit-background-clip:text;background-clip:text;color:transparent !important;
+    filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
   .opt-row{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
-  .opt-row label{background:#f1e9fb;border:2px solid transparent;border-radius:999px;
-    padding:8px 16px;font-weight:800;cursor:pointer;color:#5b4f70}
+  .opt-row label{background:rgba(255,255,255,.06);border:2px solid rgba(245,166,35,.25);border-radius:999px;
+    padding:8px 16px;font-weight:800;cursor:pointer;color:#cfc4a6;transition:border-color .15s ease,color .15s ease}
+  .opt-row label:hover{border-color:rgba(245,166,35,.6);color:#f6efdd}
   .opt-row input{display:none}
-  .opt-row input:checked+label{border-color:#7c5cd6;background:#e7dbff;color:#3b3449}
+  .opt-row input:checked+label{border-color:#f5a623;color:#ffd98c;
+    background:linear-gradient(180deg, rgba(245,166,35,.28), rgba(245,166,35,.14));
+    box-shadow:0 0 14px rgba(245,166,35,.3)}
+  .ch-card .btn{background:linear-gradient(180deg,#ffd073,#f5a623 55%,#dd8f0d);color:#2a1a04;
+    border-bottom:4px solid #a86e06;text-shadow:0 1px 0 rgba(255,240,200,.5);
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55)}
+  .btn-row .btn.ghost{background:linear-gradient(165deg, rgba(26,21,36,.94), rgba(15,12,22,.96));
+    color:#f0c268;border:2px solid rgba(245,166,35,.35);border-bottom:4px solid rgba(245,166,35,.4);
+    box-shadow:0 10px 22px rgba(30,18,4,.3);text-shadow:none}
   #promo .ch-card{max-width:340px}
-  #promo .opt-row button{font-size:2.4rem;background:#f1e9fb;border:2px solid transparent;
-    border-radius:16px;padding:8px 14px;cursor:pointer}
-  #promo .opt-row button:hover{border-color:#7c5cd6}
+  #promo .opt-row button{font-size:2.4rem;line-height:1.15;color:#f0c268;
+    background:linear-gradient(165deg,#2c2115,#17100a);border:2px solid rgba(245,166,35,.3);
+    border-radius:16px;padding:8px 14px;cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.6);
+    transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+  #promo .opt-row button:hover{border-color:#f5a623;box-shadow:0 0 16px rgba(245,166,35,.4);
+    transform:translateY(-2px)}
 </style>
 </head>
 <body>
@@ -194,6 +247,6 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/chess.js?v=1"></script>
+<script src="../js/chess.js?v=2"></script>
 </body>
 </html>
