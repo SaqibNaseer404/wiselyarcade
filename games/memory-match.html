@@ -20,10 +20,52 @@
 <meta name="description" content="Play Animal Memory Match free online — flip cards and find all 8 animal pairs. A fun memory game for kids ages 5–9 that teaches patience and paying attention. No download.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   .game-area{max-width:880px}
+  /* ---- premium card table ---- */
+  /* dark-glass stat chips with amber numbers */
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  /* the table: dark walnut frame around deep green felt */
+  .game-area .stage{
+    background:linear-gradient(145deg,#4b3016,#2e1c0c 58%,#221304);
+    padding:12px;border-radius:26px;
+    box-shadow:0 32px 62px rgba(43,25,4,.48), 0 6px 16px rgba(43,25,4,.3),
+      inset 0 2px 0 rgba(255,201,110,.4), inset 0 0 0 2px rgba(0,0,0,.25)}
+  .game-area .mboard{
+    background:
+      radial-gradient(560px 380px at 50% 30%, rgba(255,255,255,.1), rgba(255,255,255,0) 62%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, rgba(0,0,0,0) 2px 4px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.02) 0 2px, rgba(0,0,0,0) 2px 4px),
+      radial-gradient(circle at 50% 34%, #1e7d57 0%, #145c40 56%, #0b3a27 100%);
+    padding:14px;border-radius:18px;gap:12px;
+    box-shadow:inset 0 0 46px rgba(0,0,0,.52), inset 0 3px 10px rgba(0,0,0,.45)}
+  /* win overlay: dark trophy card over the table */
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5);
+    -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+  .game-area .overlay p strong{color:#ffc46b}
+  /* amber primary / dark ghost buttons (page scope) */
+  .game-area .btn{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;
+    border-bottom:4px solid #b45309;text-shadow:none;
+    box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 2px 0 rgba(255,255,255,.6)}
+  .game-area .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.96),rgba(11,17,29,.96));
+    color:#ffc46b;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.5);
+    box-shadow:0 10px 22px rgba(10,16,30,.35);text-shadow:none}
 </style>
 </head>
 <body>
@@ -112,7 +154,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/memory-match.js"></script>
+<script src="../js/memory-match.js?v=2"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
