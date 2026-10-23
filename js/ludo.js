@@ -322,9 +322,24 @@ function paintStatic() {
   for (var r = 6; r < 9; r++) for (var c = 6; c < 9; c++) cellAt(c, r).classList.add('center-c');
 }
 
+/* render-only fx memory: the steps each token had at the previous render.
+   Used solely to animate movement (glide) and captures (burst); never read
+   by any game rule. */
+var fxPrevSteps = {};
+
 function renderAll() {
   var layer = document.getElementById('tokens');
+  // remember where each token was drawn last time (render layer only)
+  var prevPos = {};
+  var oldToks = layer.querySelectorAll('.token');
+  for (var oi = 0; oi < oldToks.length; oi++) {
+    prevPos[oldToks[oi].dataset.pi + ':' + oldToks[oi].dataset.ti] =
+      { left: oldToks[oi].style.left, top: oldToks[oi].style.top };
+  }
+  var fxOn = (phase === 'move');
+  var bursts = [];
   layer.innerHTML = '';
+  boardEl.setAttribute('data-turn', players[turn] ? players[turn].color : '');
   // count tokens per square for offsets
   var occ = {};
   players.forEach(function (pl) {
@@ -347,8 +362,10 @@ function renderAll() {
       if (n > 1) { ox = (k % 2 ? 0.22 : -0.22); oy = (k < 2 ? -0.22 : 0.22); if (n === 2) oy = 0; }
       var t = document.createElement('div');
       t.className = 'token tok-' + pl.color;
-      t.style.left = ((x + 0.5 + ox) / 15 * 100) + '%';
-      t.style.top = ((y + 0.5 + oy) / 15 * 100) + '%';
+      var lx = ((x + 0.5 + ox) / 15 * 100) + '%';
+      var ly = ((y + 0.5 + oy) / 15 * 100) + '%';
+      t.style.left = lx;
+      t.style.top = ly;
       t.dataset.pi = players.indexOf(pl);
       t.dataset.ti = i;
       if (phase === 'move' && !pl.ai && movable.some(function (m) { return m.ti === i; })) {
@@ -356,7 +373,41 @@ function renderAll() {
         t.addEventListener('click', onToken);
       }
       layer.appendChild(t);
+      // visual-only movement fx: glide from the previously drawn position,
+      // pop-in when a capture sends this token back to base
+      if (fxOn) {
+        var pk = t.dataset.pi + ':' + i;
+        var pp = prevPos[pk], ps = fxPrevSteps[pk];
+        if (ps !== undefined && ps >= 0 && s === -1) {
+          if (pp) bursts.push(pp);
+          t.classList.add('spawn');
+        } else if (pp && ps !== undefined && ps !== s) {
+          var dx = Math.abs(parseFloat(lx) - parseFloat(pp.left));
+          var dy = Math.abs(parseFloat(ly) - parseFloat(pp.top));
+          if ((dx > 0.01 || dy > 0.01) && dx <= 57 && dy <= 57) {
+            t.style.transition = 'none';
+            t.style.left = pp.left; t.style.top = pp.top;
+            void t.offsetWidth;
+            t.style.transition = 'left .45s cubic-bezier(.25,.8,.35,1), top .45s cubic-bezier(.25,.8,.35,1)';
+            t.style.left = lx; t.style.top = ly;
+            t.classList.add('hop');
+          }
+        }
+      }
     }
+  });
+  // capture bursts ride on the board itself so the next render cannot wipe them
+  bursts.forEach(function (bp) {
+    var b = document.createElement('div');
+    b.className = 'fx-burst';
+    b.style.left = bp.left; b.style.top = bp.top;
+    boardEl.appendChild(b);
+    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 700);
+  });
+  // sync fx memory with the state just drawn
+  fxPrevSteps = {};
+  players.forEach(function (pl, pi) {
+    for (var i = 0; i < 4; i++) fxPrevSteps[pi + ':' + i] = pl.tokens[i];
   });
   // turn banner dots
   var dots = document.querySelectorAll('.pdot');
@@ -380,9 +431,19 @@ function onToken(e) {
 
 function highlightMovable() { renderAll(); }
 
+/* pip layouts on a 3x3 grid for the die face (render only — the rolled
+   value still comes from doRoll exactly as before) */
+var PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
 function drawDice(v) {
   var el = document.getElementById('dice');
-  el.textContent = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][v - 1];
+  var on = PIPS[v] || PIPS[1];
+  var html = '';
+  for (var i = 0; i < 9; i++) {
+    var cls = 'pip';
+    if (on.indexOf(i) !== -1) { cls += ' on'; if (v === 1) cls += ' mid'; }
+    html += '<span class="' + cls + '"></span>';
+  }
+  el.innerHTML = html;
   el.classList.remove('shake');
   void el.offsetWidth;
   el.classList.add('shake');
