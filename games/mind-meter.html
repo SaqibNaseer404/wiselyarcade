@@ -20,76 +20,126 @@
 <meta name="description" content="Play Mind Meter free online — a 3D IQ challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your estimated IQ, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   #mm-bg{position:absolute;inset:0;width:100%;height:100%;border-radius:12px;display:block}
   .mm-wrap{position:relative;border-radius:12px;overflow:hidden;min-height:560px;
-    background:linear-gradient(160deg,#e9ddff 0%,#d7ecff 45%,#ffe9f2 100%)}
+    background:
+      radial-gradient(720px 340px at 50% -60px, rgba(255,181,46,.16), rgba(255,181,46,0) 60%),
+      radial-gradient(900px 520px at 88% 112%, rgba(47,224,200,.10), rgba(47,224,200,0) 60%),
+      radial-gradient(700px 480px at 6% 108%, rgba(139,111,240,.12), rgba(139,111,240,0) 60%),
+      linear-gradient(160deg,#17142a 0%,#12101f 55%,#0d1420 100%);
+    box-shadow:0 24px 60px rgba(10,8,24,.45), inset 0 0 0 1px rgba(255,255,255,.06)}
   .mm-screen{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;
     justify-content:center;min-height:560px;padding:28px 18px;text-align:center}
   .mm-screen.hidden{display:none}
-  .mm-badge{font-size:3.2rem;filter:drop-shadow(0 8px 14px rgba(122,96,178,.35));
+  .mm-badge{font-size:3.2rem;filter:drop-shadow(0 8px 18px rgba(255,181,46,.40));
     animation:mm-float 3.2s ease-in-out infinite}
   @keyframes mm-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-  .mm-title{font-size:2rem;font-weight:900;color:#3b3449;margin:10px 0 4px}
-  .mm-sub{color:#6d6480;max-width:420px;margin:0 0 18px}
+  .mm-title{font-family:"Barlow Condensed","Nunito",sans-serif;font-size:2.5rem;font-weight:700;
+    letter-spacing:.5px;color:#f7f3e8;margin:10px 0 4px}
+  .mm-sub{color:#a49ec4;max-width:420px;margin:0 0 18px}
   .mm-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
-  .mm-chip{background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.9);
-    box-shadow:0 6px 16px rgba(122,96,178,.16), inset 0 2px 0 #fff;
-    border-radius:999px;padding:6px 14px;font-weight:800;color:#5b4f70;font-size:.9rem}
+  .mm-chip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.10);
+    border-radius:999px;padding:6px 14px;font-weight:800;color:#cfc9e6;font-size:.9rem}
+  .mm-chip b{color:#ffb52e}
+  /* round progress: 12 segments mirroring the game's own question counter */
+  .mm-progress{display:flex;gap:5px;width:100%;max-width:520px;margin:0 0 14px}
+  .mm-progress span{flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.13);
+    transition:background .3s ease, box-shadow .3s ease}
+  .mm-progress span.on{background:linear-gradient(90deg,#ff9f2e,#ffd166);
+    box-shadow:0 0 8px rgba(255,181,46,.45)}
+  .mm-progress span.now{background:#fff3d6;box-shadow:0 0 12px rgba(255,209,102,.85);
+    animation:mm-seg-pulse 1.1s ease-in-out infinite}
+  @keyframes mm-seg-pulse{0%,100%{opacity:1}50%{opacity:.55}}
   #mm-card{perspective:900px;width:100%;max-width:520px}
-  .mm-card-inner{background:rgba(255,255,255,.82);backdrop-filter:blur(6px);
-    border:1px solid rgba(255,255,255,.95);border-radius:22px;
-    box-shadow:0 18px 44px rgba(122,96,178,.25), inset 0 2px 0 #fff;
-    padding:26px 22px;transform-style:preserve-3d;transition:transform .12s ease-out}
+  .mm-card-inner{position:relative;background:linear-gradient(165deg,rgba(38,36,64,.88),rgba(20,19,36,.94));
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+    border:1px solid rgba(255,255,255,.13);border-radius:22px;
+    box-shadow:0 24px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 60px rgba(124,92,246,.07);
+    padding:28px 24px;transform-style:preserve-3d;transition:transform .12s ease-out}
+  .mm-card-inner::before{content:'';position:absolute;inset:0;border-radius:22px;pointer-events:none;
+    background:radial-gradient(420px 200px at 50% 0%, rgba(255,181,46,.13), rgba(255,181,46,0) 65%)}
   .mm-pop{animation:mm-pop .35s ease}
   @keyframes mm-pop{0%{transform:scale(.94) rotateX(6deg);opacity:.4}100%{transform:scale(1) rotateX(0);opacity:1}}
-  #mm-cat{display:inline-block;font-size:.8rem;font-weight:900;color:#8a5cf6;background:#efe7ff;
+  #mm-cat{display:inline-block;font-family:"Barlow Condensed","Nunito",sans-serif;font-size:.95rem;
+    font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#ffcf6e;
+    background:rgba(255,181,46,.13);border:1px solid rgba(255,181,46,.35);
     border-radius:999px;padding:5px 14px;margin-bottom:10px}
-  #mm-num{font-size:.8rem;font-weight:800;color:#9a90ad;margin-bottom:8px}
-  #mm-q{font-size:1.25rem;font-weight:900;color:#3b3449;margin:0 0 18px;line-height:1.45}
+  #mm-num{font-family:"Barlow Condensed","Nunito",sans-serif;font-size:.95rem;font-weight:600;
+    letter-spacing:1.5px;text-transform:uppercase;color:#cfc9e6;margin-bottom:8px}
+  #mm-q{font-family:"Barlow Condensed","Nunito",sans-serif;font-size:1.6rem;font-weight:600;
+    letter-spacing:.2px;color:#f7f3e8;margin:0 0 18px;line-height:1.35}
   .mm-timer{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px}
+  .mm-timer svg{filter:drop-shadow(0 0 10px rgba(255,181,46,.25))}
   #mm-ring-fg{transition:stroke-dashoffset 1s linear}
-  #mm-time{font-weight:900;color:#5b4f70;min-width:64px;text-align:left}
+  #mm-ring-fg.low{stroke:#ff5470}
+  #mm-time{font-family:"Barlow Condensed","Nunito",sans-serif;font-weight:700;font-size:1.5rem;
+    color:#f5f1e6;min-width:64px;text-align:left}
   #mm-opts{display:grid;gap:10px}
   .mm-opt{display:flex;align-items:center;gap:12px;text-align:left;cursor:pointer;
-    background:#fff;border:2px solid #e6def7;border-radius:16px;padding:12px 14px;
-    font-family:inherit;font-size:1rem;font-weight:800;color:#4a415c;
-    box-shadow:0 4px 12px rgba(122,96,178,.12), inset 0 2px 0 #fff;
+    background:linear-gradient(165deg,#2b2949,#1e1c33);border:2px solid rgba(255,255,255,.12);border-radius:16px;
+    padding:12px 14px;font-family:inherit;font-size:1.05rem;font-weight:800;color:#efeaf9;
+    box-shadow:0 6px 16px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.12);
     transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease}
-  .mm-opt:hover:not(:disabled){transform:translateY(-2px) scale(1.01);border-color:#b79df5;
-    box-shadow:0 8px 20px rgba(122,96,178,.22), inset 0 2px 0 #fff}
-  .mm-opt:disabled{cursor:default;opacity:.85}
+  .mm-opt:hover:not(:disabled){transform:translateY(-2px) scale(1.01);border-color:rgba(255,181,46,.65);
+    box-shadow:0 10px 22px rgba(0,0,0,.5), 0 0 0 1px rgba(255,181,46,.25), inset 0 1px 0 rgba(255,255,255,.16)}
+  .mm-opt:active:not(:disabled){transform:translateY(1px)}
+  .mm-opt:disabled{cursor:default;opacity:.92}
+  .mm-opt:disabled:not(.correct):not(.wrong){opacity:.5}
   .mm-letter{flex:0 0 34px;height:34px;border-radius:12px;display:flex;align-items:center;justify-content:center;
-    background:linear-gradient(145deg,#c9b3f5,#9d7bea);color:#fff;font-weight:900;
-    box-shadow:0 3px 8px rgba(157,123,234,.4)}
-  .mm-opt.correct{border-color:#34c98e;background:#e9fff4}
-  .mm-opt.correct .mm-letter{background:linear-gradient(145deg,#5fe0a8,#2bb673)}
-  .mm-opt.wrong{border-color:#f2789f;background:#ffedf3;animation:mm-shake .3s ease}
-  .mm-opt.wrong .mm-letter{background:linear-gradient(145deg,#f5a3b8,#e15b85)}
+    font-family:"Barlow Condensed","Nunito",sans-serif;font-size:1.15rem;
+    background:linear-gradient(145deg,#ffd166,#ff9f2e);color:#2a1c05;font-weight:700;
+    box-shadow:0 3px 8px rgba(255,159,46,.45), inset 0 1px 0 rgba(255,255,255,.6)}
+  .mm-opt.correct{border-color:#2fe08c;background:linear-gradient(165deg,#14532d,#0f3d24);color:#eafff3;
+    box-shadow:0 0 0 1px rgba(47,224,140,.5), 0 0 26px rgba(47,224,140,.35), inset 0 1px 0 rgba(255,255,255,.15)}
+  .mm-opt.correct .mm-letter{background:linear-gradient(145deg,#7dffbe,#2bb673);color:#06351c;
+    box-shadow:0 3px 8px rgba(43,182,115,.5)}
+  .mm-opt.wrong{border-color:#ff5470;background:linear-gradient(165deg,#4d1626,#38101d);color:#ffe9ee;
+    animation:mm-shake .3s ease}
+  .mm-opt.wrong .mm-letter{background:linear-gradient(145deg,#ff8fa8,#e15b85);color:#3d0a18}
   @keyframes mm-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
   #mm-stage{position:relative}
   .mm-popup{position:absolute;top:-6px;left:50%;transform:translate(-50%,0);z-index:5;
-    font-size:1.6rem;font-weight:900;pointer-events:none;animation:mm-rise .9s ease forwards}
-  .mm-popup.good{color:#1fae6e;text-shadow:0 2px 0 #fff}
-  .mm-popup.bad{color:#e15b85;text-shadow:0 2px 0 #fff}
+    font-family:"Barlow Condensed","Nunito",sans-serif;
+    font-size:2rem;font-weight:700;pointer-events:none;animation:mm-rise .9s ease forwards}
+  .mm-popup.good{color:#3ce68f;text-shadow:0 2px 14px rgba(60,230,143,.5), 0 2px 0 rgba(0,0,0,.4)}
+  .mm-popup.bad{color:#ff7d9c;text-shadow:0 2px 14px rgba(255,84,112,.45), 0 2px 0 rgba(0,0,0,.4)}
   @keyframes mm-rise{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}30%{opacity:1}
     100%{opacity:0;transform:translate(-50%,-46px) scale(1.1)}}
   .mm-iq-ring{width:150px;height:150px;border-radius:50%;margin:6px auto 10px;
-    background:conic-gradient(#9d7bea 0deg,#5fe0a8 120deg,#ffd166 240deg,#9d7bea 360deg);
+    background:conic-gradient(#ffd166 0deg,#ff9f2e 110deg,#2fe0c8 230deg,#ffd166 360deg);
     display:flex;align-items:center;justify-content:center;
-    box-shadow:0 14px 34px rgba(122,96,178,.35), inset 0 3px 0 rgba(255,255,255,.7);
+    box-shadow:0 14px 34px rgba(0,0,0,.5), 0 0 34px rgba(255,181,46,.28), inset 0 3px 0 rgba(255,255,255,.35);
     animation:mm-spin-in .8s cubic-bezier(.2,1.4,.4,1)}
   @keyframes mm-spin-in{0%{transform:scale(.4) rotate(-120deg);opacity:0}100%{transform:scale(1) rotate(0);opacity:1}}
-  .mm-iq-inner{width:118px;height:118px;border-radius:50%;background:#fff;
+  .mm-iq-inner{width:118px;height:118px;border-radius:50%;
+    background:radial-gradient(circle at 50% 35%,#2b2949,#17152a);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    box-shadow:inset 0 3px 10px rgba(122,96,178,.18)}
-  #mm-iq{font-size:2.6rem;font-weight:900;color:#3b3449;line-height:1}
-  .mm-iq-label{font-size:.72rem;font-weight:900;color:#9a90ad;letter-spacing:2px}
-  #mm-rank{font-size:1.3rem;font-weight:900;color:#5b4f70;margin:4px 0 2px}
-  #mm-acc{color:#6d6480;font-weight:700;margin:0 0 6px}
-  #mm-best-line{font-weight:900;color:#8a5cf6;margin:0 0 16px}
+    box-shadow:inset 0 3px 14px rgba(0,0,0,.6)}
+  #mm-iq{font-family:"Barlow Condensed","Nunito",sans-serif;font-size:3.1rem;font-weight:700;color:#ffb52e;line-height:1}
+  .mm-iq-label{font-size:.72rem;font-weight:900;color:#9d97b8;letter-spacing:2px}
+  #mm-rank{font-size:1.3rem;font-weight:900;color:#f5f1e6;margin:4px 0 2px}
+  #mm-acc{color:#b9b3d4;font-weight:700;margin:0 0 6px}
+  #mm-best-line{font-weight:900;color:#ffcf6e;margin:0 0 16px}
+  /* top stat chips: dark glass, amber values */
+  .stats .stat{background:rgba(16,18,32,.94);border:1px solid rgba(255,255,255,.10);
+    border-bottom:3px solid rgba(255,181,46,.35);color:#f2eefc;
+    box-shadow:0 10px 24px rgba(10,8,24,.35), inset 0 1px 0 rgba(255,255,255,.08)}
+  .stats .stat span{color:#9d97b8}
+  .stats .stat>div{font-family:"Barlow Condensed","Nunito",sans-serif;font-size:1.45rem;
+    font-weight:700;color:#ffb52e;line-height:1.15}
+  .stats .stat>div#mm-streak:not(:empty){color:#ff9a3d;text-shadow:0 0 14px rgba(255,140,40,.6)}
+  /* buttons inside the game area: amber primary / dark ghost */
+  .game-area .btn{background:linear-gradient(180deg,#ffd166 0%,#ffab2e 55%,#ff9f2e 100%);
+    color:#2a1c05;border-bottom:4px solid #b96a12;text-shadow:none;
+    box-shadow:0 8px 0 rgba(185,106,18,.16), 0 18px 32px rgba(255,171,46,.35), inset 0 2px 0 rgba(255,255,255,.55)}
+  .game-area .btn:hover{filter:brightness(1.05)}
+  .game-area .btn.ghost{background:rgba(20,22,38,.88);color:#ffb52e;
+    border:1px solid rgba(255,181,46,.45);border-bottom:3px solid rgba(255,181,46,.35);
+    box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.10)}
   .game-area{max-width:880px}
 </style>
 </head>
@@ -137,13 +187,14 @@
             <span class="mm-chip" id="mm-num">Question 1 of 12</span>
             <span class="mm-chip">Score: <b id="mm-score2">0</b></span>
           </div>
+          <div class="mm-progress" id="mm-progress" aria-hidden="true"></div>
           <div id="mm-card">
             <div class="mm-card-inner">
               <span id="mm-cat">🔢 Number Logic</span>
               <div class="mm-timer">
                 <svg width="56" height="56" viewBox="0 0 56 56">
-                  <circle cx="28" cy="28" r="26" fill="none" stroke="#e6def7" stroke-width="6"/>
-                  <circle id="mm-ring-fg" cx="28" cy="28" r="26" fill="none" stroke="#9d7bea"
+                  <circle cx="28" cy="28" r="26" fill="none" stroke="#2e2b4d" stroke-width="6"/>
+                  <circle id="mm-ring-fg" cx="28" cy="28" r="26" fill="none" stroke="#ffb52e"
                     stroke-width="6" stroke-linecap="round" stroke-dasharray="163.36" stroke-dashoffset="0"
                     transform="rotate(-90 28 28)"/>
                 </svg>
@@ -221,7 +272,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/mind-meter.js?v=2"></script>
+<script src="../js/mind-meter.js?v=3"></script>
 <script>
 /* 3D ambience: floating pastel shapes behind the quiz, drifting with the pointer. */
 (function () {
@@ -235,7 +286,7 @@
   var scene = new THREE.Scene();
   var camera = new THREE.PerspectiveCamera(55, 2, 0.1, 100);
   camera.position.z = 14;
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xc9b3f5, 0.95));
+  scene.add(new THREE.HemisphereLight(0xdfe4ff, 0x2a2444, 0.9));
   var sun = new THREE.DirectionalLight(0xfff1d6, 0.7);
   sun.position.set(6, 10, 8);
   scene.add(sun);
@@ -248,11 +299,11 @@
     new THREE.TorusKnotGeometry(0.6, 0.2, 48, 8),
     new THREE.SphereGeometry(0.9, 18, 14)
   ];
-  var cols = [0xc9b3f5, 0x9be3d0, 0xffc7dd, 0xffe08a, 0xa9c8f5, 0xf5b3c9];
+  var cols = [0x8b6ff0, 0x2fe0c8, 0xffb52e, 0xff7d9c, 0x5f8dff, 0x7dffbe];
   for (var i = 0; i < 16; i++) {
     var m = new THREE.Mesh(
       geos[i % geos.length],
-      new THREE.MeshLambertMaterial({ color: cols[i % cols.length], transparent: true, opacity: 0.55 })
+      new THREE.MeshLambertMaterial({ color: cols[i % cols.length], transparent: true, opacity: 0.42 })
     );
     var s = 0.5 + Math.random() * 0.9;
     m.scale.set(s, s, s);
@@ -294,6 +345,40 @@
     camera.lookAt(0, 0, 0);
     renderer.render(scene, camera);
   })();
+})();
+</script>
+<script>
+/* Round-progress segments: mirrors the question counter the game already displays.
+   Purely presentational — reads DOM text/classes only, never touches game state. */
+(function () {
+  try {
+    var bar = document.getElementById('mm-progress');
+    if (!bar) return;
+    var TOTAL = 12, segs = [], i;
+    for (i = 0; i < TOTAL; i++) { var s = document.createElement('span'); bar.appendChild(s); segs.push(s); }
+    var numEl = document.getElementById('mm-num');
+    var quiz = document.getElementById('mm-quiz'), done = document.getElementById('mm-done');
+    function visible(el) { return el && !el.classList.contains('hidden'); }
+    function paint() {
+      var n = 0, j;
+      if (visible(done)) {
+        for (j = 0; j < TOTAL; j++) segs[j].className = 'on';
+        return;
+      }
+      if (visible(quiz)) {
+        var m = /Question\s+(\d+)/.exec(numEl ? numEl.textContent : '');
+        n = m ? parseInt(m[1], 10) : 0;
+      }
+      for (j = 0; j < TOTAL; j++) {
+        segs[j].className = (j < n - 1) ? 'on' : (j === n - 1 && n > 0 ? 'now' : '');
+      }
+    }
+    var mo = new MutationObserver(paint);
+    if (numEl) mo.observe(numEl, { childList: true, characterData: true, subtree: true });
+    if (quiz) mo.observe(quiz, { attributes: true, attributeFilter: ['class'] });
+    if (done) mo.observe(done, { attributes: true, attributeFilter: ['class'] });
+    paint();
+  } catch (e) {}
 })();
 </script>
 <script>
