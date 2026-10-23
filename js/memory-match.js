@@ -11,74 +11,89 @@
   (function inject3DStyle() {
     if (document.getElementById('m3d-style')) return;
     var css = [
-      /* Deeper perspective + soft floating shadow under every card */
-      '.mcard{perspective:1100px;filter:drop-shadow(0 12px 14px rgba(46,32,120,.32))}',
-      /* Springier flip */
-      '.mcard .inner{transition:transform .5s cubic-bezier(.3,1.35,.5,1)}',
+      /* Premium card table: deeper perspective + soft table shadow */
+      '.mcard{perspective:1200px;filter:drop-shadow(0 10px 12px rgba(4,26,20,.5))}',
+      '.mcard:not(.flipped):hover{filter:drop-shadow(0 12px 14px rgba(4,26,20,.55)) brightness(1.08)}',
+      '.mcard:focus-visible{outline:3px solid #f5a623;outline-offset:3px;border-radius:18px}',
+      /* Smooth 3D flip (same class-driven timing model as before) */
+      '.mcard .inner{transition:transform .5s cubic-bezier(.3,1.3,.5,1)}',
       '.mcard.flipped .inner{transform:rotateY(180deg)}',
-      /* Press-down feel on unflipped cards */
-      '.mcard:not(.flipped):active .inner{transform:scale(.93)}',
+      '.mcard:not(.flipped):active .inner{transform:scale(.94)}',
 
-      /* Shared face: rounded tile, clip the sheen inside */
-      '.mface{border-radius:20px;overflow:hidden}',
+      /* Shared face: rounded playing-card tile, clip sheen inside */
+      '.mface{border-radius:18px;overflow:hidden}',
 
-      /* ---- Card BACK: glossy beveled purple tile ---- */
+      /* ---- Card BACK: deep teal-to-indigo woven tile with gold rim ---- */
       '.mface.back{',
       '  background:',
-      '    radial-gradient(circle at 32% 20%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 46%),',
-      '    radial-gradient(circle at 72% 88%, rgba(20,8,60,.35) 0%, rgba(20,8,60,0) 58%),',
-      '    linear-gradient(145deg,#b39dff 0%,#7c5cf0 48%,#4f33c4 100%);',
+      '    radial-gradient(circle at 32% 18%, rgba(255,255,255,.34) 0%, rgba(255,255,255,0) 46%),',
+      '    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 2px, rgba(255,255,255,0) 2px 6px),',
+      '    repeating-linear-gradient(-45deg, rgba(0,0,0,.07) 0 2px, rgba(0,0,0,0) 2px 6px),',
+      '    radial-gradient(circle at 74% 90%, rgba(8,20,50,.4) 0%, rgba(8,20,50,0) 58%),',
+      '    linear-gradient(150deg,#177d74 0%,#0f766e 34%,#134e6a 68%,#2b2a6e 100%);',
       '  border:none;',
       '  box-shadow:',
-      '    inset 3px 3px 0 rgba(255,255,255,.6),',     /* bevel light top-left */
-      '    inset -5px -5px 0 rgba(28,14,88,.42),',     /* bevel shade bottom-right */
-      '    inset 0 0 0 2px rgba(255,255,255,.22);',
+      '    inset 3px 3px 0 rgba(255,255,255,.35),',
+      '    inset -5px -5px 0 rgba(4,16,44,.45),',
+      '    inset 0 0 0 3px rgba(216,178,90,.95),',
+      '    inset 0 0 0 5px rgba(90,60,8,.35),',
+      '    inset 0 0 26px rgba(6,30,50,.35);',
       '}',
-      /* White specular highlight spot on the back */
+      /* Soft sheen spot on the back */
       '.mface.back::before{',
-      '  content:"";position:absolute;top:7%;left:9%;width:56%;height:30%;',
+      '  content:"";position:absolute;top:6%;left:8%;width:54%;height:28%;',
       '  border-radius:50%;transform:rotate(-16deg);pointer-events:none;',
-      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%);',
+      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 70%);',
       '}',
-      /* Paw print: embossed glossy look */
+      /* Paw print inside a gold-ring medallion */
       '.mface.back .paw{',
-      '  font-size:clamp(1.8rem,10vw,2.6rem);line-height:1;',
-      '  filter:drop-shadow(0 3px 2px rgba(20,8,60,.45)) brightness(1.12);',
+      '  display:flex;align-items:center;justify-content:center;',
+      '  width:58%;aspect-ratio:1;border-radius:50%;',
+      '  font-size:clamp(2rem,10.5vw,2.8rem);line-height:1;',
+      '  background:radial-gradient(circle at 50% 36%, rgba(255,236,170,.28) 0%, rgba(255,214,110,.12) 58%, rgba(0,0,0,.12) 100%);',
+      '  box-shadow:inset 0 0 0 2px rgba(240,199,102,.85), inset 0 3px 8px rgba(255,255,255,.25), inset 0 -6px 10px rgba(0,0,0,.3), 0 4px 10px rgba(2,12,30,.4);',
+      '  filter:drop-shadow(0 2px 2px rgba(2,12,30,.5));',
       '}',
 
-      /* ---- Card FRONT: glossy warm-cream tile ---- */
+      /* ---- Card FRONT: clean ivory face ---- */
       '.mface.front{',
       '  background:',
-      '    radial-gradient(circle at 32% 20%, rgba(255,255,255,.7) 0%, rgba(255,255,255,0) 46%),',
-      '    linear-gradient(150deg,#fffdf6 0%,#fff1c9 55%,#ffd166 100%);',
+      '    radial-gradient(circle at 50% 42%, #ffffff 0%, #fffaf0 52%, #f7ead0 100%);',
       '  border:none;transform:rotateY(180deg);',
       '  box-shadow:',
-      '    inset 3px 3px 0 rgba(255,255,255,.85),',
-      '    inset -5px -5px 0 rgba(150,95,10,.32),',
-      '    inset 0 0 0 2px rgba(255,255,255,.45);',
+      '    inset 3px 3px 0 rgba(255,255,255,.9),',
+      '    inset -5px -5px 0 rgba(146,104,32,.22),',
+      '    inset 0 0 0 2px rgba(190,150,60,.5);',
       '}',
       '.mface.front::before{',
-      '  content:"";position:absolute;top:7%;left:9%;width:56%;height:30%;',
+      '  content:"";position:absolute;top:6%;left:8%;width:54%;height:28%;',
       '  border-radius:50%;transform:rotate(-16deg);pointer-events:none;',
-      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.95) 0%, rgba(255,255,255,0) 70%);',
+      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 70%);',
       '}',
-      /* Animal pops off the tile with a soft 3D shadow */
+      /* Animal in a soft spotlight disc, larger and crisper */
       '.mface.front .critter{',
-      '  font-size:clamp(2.1rem,12vw,3.1rem);line-height:1;',
-      '  filter:drop-shadow(0 6px 4px rgba(120,70,0,.32));',
+      '  display:flex;align-items:center;justify-content:center;',
+      '  width:74%;aspect-ratio:1;border-radius:50%;',
+      '  font-size:clamp(2.3rem,12.5vw,3.3rem);line-height:1;',
+      '  background:radial-gradient(circle at 50% 36%, #ffffff 0%, #fff6dc 56%, #ffe9ae 100%);',
+      '  box-shadow:inset 0 2px 7px rgba(255,255,255,.95), inset 0 -7px 11px rgba(180,120,20,.2), 0 9px 15px rgba(96,64,4,.24);',
+      '  filter:drop-shadow(0 4px 3px rgba(120,70,0,.25));',
       '}',
 
-      /* ---- MATCHED pair: candy-green glow + pop ---- */
+      /* ---- MATCHED pair: warm gold glow + celebratory pop ---- */
       '.mcard.matched{cursor:default}',
       '.mcard.matched .mface.front{',
       '  background:',
-      '    radial-gradient(circle at 32% 20%, rgba(255,255,255,.7) 0%, rgba(255,255,255,0) 46%),',
-      '    linear-gradient(150deg,#f4ffec 0%,#c4f5ae 55%,#6fe08a 100%);',
+      '    radial-gradient(circle at 50% 42%, #fffef8 0%, #fff3cf 55%, #ffd873 100%);',
       '  box-shadow:',
-      '    inset 3px 3px 0 rgba(255,255,255,.85),',
-      '    inset -5px -5px 0 rgba(18,105,44,.38),',
-      '    inset 0 0 0 3px rgba(46,204,113,.8),',
-      '    0 0 24px rgba(46,204,113,.55);',
+      '    inset 3px 3px 0 rgba(255,255,255,.9),',
+      '    inset -5px -5px 0 rgba(160,100,6,.3),',
+      '    inset 0 0 0 3px rgba(245,166,35,.95),',
+      '    0 0 26px rgba(245,180,40,.65);',
+      '}',
+      '.mcard.matched .mface.front .critter{',
+      '  background:radial-gradient(circle at 50% 36%, #ffffff 0%, #ffedb8 55%, #ffd35e 100%);',
+      '  box-shadow:inset 0 2px 7px rgba(255,255,255,.95), inset 0 -7px 11px rgba(180,110,10,.3), 0 9px 15px rgba(120,70,0,.3);',
       '}',
       '.mcard.matched .inner{animation:m3d-pop .55s cubic-bezier(.3,1.4,.5,1)}',
       '@keyframes m3d-pop{',
@@ -87,11 +102,11 @@
       '  70%{transform:rotateY(180deg) scale(.97)}',
       '  100%{transform:rotateY(180deg) scale(1)}',
       '}',
-      /* Gloss sweep across matched cards */
+      /* Sparkle sweep across a just-matched pair */
       '.mcard.matched .mface.front::after{',
       '  content:"";position:absolute;top:-25%;bottom:-25%;left:-50%;width:45%;',
       '  transform:skewX(-18deg);pointer-events:none;',
-      '  background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.9), rgba(255,255,255,0));',
+      '  background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0));',
       '  animation:m3d-sheen .7s ease .05s;',
       '}',
       '@keyframes m3d-sheen{from{left:-50%}to{left:135%}}',
