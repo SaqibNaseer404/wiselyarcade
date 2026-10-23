@@ -2,6 +2,8 @@
 // Original 3D motorcycle Grand Prix racer. Own name, own art, own code.
 // Career: 10 levels. Earn points by finishing position, spend them on
 // Engine / Tires / Nitro upgrades in the garage. Progress in localStorage.
+// Level 1 is the classic 3-lap circuit; levels 2-10 are straight daylight
+// point-to-point sprints with jump ramps and river gaps.
 (function () {
   'use strict';
   if (!window.THREE) return;
@@ -56,6 +58,7 @@
   var camera = new THREE.PerspectiveCamera(62, 960 / 600, 0.5, 2600);
 
   // gradient sky dome (deep blue zenith -> pale horizon)
+  var skyMesh = null;
   (function buildSky() {
     var c = document.createElement('canvas'); c.width = 32; c.height = 512;
     var x = c.getContext('2d');
@@ -71,7 +74,7 @@
     var sky = new THREE.Mesh(new THREE.SphereGeometry(2350, 28, 14),
       new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false, depthWrite: false }));
     sky.renderOrder = -10;
-    scene.add(sky);
+    scene.add(sky); skyMesh = sky;
   })();
 
   var hemi = new THREE.HemisphereLight(0xbfd9ff, 0x3f6d33, 0.8);
@@ -154,6 +157,7 @@
     curvs.push(Math.atan2(cross, dot) / segLen); // signed curvature
   }
   function trackPoint(s, lat, out) {
+    if (SPRINT_MODE) return sprintPoint(s, lat, out);
     // s = arclength along track, lat = lateral in road-halfwidth units
     s = ((s % trackLen) + trackLen) % trackLen;
     var f = s / segLen, i0 = Math.floor(f) % SAMPLES, fr = f - Math.floor(f);
@@ -167,14 +171,66 @@
     return out;
   }
   function trackTangent(s, out) {
+    if (SPRINT_MODE) { out = out || new THREE.Vector3(); return out.set(0, 0, -1); }
     s = ((s % trackLen) + trackLen) % trackLen;
     var i0 = Math.floor(s / segLen) % SAMPLES;
     out = out || new THREE.Vector3();
     return out.copy(tans[i0]);
   }
   function trackCurve(s) {
+    if (SPRINT_MODE) return 0;
     s = ((s % trackLen) + trackLen) % trackLen;
     return curvs[Math.floor(s / segLen) % SAMPLES];
+  }
+
+
+  /* ============ Sprint levels 2-10: straight, daytime, point-to-point ============
+     Level 1 stays the classic 3-lap circuit on the original map. Levels 2-10
+     are open straights along -Z: rider s = distance from the start line and
+     the finish is s = spec.len (no laps, no wrap). Every river has a launch
+     ramp ending 2 m before its near bank, plus standalone ramps for pure
+     air. Circuit code never touches any of this: SPRINT_MODE stays false and
+     the original statements run verbatim. */
+  var SPRINT_MODE = false;
+  var curSpec = { sprint: false };
+  var SPRINTS = [
+    { name: 'Valley Sprint',   len: 1800, roadHalf: 6.4, traffic: 0, aiPace: 1.00, rivers: [{ at: 650, w: 26 }, { at: 1250, w: 26 }], ramps: [] },
+    { name: 'Riverbend Rush',  len: 2000, roadHalf: 6.2, traffic: 2, aiPace: 1.01, rivers: [{ at: 600, w: 28 }, { at: 1350, w: 28 }], ramps: [{ at: 1000 }] },
+    { name: 'Canyon Dash',     len: 2200, roadHalf: 6.0, traffic: 3, aiPace: 1.03, rivers: [{ at: 550, w: 28 }, { at: 1200, w: 28 }, { at: 1750, w: 28 }], ramps: [{ at: 900 }] },
+    { name: 'Coastal Run',     len: 2400, roadHalf: 5.9, traffic: 4, aiPace: 1.04, rivers: [{ at: 650, w: 30 }, { at: 1400, w: 30 }, { at: 2000, w: 30 }], ramps: [{ at: 1050 }] },
+    { name: 'Mesa Sprint',     len: 2600, roadHalf: 5.7, traffic: 5, aiPace: 1.06, rivers: [{ at: 600, w: 30 }, { at: 1350, w: 30 }, { at: 2050, w: 30 }], ramps: [{ at: 950 }, { at: 1700 }] },
+    { name: 'Rapids Run',      len: 2800, roadHalf: 5.6, traffic: 6, aiPace: 1.07, rivers: [{ at: 550, w: 30 }, { at: 1200, w: 30 }, { at: 1800, w: 30 }, { at: 2350, w: 30 }], ramps: [{ at: 900 }, { at: 2050 }] },
+    { name: 'Highland Charge', len: 2950, roadHalf: 5.4, traffic: 7, aiPace: 1.09, rivers: [{ at: 600, w: 32 }, { at: 1300, w: 32 }, { at: 1950, w: 32 }, { at: 2550, w: 32 }], ramps: [{ at: 1000 }, { at: 1650 }] },
+    { name: 'Storm Straight',  len: 3100, roadHalf: 5.3, traffic: 8, aiPace: 1.10, rivers: [{ at: 650, w: 32 }, { at: 1350, w: 32 }, { at: 2050, w: 32 }, { at: 2650, w: 32 }], ramps: [{ at: 1050 }, { at: 1750 }, { at: 2350 }] },
+    { name: 'Apex Straight',   len: 3200, roadHalf: 5.1, traffic: 9, aiPace: 1.12, rivers: [{ at: 600, w: 34 }, { at: 1300, w: 34 }, { at: 2000, w: 34 }, { at: 2700, w: 34 }], ramps: [{ at: 950 }, { at: 1650 }, { at: 2350 }] }
+  ];
+  function specFor(lv) {
+    if (lv >= 2 && lv <= LEVELS) {
+      var base = SPRINTS[lv - 2], sp = { sprint: true, lv: lv };
+      for (var k in base) sp[k] = base[k];
+      sp.gaps = base.rivers.map(function (rv) {
+        return { s0: rv.at, s1: rv.at + rv.w, rampS: rv.at - 2 };
+      });
+      sp.launchers = sp.gaps.map(function (g) { return { s: g.rampS, from: g.rampS - 14, gap: g }; })
+        .concat(base.ramps.map(function (rp) { return { s: rp.at, from: rp.at - 14, gap: null }; }));
+      sp.launchers.sort(function (a, b) { return a.s - b.s; });
+      return sp;
+    }
+    return { sprint: false };
+  }
+  function sprintPoint(s, lat, out) {
+    out = out || new THREE.Vector3();
+    out.set(lat * (curSpec.roadHalf || ROAD_HALF), 0, -s);
+    return out;
+  }
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
   }
 
   function canvasTex(w, h, draw, rx, ry) {
@@ -186,6 +242,12 @@
     if (THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
     return t;
   }
+
+  /* The classic circuit world lives in its own group so sprint levels can
+     swap it for their straight course. The group sits at the origin with no
+     transform, so classic rendering is unchanged. */
+  var classicWorld = new THREE.Group();
+  scene.add(classicWorld);
 
   // Road ribbon
   (function buildRoad() {
@@ -224,7 +286,7 @@
     var roadMat = new THREE.MeshPhongMaterial({ map: tex, shininess: 16, specular: 0x14161a });
     var m = new THREE.Mesh(g, roadMat);
     m.receiveShadow = true;
-    scene.add(m);
+    classicWorld.add(m);
     loadPhoto(roadMat, 'asphalt-color.jpg', 'asphalt-normal.jpg', 2, 3);
     // painted white edge lines (geometry, so the photo texture stays clean)
     [-1, 1].forEach(function (sd) {
@@ -240,7 +302,7 @@
       lg.setIndex(lix); lg.computeVertexNormals();
       var lm = new THREE.Mesh(lg, new THREE.MeshLambertMaterial({ color: 0xe9edf2 }));
       lm.receiveShadow = true;
-      scene.add(lm);
+      classicWorld.add(lm);
     });
     // Curbs: red/white striped ribbons just outside the road
     [-1, 1].forEach(function (side) {
@@ -263,7 +325,7 @@
       });
       var curbMesh = new THREE.Mesh(g2, new THREE.MeshLambertMaterial({ map: t2 }));
       curbMesh.receiveShadow = true;
-      scene.add(curbMesh);
+      classicWorld.add(curbMesh);
     });
   })();
 
@@ -285,7 +347,7 @@
     var g = new THREE.Mesh(new THREE.CircleGeometry(950, 40), grassMat);
     g.rotation.x = -Math.PI / 2; g.position.y = -0.05;
     g.receiveShadow = true;
-    scene.add(g);
+    classicWorld.add(g);
     loadPhoto(grassMat, 'grass-color.jpg', 'grass-normal.jpg', 170, 170);
   })();
 
@@ -301,7 +363,7 @@
     line.rotation.x = -Math.PI / 2;
     line.rotation.z = Math.atan2(p1.x - p0.x, p1.z - p0.z) + Math.PI / 2;
     var mid = trackPoint(0, 0); line.position.set(mid.x, 0.03, mid.z);
-    scene.add(line);
+    classicWorld.add(line);
     var t = trackTangent(0, new THREE.Vector3());
     var n = new THREE.Vector3(-t.z, 0, t.x);
     var poleG = new THREE.CylinderGeometry(0.5, 0.5, 12, 10);
@@ -311,7 +373,7 @@
       var pole = new THREE.Mesh(poleG, poleM);
       pole.position.set(mid.x + n.x * ROAD_HALF * s, 6, mid.z + n.z * ROAD_HALF * s);
       pole.castShadow = true;
-      scene.add(pole);
+      classicWorld.add(pole);
     });
     var banner = new THREE.Mesh(new THREE.BoxGeometry(ROAD_HALF * 3.4, 2.6, 0.6),
       new THREE.MeshLambertMaterial({ map: canvasTex(512, 64, function (x, w, h) {
@@ -323,7 +385,7 @@
     banner.position.set(mid.x, 11, mid.z);
     banner.rotation.y = Math.atan2(t.x, t.z);
     banner.castShadow = true;
-    scene.add(banner);
+    classicWorld.add(banner);
   })();
 
   // Grandstands, pit building, floodlights, trees, boards, tire stacks, hills, clouds
@@ -357,19 +419,19 @@
         tier.position.set(base.x + n.x * d, 1.6 + s * 2.5, base.z + n.z * d);
         tier.rotation.y = yaw;
         tier.castShadow = true; tier.receiveShadow = true;
-        scene.add(tier);
+        classicWorld.add(tier);
       }
       var rd = side * 42;
       var roof = new THREE.Mesh(new THREE.BoxGeometry(68, 0.8, 30), metalMat);
       roof.position.set(base.x + n.x * rd, 16.5, base.z + n.z * rd);
       roof.rotation.y = yaw; roof.castShadow = true;
-      scene.add(roof);
+      classicWorld.add(roof);
       [-26, 0, 26].forEach(function (off) {
         var cd = side * 53;
         var col = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 16.5, 8), metalMat);
         col.position.set(base.x + n.x * cd + t.x * off, 8.25, base.z + n.z * cd + t.z * off);
         col.castShadow = true;
-        scene.add(col);
+        classicWorld.add(col);
       });
     }
     buildStand(0.06, 1);
@@ -398,7 +460,7 @@
       pit.position.set(base.x + n.x * d, 5, base.z + n.z * d);
       pit.rotation.y = Math.atan2(t.x, t.z) + Math.PI / 2;
       pit.castShadow = true; pit.receiveShadow = true;
-      scene.add(pit);
+      classicWorld.add(pit);
     })();
 
     // floodlights
@@ -407,10 +469,10 @@
       var sideF = f % 2 ? 1 : -1;
       var fp = trackPoint(sF, sideF * 3.2);
       var pole2 = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 22, 8), metalMat);
-      pole2.position.set(fp.x, 11, fp.z); pole2.castShadow = true; scene.add(pole2);
+      pole2.position.set(fp.x, 11, fp.z); pole2.castShadow = true; classicWorld.add(pole2);
       var head = new THREE.Mesh(new THREE.BoxGeometry(4.4, 1.6, 0.8),
         new THREE.MeshBasicMaterial({ color: 0xf4f7fb }));
-      head.position.set(fp.x, 22.4, fp.z); scene.add(head);
+      head.position.set(fp.x, 22.4, fp.z); classicWorld.add(head);
     }
 
     // trees: real greens, two-tier canopies
@@ -423,12 +485,12 @@
       var tx = Math.cos(ang) * rad, tz = Math.sin(ang) * rad;
       var sc = 0.85 + Math.random() * 1.3;
       var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.55 * sc, 0.85 * sc, 5.5 * sc, 6), trunkM);
-      trunk.position.set(tx, 2.75 * sc, tz); trunk.castShadow = true; scene.add(trunk);
+      trunk.position.set(tx, 2.75 * sc, tz); trunk.castShadow = true; classicWorld.add(trunk);
       var lm = leafMats[k % leafMats.length];
       var c1 = new THREE.Mesh(new THREE.ConeGeometry(4.4 * sc, 8.5 * sc, 8), lm);
-      c1.position.set(tx, 9.1 * sc, tz); c1.castShadow = true; scene.add(c1);
+      c1.position.set(tx, 9.1 * sc, tz); c1.castShadow = true; classicWorld.add(c1);
       var c2 = new THREE.Mesh(new THREE.ConeGeometry(3.1 * sc, 6 * sc, 8), lm);
-      c2.position.set(tx, 12.9 * sc, tz); c2.castShadow = true; scene.add(c2);
+      c2.position.set(tx, 12.9 * sc, tz); c2.castShadow = true; classicWorld.add(c2);
     }
 
     // tire-stack barriers on the outside of the big corners
@@ -451,7 +513,7 @@
       var stack = new THREE.Mesh(stackGeo, stackMat);
       stack.position.set(sp.x, 1.3, sp.z);
       stack.castShadow = true; stack.receiveShadow = true;
-      scene.add(stack);
+      classicWorld.add(stack);
       placedStacks++;
     }
 
@@ -478,11 +540,11 @@
       board.position.set(bp.x, 1.7, bp.z);
       board.rotation.y = Math.atan2(bt.x, bt.z) + Math.PI / 2;
       board.castShadow = true;
-      scene.add(board);
+      classicWorld.add(board);
       [-4, 4].forEach(function (off) {
         var post = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 1.1, 6), boardSide);
         post.position.set(bp.x + bt.x * off, 0.55, bp.z + bt.z * off);
-        scene.add(post);
+        classicWorld.add(post);
       });
     }
 
@@ -496,7 +558,7 @@
       var hh = 80 + Math.random() * 90;
       var hill = new THREE.Mesh(new THREE.ConeGeometry(150 + Math.random() * 110, hh, 7), hillMats[hi % 3]);
       hill.position.set(Math.cos(ha) * hr, hh / 2 - 8, Math.sin(ha) * hr);
-      scene.add(hill);
+      classicWorld.add(hill);
     }
 
     // soft cloud sprites
@@ -520,7 +582,7 @@
       var scw = 200 + Math.random() * 220;
       spr.scale.set(scw, scw * 0.38, 1);
       spr.position.set((Math.random() - 0.5) * 2600, 210 + Math.random() * 170, (Math.random() - 0.5) * 2600);
-      scene.add(spr);
+      classicWorld.add(spr);
     }
   })();
 
@@ -686,21 +748,22 @@
         lap: 1, done: false, finishTime: 0,
         wob: Math.random() * 10, skill: 0.9 + Math.random() * 0.2,
         nitro: 1, // 0..1 meter
-        lean: 0, wheelSpin: 0
+        lean: 0, wheelSpin: 0, y: 0, vy: 0, air: false
       });
     }
   }
 
-  function aiLevel() { return 0.8 + (level - 1) * 0.022; } // rivals get faster
+  function aiLevel() { var b = 0.8 + (level - 1) * 0.022; return SPRINT_MODE ? b * curSpec.aiPace : b; } // rivals get faster
 
   var _p = new THREE.Vector3(), _t = new THREE.Vector3(), _p2 = new THREE.Vector3();
   function placeRider(r, dt) {
     trackPoint(r.s, r.lat, _p);
     trackTangent(r.s, _t);
-    r.mesh.position.set(_p.x, 0, _p.z);
+    r.mesh.position.set(_p.x, r.y || 0, _p.z);
     var yaw = Math.atan2(_t.x, _t.z);
     r.mesh.rotation.y = yaw;
     r.mesh.rotation.z = -r.lean; // lean into corners
+    r.mesh.rotation.x = r.air ? Math.max(-0.3, Math.min(0.45, (r.vy || 0) * 0.022)) : 0; // nose follows the jump arc
     r.wheelSpin += r.speed * dt * 1.4;
     if (r.mesh.userData.spinF) {
       r.mesh.userData.spinF.rotation.x = r.wheelSpin;
@@ -766,7 +829,7 @@
     // avoid slower rider ahead
     for (var i = 0; i < riders.length; i++) {
       var o = riders[i]; if (o === r) continue;
-      var ds = o.s - r.s; if (ds < 0) ds += trackLen;
+      var ds = o.s - r.s; if (ds < 0 && !SPRINT_MODE) ds += trackLen;
       if (ds < 7 && ds > 0 && Math.abs(o.lat - r.lat) < 0.3) { line = o.lat > 0 ? -0.6 : 0.6; break; }
     }
     var prevLat = r.lat;
@@ -781,7 +844,7 @@
   function collide() {
     for (var i = 0; i < riders.length; i++) for (var j = i + 1; j < riders.length; j++) {
       var a = riders[i], b = riders[j];
-      var ds = Math.abs(a.s - b.s); if (ds > trackLen / 2) ds = trackLen - ds;
+      var ds = Math.abs(a.s - b.s); if (!SPRINT_MODE && ds > trackLen / 2) ds = trackLen - ds;
       var dl = a.lat - b.lat;
       if (ds < 4.2 && Math.abs(dl) < 0.32) {
         var push = (0.32 - Math.abs(dl)) * Math.sign(dl || (Math.random() - 0.5));
@@ -881,6 +944,7 @@
     mmPts.bbox = { minX: minX, maxX: maxX, minZ: minZ, maxZ: maxZ };
   })();
   function drawMinimap() {
+    if (SPRINT_MODE) { drawSprintMinimap(); return; }
     var W = mm.width, H = mm.height, bb = mmPts.bbox;
     mmx.clearRect(0, 0, W, H);
     function X(x) { return 10 + (x - bb.minX) / (bb.maxX - bb.minX) * (W - 20); }
@@ -896,12 +960,12 @@
     });
   }
   function updateHUD(player, elapsed) {
-    var prog = riders.map(function (r) { return { r: r, p: (r.lap - 1) * trackLen + r.s }; });
+    var prog = riders.map(function (r) { return { r: r, p: SPRINT_MODE ? (r.done ? 1e7 - r.finishTime : r.s) : (r.lap - 1) * trackLen + r.s }; });
     prog.sort(function (a, b) { return b.p - a.p; });
     var pos = 1;
     prog.forEach(function (e, i) { if (e.r === player) pos = i + 1; });
     elPos.textContent = ORD[pos - 1] || pos + 'th';
-    elLap.textContent = Math.min(player.lap, LAPS) + '/' + LAPS;
+    elLap.textContent = SPRINT_MODE ? 'SPRINT' : Math.min(player.lap, LAPS) + '/' + LAPS;
     elTime.textContent = fmtTime(elapsed);
     elSpeed.textContent = Math.round(player.speed * 3.6);
     elNitro.style.width = Math.round(player.nitro * 100) + '%';
@@ -964,6 +1028,561 @@
     } catch (e) {}
   }
 
+
+  /* ================= Sprint world =================
+     Built fresh per sprint level into its own group (the classic circuit
+     lives in classicWorld and is only hidden, never altered). Uses the same
+     photo textures and daytime vocabulary as the classic map. Rivers cut
+     the ground and the road; a chevron ramp ends 2 m before each near bank. */
+  var sprintWorld = null;
+  function disposeGroup(g) {
+    g.traverse(function (o) {
+      if (o.geometry) o.geometry.dispose();
+      if (o.material) {
+        var ms = Array.isArray(o.material) ? o.material : [o.material];
+        ms.forEach(function (m) { if (m.map && m.map.isCanvasTexture) m.map.dispose(); m.dispose(); });
+      }
+    });
+    scene.remove(g);
+  }
+  function buildSprintWorld(sp) {
+    if (sprintWorld) disposeGroup(sprintWorld);
+    var grp = new THREE.Group();
+    sprintWorld = grp;
+    scene.add(grp);
+    var rand = mulberry32(7700 + sp.lv * 131);
+    var HW = sp.roadHalf, LEN = sp.len;
+    var S_MIN = -80, S_MAX = LEN + 180;
+
+    /* ground: grass spans between river cuts */
+    var grassBase = canvasTex(256, 256, function (x, w, h) {
+      x.fillStyle = '#39682e'; x.fillRect(0, 0, w, h);
+      for (var n = 0; n < 2400; n++) {
+        x.fillStyle = Math.random() < 0.55 ? 'rgba(10,50,8,.20)' : 'rgba(140,190,90,.13)';
+        x.fillRect(Math.random() * w, Math.random() * h, 2, 4);
+      }
+    });
+    function groundSpan(a, b) {
+      if (b - a < 4) return;
+      var gl = b - a, reps = Math.max(1, Math.round(gl / 11));
+      var t = grassBase.clone(); t.needsUpdate = true; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(56, reps);
+      var gm = new THREE.MeshPhongMaterial({ map: t, shininess: 4, specular: 0x0a0c0a });
+      var m = new THREE.Mesh(new THREE.PlaneGeometry(640, gl), gm);
+      m.rotation.x = -Math.PI / 2;
+      m.position.set(0, -0.05, -(a + b) / 2);
+      m.receiveShadow = true;
+      grp.add(m);
+      loadPhoto(gm, 'grass-color.jpg', 'grass-normal.jpg', 56, reps);
+    }
+    var bedM = new THREE.MeshLambertMaterial({ color: 0x54452e });
+    var watM = new THREE.MeshPhongMaterial({ color: 0x1f6fd0, shininess: 140, specular: 0xbfe2ff, transparent: true, opacity: 0.94, envMap: ENV, reflectivity: 0.45 });
+    var foamM = new THREE.MeshBasicMaterial({ color: 0xeaf7ff, transparent: true, opacity: 0.75 });
+    var prev = S_MIN;
+    sp.gaps.forEach(function (g) {
+      groundSpan(prev, g.s0 - 9);
+      var glen = g.s1 - g.s0, mid = (g.s0 + g.s1) / 2;
+      var bed = new THREE.Mesh(new THREE.BoxGeometry(640, 0.5, glen + 18), bedM);
+      bed.position.set(0, -1.02, -mid); grp.add(bed);
+      var wat = new THREE.Mesh(new THREE.PlaneGeometry(640, glen + 16), watM);
+      wat.rotation.x = -Math.PI / 2; wat.position.set(0, -0.68, -mid); grp.add(wat);
+      [g.s0 - 1.2, g.s1 + 1.2].forEach(function (fs) {
+        var foam = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2 + 12, 2.2), foamM);
+        foam.rotation.x = -Math.PI / 2; foam.position.set(0, -0.6, -fs); grp.add(foam);
+      });
+      prev = g.s1 + 9;
+    });
+    groundSpan(prev, S_MAX);
+
+    /* road + edge lines + curbs, 2 m samples, river-gap segments skipped */
+    function inGap(a, b) {
+      for (var gi = 0; gi < sp.gaps.length; gi++) {
+        var g = sp.gaps[gi];
+        if (b > g.s0 && a < g.s1) return true;
+      }
+      return false;
+    }
+    function ribbon(latA, latB, y, mat, vDiv) {
+      var pos = [], uvA = [], idx = [], vi = 0, DS = 2;
+      for (var s = S_MIN; s < S_MAX - 0.1; s += DS) {
+        if (inGap(s, s + DS)) continue;
+        var xA = latA * HW, xB = latB * HW;
+        pos.push(xA, y, -s, xB, y, -s, xA, y, -(s + DS), xB, y, -(s + DS));
+        uvA.push(0, s / vDiv, 1, s / vDiv, 0, (s + DS) / vDiv, 1, (s + DS) / vDiv);
+        idx.push(vi, vi + 1, vi + 2, vi + 1, vi + 3, vi + 2);
+        vi += 4;
+      }
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uvA, 2));
+      g.setIndex(idx); g.computeVertexNormals();
+      var m = new THREE.Mesh(g, mat);
+      m.receiveShadow = true;
+      grp.add(m);
+      return m;
+    }
+    var roadMat = new THREE.MeshPhongMaterial({
+      map: canvasTex(256, 256, function (x, w, h) {
+        x.fillStyle = '#33363b'; x.fillRect(0, 0, w, h);
+        for (var n = 0; n < 5200; n++) {
+          var g7 = Math.random();
+          x.fillStyle = g7 < 0.5 ? 'rgba(0,0,0,.22)' : 'rgba(255,255,255,.07)';
+          x.fillRect(Math.random() * w, Math.random() * h, 1.6, 1.6);
+        }
+      }), shininess: 16, specular: 0x14161a
+    });
+    loadPhoto(roadMat, 'asphalt-color.jpg', 'asphalt-normal.jpg', 2, 3);
+    ribbon(-1.06, 1.06, 0.02, roadMat, 26);
+    var lineMat = new THREE.MeshLambertMaterial({ color: 0xe9edf2 });
+    ribbon(-1.03, -0.97, 0.032, lineMat, 26);
+    ribbon(0.97, 1.03, 0.032, lineMat, 26);
+    var curbMat = new THREE.MeshLambertMaterial({
+      map: canvasTex(64, 64, function (x, w, h) {
+        x.fillStyle = '#f2f2f2'; x.fillRect(0, 0, w, h / 2);
+        x.fillStyle = '#c92a2a'; x.fillRect(0, h / 2, w, h / 2);
+      }, 1, 1)
+    });
+    ribbon(-1.45, -1.06, 0.015, curbMat, 8);
+    ribbon(1.06, 1.45, 0.015, curbMat, 8);
+
+    /* launch ramps: chevron wedges, lip exactly at the launcher distance */
+    (function buildRamps() {
+      var W = HW * 2 * 1.04, L = 14, H = 1.5;
+      var pos = [
+        -W / 2, 0, -L / 2, W / 2, 0, -L / 2, -W / 2, H, L / 2,
+        W / 2, 0, -L / 2, W / 2, H, L / 2, -W / 2, H, L / 2,
+        -W / 2, 0, L / 2, W / 2, 0, L / 2, -W / 2, H, L / 2,
+        W / 2, 0, L / 2, W / 2, H, L / 2, -W / 2, H, L / 2,
+        W / 2, 0, -L / 2, -W / 2, 0, -L / 2, W / 2, 0, L / 2,
+        -W / 2, 0, -L / 2, -W / 2, 0, L / 2, W / 2, 0, L / 2,
+        -W / 2, 0, -L / 2, -W / 2, H, L / 2, -W / 2, 0, L / 2,
+        W / 2, 0, -L / 2, W / 2, 0, L / 2, W / 2, H, L / 2
+      ];
+      var uvA = [];
+      for (var ui = 0; ui < pos.length / 3; ui++) uvA.push((ui % 3) / 2, (ui % 2));
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvA, 2));
+      geo.computeVertexNormals();
+      var tex = canvasTex(128, 128, function (x, w, h) {
+        x.fillStyle = '#f7b500'; x.fillRect(0, 0, w, h);
+        x.fillStyle = '#23272e';
+        for (var ci = 0; ci < 4; ci++) {
+          x.beginPath();
+          x.moveTo(14 + ci * 30, 96); x.lineTo(44 + ci * 30, 64); x.lineTo(74 + ci * 30, 96);
+          x.lineTo(74 + ci * 30, 112); x.lineTo(44 + ci * 30, 80); x.lineTo(14 + ci * 30, 112);
+          x.closePath(); x.fill();
+        }
+      });
+      var mat = new THREE.MeshPhongMaterial({ map: tex, shininess: 24, specular: 0x666666 });
+      sp.launchers.forEach(function (Ln) {
+        var m = new THREE.Mesh(geo, mat);
+        m.castShadow = true;
+        m.position.set(0, 0.02, -(Ln.s - L / 2));
+        m.rotation.y = Math.PI;
+        grp.add(m);
+      });
+    })();
+
+    /* start / finish gantries with checkered lines */
+    function makeGantry(s, text) {
+      var poleM = new THREE.MeshPhongMaterial({ color: 0xd4d9e0, shininess: 70, specular: 0xbbbbcc, envMap: ENV, reflectivity: 0.5 });
+      loadPhoto(poleM, 'metal-color.jpg', null, 1, 2);
+      var poleG = new THREE.CylinderGeometry(0.5, 0.5, 12, 10);
+      [-1.5, 1.5].forEach(function (sd) {
+        var pole = new THREE.Mesh(poleG, poleM);
+        pole.position.set(sd * HW, 6, -s);
+        pole.castShadow = true;
+        grp.add(pole);
+      });
+      var banner = new THREE.Mesh(new THREE.BoxGeometry(HW * 3.4, 2.6, 0.6),
+        new THREE.MeshLambertMaterial({
+          map: canvasTex(512, 64, function (x, w, h) {
+            x.fillStyle = '#1c2136'; x.fillRect(0, 0, w, h);
+            x.fillStyle = '#ffd166'; x.font = '900 40px Nunito, sans-serif';
+            x.textAlign = 'center'; x.textBaseline = 'middle';
+            x.fillText(text, w / 2, h / 2);
+          })
+        }));
+      banner.position.set(0, 11, -s);
+      banner.rotation.y = Math.PI;
+      banner.castShadow = true;
+      grp.add(banner);
+      var line = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2.12, 2.2),
+        new THREE.MeshBasicMaterial({
+          map: canvasTex(64, 64, function (x, w, h) {
+            for (var r = 0; r < 8; r++) for (var c = 0; c < 8; c++) { x.fillStyle = (r + c) % 2 ? '#111' : '#f5f5f5'; x.fillRect(c * 8, r * 8, 8, 8); }
+          })
+        }));
+      line.rotation.x = -Math.PI / 2;
+      line.position.set(0, 0.03, -s);
+      grp.add(line);
+    }
+    makeGantry(0, 'APEX GP  •  ' + sp.name.toUpperCase());
+    makeGantry(LEN, 'FINISH  •  APEX GP');
+
+    /* scenery: trees, rocks, sponsor boards, a start grandstand, hills, clouds */
+    function nearRiver(s) {
+      for (var gi = 0; gi < sp.gaps.length; gi++) if (s > sp.gaps[gi].s0 - 14 && s < sp.gaps[gi].s1 + 14) return true;
+      return false;
+    }
+    var trunkM = new THREE.MeshLambertMaterial({ color: 0x6b4a2c });
+    var leafMats = [0x2c6e2e, 0x35793a, 0x275e2a, 0x3d8140].map(function (cc) { return new THREE.MeshLambertMaterial({ color: cc }); });
+    var rockM = new THREE.MeshLambertMaterial({ color: 0x7a7d80 });
+    for (var k = 0; k < 140; k++) {
+      var sK = -40 + rand() * (LEN + 240);
+      if (nearRiver(sK)) continue;
+      var sideK = rand() < 0.5 ? -1 : 1;
+      var xK = sideK * (HW * 2.2 + rand() * HW * 5.5);
+      if (rand() < 0.3) {
+        var rk = new THREE.Mesh(new THREE.DodecahedronGeometry(0.9 + rand() * 2.2), rockM);
+        rk.position.set(xK, 0.5, -sK);
+        rk.rotation.set(rand() * 3, rand() * 3, rand() * 3);
+        rk.castShadow = true;
+        grp.add(rk);
+      } else {
+        var sc = 0.85 + rand() * 1.3;
+        var tr = new THREE.Group();
+        var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.55 * sc, 0.85 * sc, 5.5 * sc, 6), trunkM);
+        trunk.position.y = 2.75 * sc; trunk.castShadow = true; tr.add(trunk);
+        var lm = leafMats[k % leafMats.length];
+        var c1 = new THREE.Mesh(new THREE.ConeGeometry(4.4 * sc, 8.5 * sc, 8), lm);
+        c1.position.y = 9.1 * sc; c1.castShadow = true; tr.add(c1);
+        var c2 = new THREE.Mesh(new THREE.ConeGeometry(3.1 * sc, 6 * sc, 8), lm);
+        c2.position.y = 12.9 * sc; tr.add(c2);
+        tr.position.set(xK, 0, -sK);
+        grp.add(tr);
+      }
+    }
+    var boardWords = [['SPRINT', '#10151d', '#ffb02e'], ['JUMP', '#7a1622', '#ffffff'], ['RIVER', '#12325e', '#ffffff'], ['APEX', '#10151d', '#7dd3fc'], ['TURBO', '#7a1622', '#ffd166'], ['SWIFT', '#12325e', '#ffffff']];
+    var boardSide = new THREE.MeshLambertMaterial({ color: 0x22262d });
+    for (var bd = 0; bd < Math.floor(LEN / 260); bd++) {
+      var bs = 140 + bd * 260 + rand() * 60;
+      if (nearRiver(bs)) continue;
+      var bSide = bd % 2 ? 1 : -1;
+      var bw = boardWords[bd % boardWords.length];
+      var bm = new THREE.MeshLambertMaterial({
+        map: canvasTex(256, 48, function (x, w, h) {
+          x.fillStyle = bw[1]; x.fillRect(0, 0, w, h);
+          x.fillStyle = bw[2]; x.font = '900 30px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle';
+          x.fillText(bw[0], w / 2, h / 2 + 1);
+        })
+      });
+      var board = new THREE.Mesh(new THREE.BoxGeometry(11, 2.3, 0.35), [boardSide, boardSide, boardSide, boardSide, bm, bm]);
+      board.position.set(bSide * HW * 2.35, 1.7, -bs);
+      board.rotation.y = (bSide > 0 ? -1 : 1) * Math.PI / 2;
+      board.castShadow = true;
+      grp.add(board);
+      [-4, 4].forEach(function (dz) {
+        var post = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.1, 6), boardSide);
+        post.position.set(bSide * HW * 2.35, 0.55, -bs + dz);
+        grp.add(post);
+      });
+    }
+    (function buildSprintStand() {
+      var plainMat = new THREE.MeshLambertMaterial({ color: 0x646a71 });
+      var seatTex = canvasTex(256, 128, function (x, w, h) {
+        x.fillStyle = '#585d63'; x.fillRect(0, 0, w, h);
+        var cols = ['#e63946', '#f4a261', '#2a9d8f', '#e9c46a', '#457b9d', '#9b5de5', '#00bbf9', '#888888'];
+        for (var r = 0; r < 8; r++) for (var c = 0; c < 32; c++) {
+          if (Math.random() < 0.06) continue;
+          x.fillStyle = cols[(r * 7 + c * 13) % cols.length];
+          x.fillRect(c * 8 + 1, r * 16 + 3, 6, 9);
+        }
+      });
+      var seatMat = new THREE.MeshLambertMaterial({ map: seatTex });
+      for (var s2 = 0; s2 < 5; s2++) {
+        var tier = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.4, 64), [plainMat, seatMat, plainMat, plainMat, seatMat, seatMat]);
+        tier.position.set(HW + 22 + s2 * 5.6, 1.6 + s2 * 2.5, -30);
+        tier.castShadow = true; tier.receiveShadow = true;
+        grp.add(tier);
+      }
+      var roof = new THREE.Mesh(new THREE.BoxGeometry(30, 0.8, 68), new THREE.MeshPhongMaterial({ color: 0xd4d9e0, shininess: 60, envMap: ENV, reflectivity: 0.4 }));
+      roof.position.set(HW + 36, 16.5, -30);
+      roof.castShadow = true;
+      grp.add(roof);
+    })();
+    var hillMats = [0x2e4d31, 0x294236, 0x33512f].map(function (cc) { return new THREE.MeshLambertMaterial({ color: cc }); });
+    for (var hi = 0; hi < 16; hi++) {
+      var hs = (hi / 16) * LEN + rand() * 120;
+      var hSide = hi % 2 ? 1 : -1;
+      var hh = 80 + rand() * 90;
+      var hill = new THREE.Mesh(new THREE.ConeGeometry(150 + rand() * 110, hh, 7), hillMats[hi % 3]);
+      hill.position.set(hSide * (300 + rand() * 120), hh / 2 - 8, -hs);
+      grp.add(hill);
+    }
+    var cloudTex = (function () {
+      var c = document.createElement('canvas'); c.width = 256; c.height = 128;
+      var x = c.getContext('2d');
+      for (var q = 0; q < 16; q++) {
+        var cx = 30 + Math.random() * 196, cy = 44 + Math.random() * 40, r = 16 + Math.random() * 26;
+        var gg = x.createRadialGradient(cx, cy, 1, cx, cy, r);
+        gg.addColorStop(0, 'rgba(255,255,255,.5)');
+        gg.addColorStop(1, 'rgba(255,255,255,0)');
+        x.fillStyle = gg;
+        x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill();
+      }
+      return new THREE.CanvasTexture(c);
+    })();
+    for (var cq = 0; cq < 14; cq++) {
+      var sm = new THREE.SpriteMaterial({ map: cloudTex, transparent: true, opacity: 0.5 + rand() * 0.3, depthWrite: false, fog: false });
+      var spr = new THREE.Sprite(sm);
+      var scw = 200 + rand() * 220;
+      spr.scale.set(scw, scw * 0.38, 1);
+      spr.position.set((rand() - 0.5) * 1600, 210 + rand() * 170, -(rand() * (LEN + 300)));
+      grp.add(spr);
+    }
+  }
+
+  /* ================= Sprint vertical physics =================
+     One shared step for player, AI and traffic (Nitro GP's proven model).
+     A rider enters a ramp zone grounded and climbs it (rampProfile sets the
+     height); crossing the lip launches them. ~120 km/h clears a full river;
+     slower = splash and a near-side respawn. Clean landing keeps 96% speed. */
+  var GRAV = 20;
+  function gapAt(s) {
+    if (!curSpec.gaps) return null;
+    for (var i = 0; i < curSpec.gaps.length; i++) {
+      var g = curSpec.gaps[i];
+      if (s > g.s0 + 0.5 && s < g.s1 - 0.5) return g;
+    }
+    return null;
+  }
+  function rampProfile(s) {
+    var h = 0;
+    for (var i = 0; i < curSpec.launchers.length; i++) {
+      var L = curSpec.launchers[i];
+      if (s >= L.from && s <= L.s) h = Math.max(h, 1.5 * (s - L.from) / (L.s - L.from));
+    }
+    return h;
+  }
+  function launchVy(r, L, isTraffic) {
+    var vy = Math.max(6.5, Math.min(19, r.speed * 0.30));
+    if (L.gap) {
+      var dist = (L.gap.s1 + 2) - L.s;
+      var tFly = dist / Math.max(8, r.speed);
+      var need = tFly * GRAV / 2 + 0.4;
+      if (isTraffic || (!r.isPlayer && vy < need)) vy = Math.min(26, Math.max(vy, need));
+    }
+    return vy;
+  }
+  function stepVertical(r, dt, prevS, isTraffic) {
+    if (!SPRINT_MODE) return;
+    if (!r.air) {
+      for (var i = 0; i < curSpec.launchers.length; i++) {
+        var L = curSpec.launchers[i];
+        if (prevS < L.s && r.s >= L.s && Math.abs(r.lat) <= 1.08) {
+          r.air = true;
+          r.vy = launchVy(r, L, isTraffic);
+          if (r.isPlayer) beep(740, 0.12);
+          break;
+        }
+      }
+    }
+    if (r.air) {
+      r.vy -= GRAV * dt;
+      r.y += r.vy * dt;
+      if (r.y <= 0) {
+        r.y = 0; r.air = false; r.vy = 0;
+        if (gapAt(r.s)) { doSplash(r, isTraffic); return; }
+        r.speed *= 0.96;
+      }
+    } else {
+      r.y = Math.abs(r.lat) <= 1.08 ? rampProfile(r.s) : 0;
+      if (gapAt(r.s)) doSplash(r, isTraffic);
+    }
+  }
+  function doSplash(r, isTraffic) {
+    var g = gapAt(r.s);
+    spawnSplash(r.mesh.position.x, r.mesh.position.z);
+    r.air = false; r.y = 0; r.vy = 0;
+    if (isTraffic) { r.s = (g ? g.s1 : r.s) + 12; return; }
+    r.s = (g ? g.rampS : r.s) - 16;
+    r.speed = Math.min(r.speed, 12);
+    r.lat = Math.max(-0.5, Math.min(0.5, r.lat));
+    if (r.isPlayer) { toast('Splash! 💦 Too slow — hit the ramp with speed!'); beep(196, 0.3); }
+  }
+
+  /* splash particles (small sprite pool, sprint only) */
+  var splashPool = [];
+  (function initSplash() {
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var x = c.getContext('2d');
+    var rg = x.createRadialGradient(32, 32, 2, 32, 32, 30);
+    rg.addColorStop(0, 'rgba(255,255,255,.95)');
+    rg.addColorStop(0.5, 'rgba(160,215,255,.55)');
+    rg.addColorStop(1, 'rgba(160,215,255,0)');
+    x.fillStyle = rg; x.fillRect(0, 0, 64, 64);
+    var t = new THREE.CanvasTexture(c);
+    for (var i = 0; i < 26; i++) {
+      var sm = new THREE.SpriteMaterial({ map: t, transparent: true, opacity: 0, depthWrite: false, color: 0xbfe3ff });
+      var spr = new THREE.Sprite(sm);
+      spr.visible = false;
+      scene.add(spr);
+      splashPool.push({ sp: spr, life: 0, max: 1, vx: 0, vy: 0, vz: 0 });
+    }
+  })();
+  function spawnSplash(x, z) {
+    var n = 0;
+    for (var i = 0; i < splashPool.length && n < 10; i++) {
+      var p = splashPool[i];
+      if (p.life > 0) continue;
+      n++;
+      p.life = 0.7 + Math.random() * 0.4;
+      p.max = p.life;
+      p.vx = (Math.random() - 0.5) * 7; p.vz = (Math.random() - 0.5) * 7;
+      p.vy = 5 + Math.random() * 6;
+      p.sp.position.set(x + (Math.random() - 0.5) * 2.4, 0.6, z + (Math.random() - 0.5) * 2.4);
+      var sc = 1.6 + Math.random() * 2.2;
+      p.sp.scale.set(sc, sc, 1);
+      p.sp.visible = true;
+    }
+  }
+  function updateSplash(dt) {
+    for (var i = 0; i < splashPool.length; i++) {
+      var p = splashPool[i];
+      if (p.life <= 0) continue;
+      p.life -= dt;
+      if (p.life <= 0) { p.sp.visible = false; p.sp.material.opacity = 0; continue; }
+      p.vy -= 12 * dt;
+      p.sp.position.x += p.vx * dt;
+      p.sp.position.y += p.vy * dt;
+      p.sp.position.z += p.vz * dt;
+      if (p.sp.position.y < 0.2) p.sp.position.y = 0.2;
+      p.sp.material.opacity = 0.85 * (p.life / p.max);
+    }
+  }
+
+  /* ================= Sprint traffic (slow ambient bikes) ================= */
+  var traffic = [];
+  var TRAFFIC_COLORS = [0x607d8b, 0x90a4ae, 0x546e7a, 0x78909c, 0x455a64, 0x8d6e63];
+  function clearTraffic() {
+    traffic.forEach(function (t) { scene.remove(t.mesh); });
+    traffic = [];
+  }
+  function resetTraffic() {
+    clearTraffic();
+    var nT = curSpec.traffic || 0;
+    for (var i = 0; i < nT; i++) {
+      var mesh = makeBike(TRAFFIC_COLORS[i % TRAFFIC_COLORS.length]);
+      scene.add(mesh);
+      var cr = 19 + Math.random() * 7;
+      traffic.push({
+        mesh: mesh, isPlayer: false,
+        s: 150 + (nT > 1 ? (i / (nT - 1)) : 0) * (curSpec.len - 420) + Math.random() * 40,
+        lat: (Math.random() - 0.5) * 1.2, speed: cr, cruise: cr,
+        y: 0, vy: 0, air: false, lean: 0, wheelSpin: 0, wob: Math.random() * 10
+      });
+    }
+  }
+  function stepTraffic(dt, elapsed) {
+    if (!SPRINT_MODE) return;
+    traffic.forEach(function (t) {
+      var prevS = t.s;
+      t.speed += (t.cruise - t.speed) * Math.min(1, dt * 0.8);
+      t.lat += Math.sin(elapsed * 0.3 + t.wob) * 0.1 * dt;
+      t.lat = Math.max(-0.85, Math.min(0.85, t.lat));
+      t.s += t.speed * dt;
+      if (t.s > curSpec.len + 200) t.s = -160;
+      stepVertical(t, dt, prevS, true);
+      t.mesh.position.set(t.lat * curSpec.roadHalf, t.y || 0, -t.s);
+      t.mesh.rotation.y = Math.PI;
+      t.mesh.rotation.x = t.air ? Math.max(-0.3, Math.min(0.45, (t.vy || 0) * 0.022)) : 0;
+      t.wheelSpin += t.speed * dt * 1.4;
+      if (t.mesh.userData.spinF) {
+        t.mesh.userData.spinF.rotation.x = t.wheelSpin;
+        t.mesh.userData.spinR.rotation.x = t.wheelSpin;
+      }
+    });
+  }
+  function trafficCollide() {
+    if (!SPRINT_MODE || !traffic.length) return;
+    for (var i = 0; i < riders.length; i++) {
+      var r = riders[i];
+      if (r.done) continue;
+      for (var j = 0; j < traffic.length; j++) {
+        var t = traffic[j];
+        var ds = t.s - r.s;
+        if (ds < 5 && ds > -5 && Math.abs(t.lat - r.lat) < 0.34) {
+          var push = (0.34 - Math.abs(t.lat - r.lat)) * (r.lat >= t.lat ? 1 : -1);
+          r.lat += push * 0.5;
+          r.speed *= 0.965;
+          if (r.isPlayer && Math.random() < 0.08) toast('Bumped! Hold your line.');
+        }
+      }
+    }
+  }
+
+  /* ================= Sprint race flow ================= */
+  function stepSprintRace(dt) {
+    raceTime += dt;
+    riders.forEach(function (r) {
+      if (r.done) return;
+      var prevS = r.s;
+      if (r.isPlayer) stepPlayer(r, dt, input);
+      else stepAI(r, dt, raceTime);
+      stepVertical(r, dt, prevS, false);
+      placeRider(r, dt);
+      if (r.s >= curSpec.len && !r.done) {
+        r.done = true; r.finishTime = raceTime;
+        if (r.isPlayer) finishSprintRace(r);
+      }
+    });
+    stepTraffic(dt, raceTime);
+    updateSplash(dt);
+    collide();
+    trafficCollide();
+    playerPos = updateHUD(player, raceTime);
+    engineSound(player.speed, true);
+    updateCamera(player, dt);
+  }
+  function finishSprintRace(p) {
+    p.done = true; p.finishTime = raceTime;
+    state = 'done';
+    engineSound(0, false);
+    var pos = 1;
+    riders.forEach(function (r) {
+      if (r === p) return;
+      if (r.done && r.finishTime <= p.finishTime) pos++;
+      else if (!r.done && r.s > p.s) pos++;
+    });
+    var earned = POINTS[pos - 1] || 20;
+    store.points += earned;
+    var unlocked = false;
+    if (pos <= 3 && store.level < LEVELS) { store.level++; unlocked = true; }
+    saveStore();
+    var titles = ['🥇 Sprint King!', '🥈 So Close!', '🥉 Podium Finish', 'Finished 4th', 'Finished 5th', 'Finished 6th'];
+    el('ag-res-title').textContent = titles[pos - 1];
+    el('ag-res-sub').innerHTML = 'Level ' + level + ' · Sprint · Time ' + fmtTime(raceTime) +
+      '<br>💰 <b>+' + earned + ' points</b> (total ' + store.points + ')' +
+      (unlocked ? '<br>🔓 <b>Level ' + store.level + ' unlocked!</b>' : (store.level >= LEVELS && pos <= 3 ? '<br>👑 You conquered all 10 levels — legend!' : ''));
+    el('ag-next').style.display = (store.level > level) ? '' : 'none';
+    show(resEl);
+    refreshMenu();
+  }
+  function drawSprintMinimap() {
+    var W = mm.width, H = mm.height;
+    mmx.clearRect(0, 0, W, H);
+    var xC = W / 2, y0 = H - 12, y1 = 12;
+    function Y(s) { return y0 - Math.max(0, Math.min(1, s / curSpec.len)) * (y0 - y1); }
+    mmx.strokeStyle = 'rgba(255,255,255,.75)'; mmx.lineWidth = 5; mmx.lineJoin = 'round';
+    mmx.beginPath(); mmx.moveTo(xC, y0); mmx.lineTo(xC, y1); mmx.stroke();
+    mmx.strokeStyle = '#38bdf8'; mmx.lineWidth = 3;
+    curSpec.gaps.forEach(function (g) {
+      mmx.beginPath(); mmx.moveTo(xC - 12, Y(g.s0)); mmx.lineTo(xC + 12, Y(g.s0)); mmx.stroke();
+    });
+    mmx.strokeStyle = '#f5f5f5'; mmx.lineWidth = 3;
+    mmx.beginPath(); mmx.moveTo(xC - 12, Y(curSpec.len) + 6); mmx.lineTo(xC + 12, Y(curSpec.len) + 6); mmx.stroke();
+    traffic.forEach(function (t) {
+      mmx.fillStyle = '#7dd3fc';
+      mmx.beginPath(); mmx.arc(xC + t.lat * 12, Y(t.s), 2.5, 0, 7); mmx.fill();
+    });
+    riders.forEach(function (r) {
+      mmx.fillStyle = r.isPlayer ? '#ffb02e' : '#cbd5e1';
+      mmx.beginPath(); mmx.arc(xC + r.lat * 12, Y(r.s), r.isPlayer ? 4.5 : 3, 0, 7); mmx.fill();
+    });
+  }
+
   /* ================= Game flow ================= */
   var menuEl = el('ag-menu'), garageEl = el('ag-garage'), resEl = el('ag-results');
   var state = 'menu'; // menu | garage | countdown | race | done
@@ -971,20 +1590,40 @@
 
   function show(elm) { [menuEl, garageEl, resEl].forEach(function (m) { m.classList.add('hidden'); }); if (elm) elm.classList.remove('hidden'); }
   function refreshMenu() {
-    el('ag-menu-level').textContent = store.level;
-    el('ag-menu-sub').innerHTML = '3 laps · 5 rivals · Level <b>' + store.level + '</b> of ' + LEVELS +
-      '<br>Finish well to earn points, then spend them in the garage.<br>💰 You have <b>' + store.points + '</b> points.';
+    var ml = el('ag-menu-level'); // guard: #ag-menu-sub markup replaces this node
+    if (ml) ml.textContent = store.level;
+    if (specFor(store.level).sprint) {
+      el('ag-menu-sub').innerHTML = 'Daylight sprint · 5 rivals · Level <b>' + store.level + '</b> of ' + LEVELS +
+        '<br>Straight point-to-point — hit the ramps fast to clear the rivers!<br>💰 You have <b>' + store.points + '</b> points.';
+    } else {
+      el('ag-menu-sub').innerHTML = '3 laps · 5 rivals · Level <b>' + store.level + '</b> of ' + LEVELS +
+        '<br>Finish well to earn points, then spend them in the garage.<br>💰 You have <b>' + store.points + '</b> points.';
+    }
   }
   function startRace(lv) {
     initAudio();
     if (AC && AC.state === 'suspended') AC.resume();
+    curSpec = specFor(lv);
+    SPRINT_MODE = !!curSpec.sprint;
+    if (SPRINT_MODE) {
+      buildSprintWorld(curSpec);
+      classicWorld.visible = false;
+      sprintWorld.visible = true;
+    } else {
+      classicWorld.visible = true;
+      if (sprintWorld) sprintWorld.visible = false;
+      clearTraffic();
+    }
     resetRiders(lv);
+    if (SPRINT_MODE) resetTraffic();
     player = null;
     for (var pi2 = 0; pi2 < riders.length; pi2++) if (riders[pi2].isPlayer) player = riders[pi2];
     raceTime = 0; state = 'countdown'; countT = 0;
     show(null); hud.style.display = 'flex';
     countEl.classList.remove('hidden');
-    toast('Level ' + lv + ' — 3 laps. Good luck!');
+    toast(SPRINT_MODE
+      ? 'Level ' + lv + ' — ' + curSpec.name + ' · Sprint! Hit the ramps FAST to clear the rivers! 🏁'
+      : 'Level ' + lv + ' — 3 laps. Good luck!');
   }
   function doCountdown(dt) {
     countT += dt;
@@ -1077,7 +1716,18 @@
 
   el('ag-start').addEventListener('click', function () { startRace(store.level); });
   el('ag-garage-btn').addEventListener('click', function () { state = 'garage'; renderGarage(); show(garageEl); });
-  el('ag-garage-back').addEventListener('click', function () { state = 'menu'; refreshMenu(); show(menuEl); });
+  el('ag-garage-back').addEventListener('click', function () {
+    state = 'menu';
+    if (SPRINT_MODE) { // a sprint ran: restore the classic menu attract scene
+      SPRINT_MODE = false; curSpec = { sprint: false };
+      classicWorld.visible = true;
+      if (sprintWorld) sprintWorld.visible = false;
+      clearTraffic();
+      resetRiders(1);
+      riders.forEach(function (r) { r.s = -30 - Math.random() * 40; r.lat = (Math.random() - 0.5); r.speed = 0; r.y = 0; r.vy = 0; r.air = false; placeRider(r, 0.016); });
+    }
+    refreshMenu(); show(menuEl);
+  });
   el('ag-garage-race').addEventListener('click', function () { startRace(store.level); });
   el('ag-next').addEventListener('click', function () { startRace(store.level); });
   el('ag-retry').addEventListener('click', function () { startRace(level); });
@@ -1098,7 +1748,7 @@
       updateCamera(player, dt);
       doCountdown(dt);
     } else if (state === 'race') {
-      stepRace(dt);
+      if (SPRINT_MODE) stepSprintRace(dt); else stepRace(dt);
     } else if (state === 'done') {
       // slow-mo orbit of winner area
       idleT += dt * 0.3;
@@ -1117,9 +1767,23 @@
       if (camera.fov !== 58) { camera.fov = 58; camera.updateProjectionMatrix(); }
       streakMat.opacity = 0;
     }
+    if (skyMesh) { skyMesh.position.x = camera.position.x; skyMesh.position.z = camera.position.z; }
     renderer.render(scene, camera);
   }
   requestAnimationFrame(frame);
+
+  // read-only QA hook (same pattern as Nitro GP's __ngp): lets tests drive
+  // races and observe state without changing gameplay code paths
+  window.__ag = {
+    riders: function () { return riders; },
+    traffic: function () { return traffic; },
+    spec: function () { return curSpec; },
+    state: function () { return state; },
+    store: function () { return store; },
+    player: function () { return player; },
+    mode: function () { return SPRINT_MODE ? 'sprint' : 'circuit'; },
+    start: function (lv) { startRace(lv); }
+  };
 
   window.addEventListener('resize', function () {
     var w = canvas.clientWidth || 960;
