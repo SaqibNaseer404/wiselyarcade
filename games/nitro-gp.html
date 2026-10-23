@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Nitro GP — Free Online 3D Car Racing Game | Wisely Arcade</title>
 <link rel="canonical" href="https://wiselyarcade.com/games/nitro-gp">
-<meta name="description" content="Play Nitro GP free online — Need-for-Speed-style 3D street racing at night. Dodge traffic, drift corners, race 3 laps against 5 rivals, earn points and upgrade your car. No download, no sign-up, family-friendly.">
+<meta name="description" content="Play Nitro GP free online — Need-for-Speed-style 3D street racing. Race 3 laps against 5 rivals on 10 neon night circuits, then take on 5 daylight sprint levels with jump ramps and river gaps. Dodge traffic, drift corners, earn points and upgrade your car. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -82,7 +82,7 @@
 <main>
   <div class="game-head">
     <h1>Nitro GP</h1>
-    <p>Need-for-Speed-style 3D street racing — neon city at night, live traffic, drift corners, 3 laps against 5 rivals. Earn points, upgrade your ride.</p>
+    <p>Need-for-Speed-style 3D street racing — neon city at night, live traffic, drift corners, 3 laps against 5 rivals — plus 5 daylight sprint levels with jump ramps and rivers to clear. Earn points, upgrade your ride.</p>
   </div>
 
   <div class="wrap">
@@ -111,7 +111,7 @@
 
         <div class="ag-overlay" id="ag-menu">
           <h2>Nitro <span class="grad">GP</span> 🏎️</h2>
-          <p id="ag-menu-sub">3 laps · 5 rivals · Level <b id="ag-menu-level">1</b> of 10<br>Finish well to earn points, then spend them in the garage.</p>
+          <p id="ag-menu-sub">3 laps · 5 rivals · Level <b id="ag-menu-level">1</b> of 15<br>Finish well to earn points, then spend them in the garage.</p>
           <div class="ag-row">
             <button class="btn big" id="ag-start">🏁 Start Race</button>
             <button class="btn ghost big" id="ag-garage-btn">🔧 Garage</button>
@@ -145,7 +145,7 @@
       <h2>How to Play</h2>
       <p>Nitro GP is Need-for-Speed-style street racing, right in your browser — a neon city at night, live traffic on the road, and corners begging to be drifted. You start at the back of a 6-car grid: fight through traffic and rivals over 3 laps. Tap the handbrake (<span class="kbd">Space</span>) to kick the tail out, drift clean, and fire the nitro on the straights.</p>
       <ol>
-        <li><strong>10 career levels.</strong> Each level the rivals get faster and braver. Beat a level to unlock the next.</li>
+        <li><strong>15 career levels.</strong> Levels 1–10 are neon night circuits over 3 laps; levels 11–15 are <strong>daylight sprints</strong> — straight point-to-point runs with jump ramps and rivers you must clear at speed (too slow and you splash!). Sprint roads are narrower, the traffic denser and the rivals faster. Each level the rivals get faster and braver. Beat a level to unlock the next.</li>
         <li><strong>Earn points</strong> for where you finish — 1st place pays 100. Points never expire.</li>
         <li><strong>Upgrade your car</strong> in the garage: <strong>Engine</strong> (top speed), <strong>Tires</strong> (grip in corners), <strong>Nitro</strong> (boost power). Five stages each — a fully upgraded car is a different beast.</li>
         <li>Dodge the <strong>city traffic</strong> — clipping a taxi scrubs your speed hard. The barriers spark you back onto the road; the sidewalks slow you down. Smooth is fast.</li>
@@ -188,7 +188,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/nitro-gp.js?v=5"></script>
+<script src="../js/nitro-gp.js?v=6"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
