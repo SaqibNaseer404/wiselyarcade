@@ -20,67 +20,150 @@
 <meta name="description" content="Play Ludo free online — vs the computer or pass-and-play with up to 4 players, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=9">
 <style>
   .lu-wrap{max-width:760px;margin:0 auto}
   .lu-top{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
-  #dice{font-size:3.4rem;line-height:1;filter:drop-shadow(0 8px 14px rgba(122,96,178,.35));
-    background:rgba(255,255,255,.85);border-radius:20px;width:84px;height:84px;
-    display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+  /* premium die: ivory cube face with deep inset pips (pips drawn by ludo.js) */
+  #dice{width:84px;height:84px;border-radius:18px;padding:13px;box-sizing:border-box;
+    display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+    background:linear-gradient(145deg,#fffef9 0%,#f3edda 55%,#e0d5b8 100%);
+    border:2px solid #cfc39f;
+    box-shadow:0 12px 22px rgba(74,52,16,.35), inset 0 2px 3px rgba(255,255,255,.95), inset 0 -7px 12px rgba(122,96,40,.28)}
+  #dice .pip{width:12px;height:12px;border-radius:50%;justify-self:center;align-self:center;background:transparent}
+  #dice .pip.on{background:radial-gradient(circle at 35% 30%,#66738c,#232c40 72%);
+    box-shadow:inset 0 2px 3px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.75)}
+  #dice .pip.on.mid{width:19px;height:19px;background:radial-gradient(circle at 35% 30%,#ffab9c,#d92c1e 72%);
+    box-shadow:inset 0 2px 3px rgba(90,0,0,.5), 0 1px 0 rgba(255,255,255,.75)}
   #dice.shake{animation:lshake .4s ease}
-  @keyframes lshake{0%,100%{transform:rotate(0)}25%{transform:rotate(-18deg) scale(1.08)}
-    50%{transform:rotate(14deg) scale(1.12)}75%{transform:rotate(-8deg)}}
+  @keyframes lshake{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-17deg) translateY(-6px) scale(1.07)}
+    50%{transform:rotate(13deg) translateY(2px) scale(1.11)}75%{transform:rotate(-8deg) translateY(-2px)}}
   #roll-btn.ready{animation:lpulse 1.4s ease-in-out infinite}
   @keyframes lpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-  #msg{font-weight:800;color:#5b4f70;text-align:center;min-height:1.6em;margin:6px 0 12px}
+  @keyframes tokpulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.14)}}
+  #msg{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:1.4rem;
+    letter-spacing:.05em;color:#2e3a56;text-align:center;min-height:1.6em;margin:6px 0 12px}
+  /* the board: deluxe edition on a dark wooden table frame */
   #ludo-board{position:relative;width:min(94vw,560px);aspect-ratio:1;margin:0 auto;
     display:grid;grid-template-columns:repeat(15,1fr);grid-template-rows:repeat(15,1fr);
-    border-radius:20px;overflow:hidden;border:6px solid rgba(255,255,255,.95);
-    box-shadow:0 24px 60px rgba(122,96,178,.3);background:#e8e2f2}
-  .lcell{border:1px solid rgba(120,100,160,.14);display:flex;align-items:center;
+    border-radius:20px;overflow:hidden;border:12px solid #3a2412;background:#2a1a0e;
+    box-shadow:0 34px 70px rgba(43,24,4,.5), 0 6px 18px rgba(43,24,4,.35),
+      inset 0 0 0 2px rgba(255,196,110,.35), inset 0 0 34px rgba(0,0,0,.35)}
+  .lcell{border:1px solid rgba(101,72,30,.16);display:flex;align-items:center;
     justify-content:center;font-size:clamp(.4rem,1.6vw,.8rem);color:rgba(90,70,130,.55)}
-  .lcell.track{background:#fff}
-  .lcell.base-inner{background:rgba(255,255,255,.85) !important}
-  .base-red{background:#f6b8b8}.base-green{background:#b5e8c8}
-  .base-yellow{background:#f5e6a8}.base-blue{background:#b8cdf5}
-  .start-red{background:#ef4444 !important;color:#fff}.start-green{background:#22c55e !important;color:#fff}
-  .start-yellow{background:#eab308 !important;color:#fff}.start-blue{background:#3b82f6 !important;color:#fff}
-  .stretch-red{background:#f6b8b8 !important}.stretch-green{background:#b5e8c8 !important}
-  .stretch-yellow{background:#f5e6a8 !important}.stretch-blue{background:#b8cdf5 !important}
-  .center-c{background:linear-gradient(135deg,#f6b8b8,#b5e8c8,#f5e6a8,#b8cdf5) !important}
+  .lcell.track{background:linear-gradient(145deg,#fffdf5,#f0e7d0);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.9), inset 0 -2px 3px rgba(120,90,40,.16)}
+  .lcell.base-inner{background:linear-gradient(145deg,#fffdf4,#ece2c8) !important;
+    box-shadow:inset 0 3px 8px rgba(96,64,20,.28), inset 0 -1px 0 rgba(255,255,255,.8)}
+  .base-red{background:radial-gradient(circle at 50% 38%,#f87171,#dc2626 68%,#991b1b)}
+  .base-green{background:radial-gradient(circle at 50% 38%,#4ade80,#16a34a 68%,#14532d)}
+  .base-yellow{background:radial-gradient(circle at 50% 38%,#fde047,#ca8a04 68%,#854d0e)}
+  .base-blue{background:radial-gradient(circle at 50% 38%,#60a5fa,#2563eb 68%,#1e3a8a)}
+  /* the active player's yard glows softly */
+  #ludo-board[data-turn="red"] .base-red,
+  #ludo-board[data-turn="green"] .base-green,
+  #ludo-board[data-turn="yellow"] .base-yellow,
+  #ludo-board[data-turn="blue"] .base-blue{
+    box-shadow:inset 0 0 26px rgba(255,255,255,.5), inset 0 0 6px rgba(255,255,255,.65)}
+  .start-red{background:radial-gradient(circle at 35% 30%,#ff9d9d,#ef4444 55%,#b91c1c) !important;color:#fff}
+  .start-green{background:radial-gradient(circle at 35% 30%,#8df0ae,#22c55e 55%,#15803d) !important;color:#fff}
+  .start-yellow{background:radial-gradient(circle at 35% 30%,#fde68a,#eab308 55%,#a16207) !important;color:#fff}
+  .start-blue{background:radial-gradient(circle at 35% 30%,#a8c8ff,#3b82f6 55%,#1d4ed8) !important;color:#fff}
+  .stretch-red{background:linear-gradient(145deg,#fecaca,#f87171) !important}
+  .stretch-green{background:linear-gradient(145deg,#bbf7d0,#4ade80) !important}
+  .stretch-yellow{background:linear-gradient(145deg,#fef08a,#facc15) !important}
+  .stretch-blue{background:linear-gradient(145deg,#bfdbfe,#60a5fa) !important}
+  /* gleaming safe stars: filled, shaded, glowing (glyph hidden, star redrawn) */
+  .lcell.safe{font-size:0;background:radial-gradient(circle at 50% 50%,#ffedbe,#fdf6e0 78%);
+    box-shadow:inset 0 0 8px rgba(245,166,35,.35)}
+  .lcell.safe::before{content:'★';font-size:clamp(.6rem,2.2vw,1.05rem);line-height:1;font-weight:900;
+    color:#f5a623;text-shadow:0 0 7px rgba(255,180,60,.9), 0 1px 1px rgba(146,84,0,.55)}
+  .lcell[class*="start-"]::before{color:#fff;text-shadow:0 0 7px rgba(255,255,255,.75), 0 1px 2px rgba(0,0,0,.4)}
+  /* polished center: four colors around a golden heart.
+     Cells are built in row order, so child index = row*15 + col + 1. */
+  .center-c{background:radial-gradient(circle at 50% 45%,#ffe9a8,#f5b921 62%,#d97706) !important;
+    box-shadow:inset 0 0 14px rgba(255,240,190,.65)}
+  #ludo-board > .lcell:nth-child(97), #ludo-board > .lcell:nth-child(112){
+    background:radial-gradient(circle at 50% 45%,#f87171,#dc2626 70%,#991b1b) !important}
+  #ludo-board > .lcell:nth-child(98), #ludo-board > .lcell:nth-child(99){
+    background:radial-gradient(circle at 50% 45%,#4ade80,#16a34a 70%,#14532d) !important}
+  #ludo-board > .lcell:nth-child(114), #ludo-board > .lcell:nth-child(129){
+    background:radial-gradient(circle at 50% 45%,#fde047,#ca8a04 70%,#854d0e) !important}
+  #ludo-board > .lcell:nth-child(127), #ludo-board > .lcell:nth-child(128){
+    background:radial-gradient(circle at 50% 45%,#60a5fa,#2563eb 70%,#1e3a8a) !important}
   #tokens{position:absolute;inset:0;pointer-events:none}
+  /* glossy pawn tokens: jewel dome, base shade, specular highlight */
   .token{position:absolute;width:5.4%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);
-    border:2px solid #fff;box-shadow:0 3px 8px rgba(40,25,70,.4);pointer-events:none;z-index:2}
-  .tok-red{background:radial-gradient(circle at 35% 30%,#ffb3b3,#ef4444 70%)}
-  .tok-green{background:radial-gradient(circle at 35% 30%,#b8f0cd,#22c55e 70%)}
-  .tok-yellow{background:radial-gradient(circle at 35% 30%,#fdf0b0,#eab308 70%)}
-  .tok-blue{background:radial-gradient(circle at 35% 30%,#c3d6fb,#3b82f6 70%)}
-  .token.movable{pointer-events:auto;cursor:pointer;animation:lpulse 1s ease-in-out infinite;
-    outline:3px solid #fff;z-index:3}
-  .pdot{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.75);
-    border:2px solid transparent;border-radius:999px;padding:6px 14px;font-weight:800;color:#5b4f70}
-  .pdot .swatch{width:16px;height:16px;border-radius:50%;border:2px solid #fff;
-    box-shadow:0 2px 5px rgba(40,25,70,.3)}
-  .pdot.active{border-color:#7c5cd6;background:#fff}
-  .pdot .phome{font-size:.8rem;color:#8a7ba3}
-  .lu-overlay{position:fixed;inset:0;background:rgba(80,60,120,.45);backdrop-filter:blur(6px);
+    border:2px solid rgba(255,255,255,.92);pointer-events:none;z-index:2;
+    box-shadow:0 5px 9px rgba(35,18,60,.5), inset 0 -5px 7px rgba(0,0,0,.38), inset 0 4px 6px rgba(255,255,255,.5)}
+  .token::before{content:'';position:absolute;left:10%;right:10%;bottom:5%;height:30%;border-radius:50%;
+    background:rgba(0,0,0,.16)}
+  .token::after{content:'';position:absolute;left:23%;top:13%;width:36%;height:25%;border-radius:50%;
+    background:radial-gradient(ellipse at center,rgba(255,255,255,.95),rgba(255,255,255,0) 70%);transform:rotate(-18deg)}
+  .tok-red{background:radial-gradient(circle at 35% 28%,#ffd9d9,#ff7b7b 32%,#ef4444 62%,#991b1b)}
+  .tok-green{background:radial-gradient(circle at 35% 28%,#d2f9de,#4ade80 32%,#22c55e 62%,#14532d)}
+  .tok-yellow{background:radial-gradient(circle at 35% 28%,#fef6c3,#fde047 32%,#eab308 62%,#854d0e)}
+  .tok-blue{background:radial-gradient(circle at 35% 28%,#dbeafe,#7db1ff 32%,#3b82f6 62%,#1e3a8a)}
+  .token.movable{pointer-events:auto;cursor:pointer;animation:tokpulse 1s ease-in-out infinite;
+    box-shadow:0 0 0 3px #fff, 0 0 0 5px rgba(245,166,35,.95), 0 0 22px 7px rgba(245,166,35,.5),
+    0 5px 9px rgba(35,18,60,.5), inset 0 -5px 7px rgba(0,0,0,.38), inset 0 4px 6px rgba(255,255,255,.5);z-index:3}
+  .token.hop{animation:luhop .45s ease}
+  @keyframes luhop{0%{transform:translate(-50%,-50%) scale(1)}40%{transform:translate(-50%,-98%) scale(1.13)}
+    100%{transform:translate(-50%,-50%) scale(1)}}
+  .token.spawn{animation:luspawn .38s ease}
+  @keyframes luspawn{0%{transform:translate(-50%,-50%) scale(.3);opacity:.3}
+    100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  .fx-burst{position:absolute;width:9.5%;aspect-ratio:1;border-radius:50%;pointer-events:none;z-index:5;
+    transform:translate(-50%,-50%);border:3px solid rgba(255,213,90,.95);
+    box-shadow:0 0 20px 5px rgba(255,170,40,.55), inset 0 0 16px rgba(255,120,60,.55);
+    animation:luburst .62s ease-out forwards}
+  @keyframes luburst{0%{opacity:1;transform:translate(-50%,-50%) scale(.35)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}
+  /* dark-glass player chips */
+  .pdot{display:flex;align-items:center;gap:8px;border-radius:999px;padding:6px 14px;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;letter-spacing:.05em;font-size:1.05rem;
+    color:#eef2ff;background:linear-gradient(180deg,rgba(15,23,38,.93),rgba(10,15,26,.88));
+    border:2px solid rgba(255,255,255,.14);box-shadow:0 10px 22px rgba(10,16,30,.3)}
+  .pdot .swatch{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.85);
+    box-shadow:0 2px 5px rgba(0,0,0,.45), inset 0 -2px 3px rgba(0,0,0,.3)}
+  .pdot.active{border-color:#f5a623;background:linear-gradient(180deg,rgba(24,34,54,.97),rgba(13,20,34,.94));
+    box-shadow:0 0 0 2px rgba(245,166,35,.35), 0 0 20px rgba(245,166,35,.35), 0 12px 24px rgba(10,16,30,.4)}
+  .pdot[data-color="red"].active{border-color:#ff7a6b;
+    box-shadow:0 0 0 2px rgba(239,68,68,.35), 0 0 20px rgba(239,68,68,.45), 0 12px 24px rgba(10,16,30,.4)}
+  .pdot[data-color="green"].active{border-color:#4ade80;
+    box-shadow:0 0 0 2px rgba(34,197,94,.35), 0 0 20px rgba(34,197,94,.45), 0 12px 24px rgba(10,16,30,.4)}
+  .pdot[data-color="yellow"].active{border-color:#facc15;
+    box-shadow:0 0 0 2px rgba(234,179,8,.35), 0 0 20px rgba(234,179,8,.45), 0 12px 24px rgba(10,16,30,.4)}
+  .pdot[data-color="blue"].active{border-color:#60a5fa;
+    box-shadow:0 0 0 2px rgba(59,130,246,.35), 0 0 20px rgba(59,130,246,.45), 0 12px 24px rgba(10,16,30,.4)}
+  .pdot .phome{font-size:.92rem;color:#ffc46b}
+  .lu-overlay{position:fixed;inset:0;background:rgba(7,10,20,.58);backdrop-filter:blur(6px);
     display:none;align-items:center;justify-content:center;z-index:50;padding:18px}
   .lu-overlay.show{display:flex}
-  .lu-card{background:rgba(255,255,255,.94);border-radius:24px;padding:30px 28px;max-width:430px;
-    width:100%;text-align:center;box-shadow:0 30px 70px rgba(60,40,100,.35)}
-  .lu-card h2{margin:0 0 6px;color:#3b3449}
-  .lu-card p{color:#6d6480}
+  .lu-card{background:linear-gradient(165deg,rgba(17,25,42,.97),rgba(9,13,24,.97));
+    border:1px solid rgba(255,255,255,.15);border-radius:24px;padding:30px 28px;max-width:430px;
+    width:100%;text-align:center;box-shadow:0 30px 70px rgba(2,6,18,.6)}
+  .lu-card h2{margin:0 0 6px;color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;
+    font-size:2rem;letter-spacing:.05em}
+  .lu-card p{color:rgba(226,232,255,.8)}
+  .lu-card > div{color:#ffd98a !important}
   .color-pick{display:flex;gap:10px;justify-content:center;margin:14px 0 20px}
   .color-pick label{width:52px;height:52px;border-radius:50%;cursor:pointer;
-    border:4px solid transparent;box-shadow:0 4px 12px rgba(40,25,70,.25)}
+    border:4px solid transparent;box-shadow:0 4px 12px rgba(0,0,0,.5), inset 0 -6px 10px rgba(0,0,0,.3), inset 0 4px 6px rgba(255,255,255,.45)}
   .color-pick input{display:none}
-  .color-pick input:checked+label{border-color:#3b3449;transform:scale(1.12)}
+  .color-pick input:checked+label{border-color:#f5a623;transform:scale(1.12);
+    box-shadow:0 0 0 2px rgba(245,166,35,.4), 0 0 18px rgba(245,166,35,.5), inset 0 -6px 10px rgba(0,0,0,.3), inset 0 4px 6px rgba(255,255,255,.45)}
   .opt-row{display:flex;gap:8px;justify-content:center;margin:10px 0;flex-wrap:wrap}
-  .opt-row label{background:#f1e9fb;border:2px solid transparent;border-radius:999px;
-    padding:8px 18px;font-weight:800;cursor:pointer;color:#5b4f70}
+  .opt-row label{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);border-radius:999px;
+    padding:8px 18px;font-weight:800;cursor:pointer;color:#dbe4ff}
   .opt-row input{display:none}
-  .opt-row input:checked+label{border-color:#7c5cd6;background:#e7dbff;color:#3b3449}
+  .opt-row input:checked+label{border-color:#f5a623;background:rgba(245,166,35,.18);color:#ffd98a}
+  /* amber primary / dark ghost buttons (page scope) */
+  .lu-wrap .btn, .lu-card .btn{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;
+    border-color:#d97706;box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 1px 0 rgba(255,255,255,.6)}
+  .lu-wrap .btn.ghost, .lu-card .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.95),rgba(11,17,29,.95));
+    color:#ffc46b;border-color:rgba(245,166,35,.45);box-shadow:0 10px 22px rgba(10,16,30,.35)}
 </style>
 </head>
 <body>
@@ -193,6 +276,6 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/ludo.js?v=4"></script>
+<script src="../js/ludo.js?v=5"></script>
 </body>
 </html>
