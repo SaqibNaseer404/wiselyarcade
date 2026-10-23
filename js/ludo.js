@@ -368,7 +368,7 @@ function renderAll() {
       t.style.top = ly;
       t.dataset.pi = players.indexOf(pl);
       t.dataset.ti = i;
-      if (phase === 'move' && !pl.ai && movable.some(function (m) { return m.ti === i; })) {
+      if (phase === 'move' && pl === cur() && movable.some(function (m) { return m.ti === i; })) {
         t.classList.add('movable');
         t.addEventListener('click', onToken);
       }
@@ -425,7 +425,7 @@ function renderAll() {
 
 function onToken(e) {
   var pi = +e.currentTarget.dataset.pi, ti = +e.currentTarget.dataset.ti;
-  if (phase !== 'move' || players[pi].ai) return;
+  if (phase !== 'move' || pi !== turn || players[pi].ai) return;
   applyMove(players[pi], ti, dice);
 }
 
