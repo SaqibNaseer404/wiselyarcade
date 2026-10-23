@@ -283,6 +283,7 @@ var GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 var st = G();
 var human = 'w', depth = 2, blunder = false, over = false;
 var sel = -1, selMoves = [];
+var lastFrom = -1, lastTo = -1; // render-only: last-move wash + slide fx
 var moveLog = [];
 
 var boardEl = document.getElementById('board');
@@ -306,6 +307,17 @@ function render() {
       var s = document.createElement('span');
       s.className = 'pc ' + p.c; s.textContent = GLYPH[p.t];
       d.appendChild(s);
+    }
+    if (i === lastFrom || i === lastTo) d.classList.add('last');
+    if (c === 0) {
+      var rk = document.createElement('span');
+      rk.className = 'coord rk'; rk.textContent = 8 - dr;
+      d.appendChild(rk);
+    }
+    if (r === 7) {
+      var fl = document.createElement('span');
+      fl.className = 'coord fl'; fl.textContent = 'abcdefgh'[dc];
+      d.appendChild(fl);
     }
     if (i === sel) d.classList.add('sel');
     for (var k = 0; k < selMoves.length; k++) if (selMoves[k].to === i) d.classList.add(st.board[i] ? 'takes' : 'move');
@@ -331,6 +343,49 @@ function render() {
     movesEl.appendChild(row);
   }
   movesEl.scrollTop = movesEl.scrollHeight;
+}
+
+/* ----- render-only move slide: a DOM ghost glides the moved piece from
+   its old square to its new one. Reads only post-render DOM geometry and
+   never touches game state; any failure is swallowed so a move can never
+   be broken by the effect. ----- */
+function slideOne(fromI, toI) {
+  var fromEl = null, toEl = null, kids = boardEl.children, i;
+  for (i = 0; i < kids.length; i++) {
+    if (+kids[i].dataset.i === fromI) fromEl = kids[i];
+    if (+kids[i].dataset.i === toI) toEl = kids[i];
+  }
+  if (!fromEl || !toEl || fromEl === toEl) return;
+  var pc = toEl.querySelector('.pc');
+  if (!pc) return;
+  var br = boardEl.getBoundingClientRect();
+  var fr = fromEl.getBoundingClientRect(), tr = toEl.getBoundingClientRect();
+  if (!fr.width) return;
+  var ghost = pc.cloneNode(true);
+  ghost.style.cssText = 'position:absolute;z-index:6;pointer-events:none;display:flex;' +
+    'align-items:center;justify-content:center;margin:0;' +
+    'left:' + (fr.left - br.left - boardEl.clientLeft) + 'px;' +
+    'top:' + (fr.top - br.top - boardEl.clientTop) + 'px;' +
+    'width:' + fr.width + 'px;height:' + fr.height + 'px;' +
+    'transition:transform .17s ease-in-out;';
+  boardEl.appendChild(ghost);
+  pc.style.visibility = 'hidden';
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      ghost.style.transform = 'translate(' + (tr.left - fr.left) + 'px,' + (tr.top - fr.top) + 'px)';
+    });
+  });
+  setTimeout(function () {
+    pc.style.visibility = '';
+    if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+  }, 230);
+}
+function slideFx(m) {
+  try {
+    slideOne(m.from, m.to);
+    if (m.castle === 'k') { var hr = Math.floor(m.from / 8); slideOne(hr * 8 + 7, hr * 8 + 5); }
+    if (m.castle === 'q') { var hr2 = Math.floor(m.from / 8); slideOne(hr2 * 8, hr2 * 8 + 3); }
+  } catch (e) { /* visual only */ }
 }
 
 function san(st0, m, legal) {
@@ -369,11 +424,13 @@ function doMove(m) {
   var captured = st.board[m.to] || null;
   if (m.ep) { var tr = rc(m.to)[0], tc = rc(m.to)[1]; captured = st.board[tr * 8 + tc + (st.turn === 'w' ? 8 : -8)]; }
   make(st, m);
+  lastFrom = m.from; lastTo = m.to;
   var key = posKey(st); st.reps[key] = (st.reps[key] || 0) + 1;
   moveLog.push({ san: s, cap: captured });
   sel = -1; selMoves = [];
   checkEnd();
   render();
+  slideFx(m);
   if (!over && st.turn !== human) setTimeout(aiMove, 450);
 }
 
