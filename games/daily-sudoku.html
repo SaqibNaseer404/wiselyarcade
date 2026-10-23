@@ -20,10 +20,23 @@
 <meta name="description" content="Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   .game-area{max-width:880px}
+  /* Premium chrome: dark-glass stat chips, trophy overlays, dark tool buttons */
+  .sudoku-meta{font-family:"Barlow Condensed",sans-serif;font-size:1.05rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#7c6414}
+  .stats .stat{background:linear-gradient(165deg,rgba(34,30,40,.97),rgba(18,16,22,.97));border:1px solid rgba(255,205,90,.28);border-bottom:3px solid rgba(217,160,40,.6);color:#f5edd8;box-shadow:0 12px 24px rgba(20,14,4,.28),inset 0 1px 0 rgba(255,255,255,.14)}
+  .stats .stat span{color:#c8a24a}
+  .stats .stat>div{font-family:"Barlow Condensed",sans-serif;font-size:1.35rem;font-weight:700;color:#f2b544;letter-spacing:.03em}
+  .stats .mistakes{color:#ffb59d}
+  .stage .overlay{background:rgba(17,14,19,.94);border-radius:16px;box-shadow:inset 0 0 0 2px rgba(242,181,68,.6),inset 0 0 70px rgba(242,181,68,.10)}
+  .stage .overlay h2{font-family:"Barlow Condensed",sans-serif;font-size:2.2rem;letter-spacing:.05em;color:#f7c948}
+  .stage .overlay p{color:#efe7d2}
+  #d-win .btn{background:linear-gradient(180deg,#ffd97a,#f2b544 55%,#dd9413);color:#33240a;border-bottom-color:#9a6a12;text-shadow:none;box-shadow:0 8px 0 rgba(120,80,10,.25),0 18px 32px rgba(217,147,13,.35),inset 0 2px 0 rgba(255,255,255,.65)}
+  #d-over h2{color:#ff9d8a}
+  .game-area .btn.ghost{background:rgba(24,21,28,.94);color:#f5edd8;border:2px solid rgba(255,205,90,.32);border-bottom:4px solid rgba(0,0,0,.55);text-shadow:none;box-shadow:0 8px 18px rgba(20,14,4,.25),inset 0 1px 0 rgba(255,255,255,.14)}
+  #d-notes.on{background:linear-gradient(180deg,#ffd97a,#f0ad3a);color:#33240a;border-color:#b97f16;border-bottom-color:#8a5f14}
 </style>
 </head>
 <body>
@@ -122,7 +135,23 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/sudoku-data.js"></script>
-<script src="../js/daily-sudoku.js?v=2"></script>
+<script src="../js/daily-sudoku.js?v=3"></script>
+<script>
+/* Presentational only: lights the pad key matching the selected cell's number. */
+(function(){try{
+  var board=document.getElementById('sboard');
+  function sync(){
+    var sel=board.querySelector('.scell.sel');
+    var v=sel?sel.textContent.trim():'';
+    if(!/^[1-9]$/.test(v))v='';
+    var btns=document.querySelectorAll('#spad button');
+    for(var i=0;i<btns.length;i++){btns[i].classList.toggle('lit',v!==''&&btns[i].textContent.trim()===v);}
+  }
+  new MutationObserver(sync).observe(board,{attributes:true,attributeFilter:['class'],subtree:true,childList:true});
+  board.addEventListener('click',function(){setTimeout(sync,0);});
+  sync();
+}catch(e){}})();
+</script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
