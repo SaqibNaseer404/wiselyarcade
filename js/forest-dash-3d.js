@@ -1,4 +1,13 @@
-/* Forest Dash 3D v6 — real-time 3D endless runner (Three.js).
+/* Forest Dash 3D v7 — real-time 3D endless runner (Three.js).
+   v7 "poster" pass: the world rebuilt to match the game's poster art —
+   a kid in a GREEN HOOD running through a magical glowing forest.
+   Twisted ancient trees (stacked, bent bark segments), teal-and-gold
+   light grade, fake god-ray shafts through the canopy, a dense ambient
+   firefly field, glowing mushroom clusters at tree bases, dappled light
+   spots on the trail, and the runner rebuilt as the poster kid (green
+   hood + short cloak, warm brown tunic, leather satchel).
+   VISUALS ONLY: every gameplay function (physics, hitboxes, scoring,
+   speed curve, spawns, storage) is byte-identical to v6.
    v6 "grown-up graphics" pass (Apex GP treatment): photo textures from
    ambientCG (CC0) — dirt trail, bark, grass — ACES tone mapping + sRGB,
    pines rebuilt from layered foliage blobs (no more cones), a two-segment
@@ -88,7 +97,7 @@
   if (THREE.sRGBEncoding !== undefined) renderer.outputEncoding = THREE.sRGBEncoding;
   if (THREE.ACESFilmicToneMapping !== undefined) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.12;
+    renderer.toneMappingExposure = 1.09;
   }
 
   var scene = new THREE.Scene();
@@ -139,18 +148,20 @@
     if (THREE.sRGBEncoding !== undefined) t.encoding = THREE.sRGBEncoding;
     return t;
   }
+  /* v7: poster grade — deep teal up top melting into warm gold at the
+     horizon, keeping the morning -> dusk arc across levels */
   var SKY_TEX = [
-    makeSkyTexture([[0, '#3E74C4'], [0.42, '#79A9E4'], [0.7, '#BCD9F2'], [0.88, '#FFE2AC'], [1, '#FFF0D0']]),
-    makeSkyTexture([[0, '#3363B4'], [0.42, '#6C97D8'], [0.7, '#AECBEC'], [0.88, '#FFD9A0'], [1, '#FFE9C4']]),
-    makeSkyTexture([[0, '#2C4E8C'], [0.4, '#5E7CB0'], [0.68, '#C08F6E'], [0.88, '#FFAA5C'], [1, '#FFC98C']]),
-    makeSkyTexture([[0, '#1C2A50'], [0.4, '#3C4E78'], [0.68, '#6B5A74'], [0.88, '#D97E46'], [1, '#F2A35E']])
+    makeSkyTexture([[0, '#1F6E6A'], [0.42, '#4FA393'], [0.7, '#A8D8B8'], [0.88, '#FFE2AC'], [1, '#FFF0D0']]),
+    makeSkyTexture([[0, '#1A5F63'], [0.42, '#43907F'], [0.7, '#97C9A4'], [0.88, '#FFD9A0'], [1, '#FFE9C4']]),
+    makeSkyTexture([[0, '#173F52'], [0.4, '#33655F'], [0.68, '#8A7A52'], [0.88, '#FFAA5C'], [1, '#FFC98C']]),
+    makeSkyTexture([[0, '#0E2438'], [0.4, '#274A4E'], [0.68, '#5C5244'], [0.88, '#D97E46'], [1, '#F2A35E']])
   ];
   /* v6: sun / light grade per level (visual only; index matches LEVELS) */
   var SKY_GRADE = [
-    { sun: 0xffe9bb, sunI: 1.05, hemiI: 0.9,  disc: 0xffe9a3, flyGlow: 1.0 },
-    { sun: 0xffdf9e, sunI: 1.0,  hemiI: 0.85, disc: 0xffdf94, flyGlow: 1.15 },
-    { sun: 0xffb066, sunI: 0.95, hemiI: 0.72, disc: 0xffa64d, flyGlow: 1.5 },
-    { sun: 0xff8f52, sunI: 0.85, hemiI: 0.6,  disc: 0xff8a3d, flyGlow: 1.9 }
+    { sun: 0xffedb8, sunI: 1.12, hemiI: 0.82, disc: 0xffe9a3, flyGlow: 1.25 },
+    { sun: 0xffe39e, sunI: 1.05, hemiI: 0.78, disc: 0xffdf94, flyGlow: 1.4 },
+    { sun: 0xffb066, sunI: 0.98, hemiI: 0.66, disc: 0xffa64d, flyGlow: 1.7 },
+    { sun: 0xff8f52, sunI: 0.88, hemiI: 0.55, disc: 0xff8a3d, flyGlow: 2.1 }
   ];
   var flyGlow = 1;
   var skyDomeMat = new THREE.MeshBasicMaterial({
@@ -166,8 +177,8 @@
   camera.position.set(0, 4.4, 8.2);
   camera.lookAt(0, 1.4, -10);
 
-  // warm, realistic forest light
-  var hemi = new THREE.HemisphereLight(0xd8ecff, 0x3f7a3f, 0.85);
+  // v7 poster light: warm gold key from the sun side, teal ambient bounce
+  var hemi = new THREE.HemisphereLight(0xbfe8d2, 0x2f6b3a, 0.85);
   scene.add(hemi);
   var sun = new THREE.DirectionalLight(0xffecc8, 1.0);
   sun.position.set(16, 30, 12);
@@ -180,12 +191,13 @@
   sun.shadow.normalBias = 0.03;
   scene.add(sun);
   scene.add(sun.target); // v6: shadow camera tracks the runner
-  var fill = new THREE.DirectionalLight(0xbcd8ff, 0.25); // cool bounce from the sky
+  var fill = new THREE.DirectionalLight(0x9fd8c0, 0.3); // v7: teal bounce from the canopy
   fill.position.set(-12, 18, -6);
   scene.add(fill);
   // v5: soft rim light from behind-left — gives the runner and trees edge
   // definition (the "high-graphics" look) for almost zero GPU cost
-  var rim = new THREE.DirectionalLight(0xa8ccff, 0.35);
+  // v7: rim warmed to gold so edges catch the poster glow
+  var rim = new THREE.DirectionalLight(0xffd9a0, 0.42);
   rim.position.set(-8, 10, -20);
   scene.add(rim);
 
@@ -225,17 +237,22 @@
     pathEdge: std({ color: 0x9a7d58, map: pathTex, roughness: 1, metalness: 0 }),
     trunk: std({ color: 0xffffff, roughness: 1, metalness: 0 }),
     trunkDark: std({ color: 0xbcae9f, roughness: 1, metalness: 0 }),
-    pine: std({ color: 0x2c7a44, roughness: 1, metalness: 0, flatShading: true }),
-    pine2: std({ color: 0x35994e, roughness: 1, metalness: 0, flatShading: true }),
-    pine3: std({ color: 0x256b3a, roughness: 1, metalness: 0, flatShading: true }),
-    pineTip: std({ color: 0x45ad5b, roughness: 1, metalness: 0, flatShading: true }),
-    leaf: std({ color: 0x3f9e4f, roughness: 1, metalness: 0, flatShading: true }),
-    leaf2: std({ color: 0x2f8a42, roughness: 1, metalness: 0, flatShading: true }),
-    leafLit: std({ color: 0x55b95e, roughness: 1, metalness: 0, flatShading: true }),
-    bush: std({ color: 0x3a8f47, roughness: 1, metalness: 0, flatShading: true }),
-    tuft: std({ color: 0x4da856, roughness: 1, metalness: 0 }),
-    fern: std({ color: 0x35853f, roughness: 1, metalness: 0, side: THREE.DoubleSide }),
-    treeline: std({ color: 0x3d6e52, roughness: 1, metalness: 0, flatShading: true }),
+    /* v7: canopy palette pushed teal-green to match the poster forest */
+    pine: std({ color: 0x1d6a4c, roughness: 1, metalness: 0, flatShading: true }),
+    pine2: std({ color: 0x27855e, roughness: 1, metalness: 0, flatShading: true }),
+    pine3: std({ color: 0x14503e, roughness: 1, metalness: 0, flatShading: true }),
+    pineTip: std({ color: 0x46b978, roughness: 1, metalness: 0, flatShading: true }),
+    leaf: std({ color: 0x2a8a68, roughness: 1, metalness: 0, flatShading: true }),
+    leaf2: std({ color: 0x1f7355, roughness: 1, metalness: 0, flatShading: true }),
+    leafLit: std({ color: 0x63c47e, roughness: 1, metalness: 0, flatShading: true }),
+    bush: std({ color: 0x2c8557, roughness: 1, metalness: 0, flatShading: true }),
+    tuft: std({ color: 0x3fa065, roughness: 1, metalness: 0 }),
+    fern: std({ color: 0x2a7a52, roughness: 1, metalness: 0, side: THREE.DoubleSide }),
+    treeline: std({ color: 0x2e6355, roughness: 1, metalness: 0, flatShading: true }),
+    /* v7 poster props: vines, deep-fog silhouette trees, moss */
+    vine: std({ color: 0x1e5c3a, roughness: 1, metalness: 0 }),
+    deepTree: std({ color: 0x14403a, roughness: 1, metalness: 0, flatShading: true }),
+    moss: std({ color: 0x4fae62, roughness: 1, metalness: 0, flatShading: true }),
     rock: std({ color: 0x8d99a8, roughness: 0.95, metalness: 0, flatShading: true }),
     rockDark: std({ color: 0x646e7e, roughness: 0.95, metalness: 0, flatShading: true }),
     snow: std({ color: 0xffffff, roughness: 0.55, metalness: 0 }),
@@ -244,17 +261,24 @@
     cloud: lam({ color: 0xffffff, transparent: true, opacity: 0.92 }),
     sunDisc: new THREE.MeshBasicMaterial({ color: 0xffe9a3, fog: false }),
     fly: new THREE.MeshBasicMaterial({ color: 0xffe066 }),
+    /* v7: the runner is the poster kid now — green hood, warm brown tunic,
+       brown trousers and boots, leather satchel (was: teal shirt + pink cap) */
     skin: std({ color: 0xf2c49b, roughness: 0.75, metalness: 0 }),
-    shirt: std({ color: 0x2fbfae, roughness: 0.85, metalness: 0 }),
-    shirtDark: std({ color: 0x25a292, roughness: 0.85, metalness: 0 }),
-    shorts: std({ color: 0x3b4a6b, roughness: 0.9, metalness: 0 }),
-    cap: std({ color: 0xf2789f, roughness: 0.7, metalness: 0 }),
+    shirt: std({ color: 0x8a5a33, roughness: 0.85, metalness: 0 }),
+    shirtDark: std({ color: 0x2e8b47, roughness: 0.85, metalness: 0 }),
+    shorts: std({ color: 0x5d4630, roughness: 0.9, metalness: 0 }),
+    pantsDark: std({ color: 0x4a3823, roughness: 0.9, metalness: 0 }),
+    cap: std({ color: 0x2e8b47, roughness: 0.75, metalness: 0 }),
+    cloak: std({ color: 0x256b3a, roughness: 0.9, metalness: 0, side: THREE.DoubleSide }),
     hair: std({ color: 0x4a3423, roughness: 0.95, metalness: 0 }),
-    shoe: std({ color: 0xf5f5f5, roughness: 0.6, metalness: 0 }),
-    shoeAccent: std({ color: 0x2fbfae, roughness: 0.6, metalness: 0 }),
-    pack: std({ color: 0xff9f43, roughness: 0.85, metalness: 0 }),
-    packDark: std({ color: 0xe07b28, roughness: 0.85, metalness: 0 }),
-    shroomCap: std({ color: 0xd64541, roughness: 0.55, metalness: 0 }),
+    shoe: std({ color: 0x6e4a2c, roughness: 0.65, metalness: 0 }),
+    shoeAccent: std({ color: 0x3d2a18, roughness: 0.65, metalness: 0 }),
+    pack: std({ color: 0x7a4a26, roughness: 0.85, metalness: 0 }),
+    packDark: std({ color: 0x54331a, roughness: 0.85, metalness: 0 }),
+    /* v7: scattered shrooms glow like the poster's — soft teal magic */
+    shroomCap: std({ color: 0x37c8ae, roughness: 0.5, metalness: 0, emissive: 0x1a9c84, emissiveIntensity: 0.55 }),
+    glowTeal: std({ color: 0x2fd8c0, roughness: 0.45, metalness: 0, emissive: 0x17bfa4, emissiveIntensity: 0.85 }),
+    glowGold: std({ color: 0xffcf5e, roughness: 0.45, metalness: 0, emissive: 0xe8a91c, emissiveIntensity: 0.8 }),
     shroomStem: std({ color: 0xf3e6cf, roughness: 0.9, metalness: 0 }),
     warn: new THREE.MeshBasicMaterial({ color: 0xffd23f })
   };
@@ -381,53 +405,126 @@
   /* ---------------- Forest walls: near detail + far depth ---------------- */
   var nearTrees = [], farTrees = [], bushes = [], tufts = [], canopy = [], patches = [];
 
+  /* v7: TWISTED ancient trunks — stacked bark segments, each rotated and
+     offset a little further than the last, so the trunk bends and corkscrews
+     like the poster's trees. Pure render geometry: tree positions, scale and
+     recycling are exactly as before (trees never collide with the runner). */
+  function twistedTrunk(g, h, baseS, detail) {
+    var segs = detail ? 4 : 3;
+    var segH = h / segs;
+    var bendA = Math.random() * Math.PI * 2;
+    var bendAmt = 0.2 + Math.random() * 0.2;
+    var twist = (Math.random() - 0.5) * 0.75;
+    var ox = 0, oz = 0, topX = 0, topZ = 0;
+    for (var sg = 0; sg < segs; sg++) {
+      var k = sg / segs;
+      var s = baseS * (1 - k * 0.45);
+      var seg = mesh(G.trunkGeo, Math.random() < 0.5 ? M.trunk : M.trunkDark, s, segH * 1.12, s, detail);
+      seg.position.set(ox, segH * (sg + 0.5), oz);
+      seg.rotation.set(Math.cos(bendA) * bendAmt * k, twist * k, Math.sin(bendA) * bendAmt * k);
+      g.add(seg);
+      ox += Math.sin(bendA) * bendAmt * segH * 0.9;
+      oz += Math.cos(bendA) * bendAmt * segH * 0.9;
+      topX = ox; topZ = oz;
+    }
+    // root flares gripping the ground
+    var roots = detail ? 3 : 0;
+    for (var r2 = 0; r2 < roots; r2++) {
+      var ra = (r2 / roots) * Math.PI * 2 + Math.random() * 0.8;
+      var root = mesh(G.cone, M.trunkDark, baseS * 0.5, 0.85, baseS * 0.5, detail);
+      root.position.set(Math.cos(ra) * baseS * 0.42, 0.3, Math.sin(ra) * baseS * 0.42);
+      root.rotation.set(Math.sin(ra) * 0.6, 0, -Math.cos(ra) * 0.6);
+      g.add(root);
+    }
+    // one bare branch stub reaching out of the bend
+    if (detail) {
+      var stub = mesh(G.trunkGeo, M.trunkDark, baseS * 0.4, 1.15, baseS * 0.4, detail);
+      stub.position.set(topX * 0.8 + 0.4, h * 0.82, topZ * 0.8);
+      stub.rotation.z = -1.05;
+      stub.rotation.y = Math.random() * 3;
+      g.add(stub);
+    }
+    return { x: topX, z: topZ };
+  }
+  /* v7: glowing mushroom cluster for a tree base — tiny emissive caps,
+     teal and gold, on pale stems (the fireflies gather here visually) */
+  function makeGlowShrooms() {
+    var g = new THREE.Group();
+    var n = 3;
+    for (var i2 = 0; i2 < n; i2++) {
+      var s = 0.55 + Math.random() * 0.6;
+      var stem = mesh(G.cyl, M.shroomStem, 0.13 * s, 0.3 * s, 0.13 * s, false);
+      stem.position.set((Math.random() - 0.5) * 0.55, 0.15 * s, (Math.random() - 0.5) * 0.55);
+      g.add(stem);
+      var capM = mesh(G.sphere, Math.random() < 0.6 ? M.glowTeal : M.glowGold, 0.4 * s, 0.24 * s, 0.4 * s, false);
+      capM.position.copy(stem.position);
+      capM.position.y = 0.32 * s;
+      g.add(capM);
+    }
+    return g;
+  }
+  /* v7: hanging vine strand — thin stem + leaf blob tip */
+  function makeVine(len) {
+    var g = new THREE.Group();
+    var stem = mesh(G.cyl, M.vine, 0.045, len, 0.045, false);
+    stem.position.y = -len / 2;
+    g.add(stem);
+    var tipL = mesh(G.ico, M.leaf2, 0.34, 0.42, 0.34, false);
+    tipL.position.y = -len;
+    g.add(tipL);
+    g.rotation.z = (Math.random() - 0.5) * 0.22;
+    g.rotation.x = (Math.random() - 0.5) * 0.22;
+    return g;
+  }
   /* v6: pines rebuilt — no more cones. Layered, drooping foliage tiers of
-     flat-shaded icosahedron blobs around a tapered bark trunk. */
+     flat-shaded icosahedron blobs. v7: on a twisted ancient trunk, canopy
+     pushed teal, vines + glowing mushrooms on the near trees. */
   function makePine(detail) {
     var g = new THREE.Group();
-    var flare = mesh(G.cyl, M.trunkDark, 0.95, 0.55, 0.95, detail);
-    flare.position.y = 0.27;
-    g.add(flare);
-    var trunk = mesh(G.trunkGeo, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.72, 2.6, 0.72, detail);
-    trunk.position.y = 1.3;
-    g.add(trunk);
+    var top = twistedTrunk(g, 3.6, 0.88, detail);
     var pm = PINES[(Math.random() * PINES.length) | 0];
     var pm2 = PINES[(Math.random() * PINES.length) | 0];
     var tiers = detail ? 4 : 3;
     var perTier = detail ? 3 : 1;
     for (var t = 0; t < tiers; t++) {
-      var ty = 2.5 + t * 1.28;
+      var ty = 3.1 + t * 1.2;
       var tr = 2.5 - t * 0.42;
       var tm = t % 2 ? pm2 : pm;
+      var cx = top.x * (0.35 + t * 0.2), cz = top.z * (0.35 + t * 0.2);
       var center = mesh(G.ico, tm, tr * 1.7, tr * 0.78, tr * 1.7, detail);
-      center.position.y = ty;
+      center.position.set(cx, ty, cz);
       center.rotation.y = Math.random() * 3;
       g.add(center);
       for (var b = 0; b < perTier; b++) {
         var ang = (b / perTier) * Math.PI * 2 + t * 1.1 + Math.random() * 0.7;
         var sat = mesh(G.ico, tm, tr * 1.05, tr * 0.62, tr * 1.05, detail);
-        sat.position.set(Math.cos(ang) * tr * 0.62, ty - 0.22, Math.sin(ang) * tr * 0.62);
+        sat.position.set(cx + Math.cos(ang) * tr * 0.62, ty - 0.22, cz + Math.sin(ang) * tr * 0.62);
         sat.rotation.y = Math.random() * 3;
         g.add(sat);
       }
     }
     var tipB = mesh(G.ico, M.pineTip, 1.15, 1.5, 1.15, detail);
-    tipB.position.y = 2.5 + tiers * 1.28 + 0.35;
+    tipB.position.set(top.x, 3.1 + tiers * 1.2 + 0.3, top.z);
     g.add(tipB);
+    if (detail) {
+      var vn = makeVine(1.5 + Math.random() * 1.1);
+      vn.position.set(top.x + 1.1, 3.4, top.z + 0.5);
+      g.add(vn);
+      if (Math.random() < 0.55) {
+        var sh2 = makeGlowShrooms();
+        sh2.position.set(0.75, 0, 0.45);
+        g.add(sh2);
+      }
+    }
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
   }
   function makeLeafy(detail) {
     var g = new THREE.Group();
-    var flare = mesh(G.cyl, M.trunkDark, 0.85, 0.5, 0.85, detail);
-    flare.position.y = 0.25;
-    g.add(flare);
-    var trunk = mesh(G.trunkGeo, Math.random() < 0.5 ? M.trunk : M.trunkDark, 0.66, 2.4, 0.66, detail);
-    trunk.position.y = 1.2;
-    g.add(trunk);
+    var top = twistedTrunk(g, 3.4, 0.82, detail);
     // v6: organic canopy — overlapping flat-shaded blobs with per-blob hue picks
     var main = mesh(G.ico, LEAVES[(Math.random() * LEAVES.length) | 0], 3.9, 3.3, 3.9, detail);
-    main.position.y = 3.9;
+    main.position.set(top.x, 4.5, top.z);
     main.rotation.y = Math.random() * 3;
     g.add(main);
     var blobs = detail ? 5 : 2;
@@ -435,9 +532,22 @@
       var ang = Math.random() * Math.PI * 2;
       var rad = 1.1 + Math.random() * 0.9;
       var bl = mesh(G.ico, LEAVES[(Math.random() * LEAVES.length) | 0], 1.6 + Math.random() * 1.1, 1.4 + Math.random() * 0.9, 1.6 + Math.random() * 1.1, detail);
-      bl.position.set(Math.cos(ang) * rad, 3.4 + Math.random() * 1.9, Math.sin(ang) * rad);
+      bl.position.set(top.x + Math.cos(ang) * rad, 4.0 + Math.random() * 1.9, top.z + Math.sin(ang) * rad);
       bl.rotation.y = Math.random() * 3;
       g.add(bl);
+    }
+    if (detail) {
+      var vn1 = makeVine(1.7 + Math.random() * 1.2);
+      vn1.position.set(top.x - 1.3, 4.4, top.z + 0.6);
+      g.add(vn1);
+      var vn2 = makeVine(1.2 + Math.random() * 0.9);
+      vn2.position.set(top.x + 1.5, 4.1, top.z - 0.7);
+      g.add(vn2);
+      if (Math.random() < 0.55) {
+        var sh3 = makeGlowShrooms();
+        sh3.position.set(-0.8, 0, 0.5);
+        g.add(sh3);
+      }
     }
     g.rotation.y = Math.random() * Math.PI * 2;
     return g;
@@ -465,6 +575,21 @@
     ft.position.set(forestX(9.5, 17), 0, -90 + Math.random() * 102);
     scene.add(ft);
     farTrees.push(ft);
+  }
+  /* v7: a second, darker tree layer deeper in the fog — simple silhouettes
+     riding as children of the far trees, so they scroll/recycle for free */
+  for (i = 0; i < farTrees.length; i++) {
+    if (Math.random() < 0.45) continue;
+    var twin = new THREE.Group();
+    var tTrunk = mesh(G.trunkGeo, M.deepTree, 0.9, 4.6, 0.9, false);
+    tTrunk.position.y = 2.3;
+    tTrunk.rotation.z = (Math.random() - 0.5) * 0.24;
+    twin.add(tTrunk);
+    var tCan = mesh(G.ico, M.deepTree, 5.2, 4.4, 5.2, false);
+    tCan.position.y = 5.6;
+    twin.add(tCan);
+    twin.position.set((Math.random() < 0.5 ? -1 : 1) * (2.5 + Math.random() * 2.5), 0, -4 - Math.random() * 4);
+    farTrees[i].add(twin);
   }
   // bushes — v6: clusters of foliage blobs, not single spheres
   function makeBush() {
@@ -495,6 +620,17 @@
     rk.scale.set(rs, rs * 0.8, rs);
     rk.position.set(forestX(3.9, 13), rs * 0.3, -90 + Math.random() * 102);
     rk.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+    // v7: moss cap + a tiny glowing pebble — rocks belong to the magic forest
+    if (Math.random() < 0.7) {
+      var mossCap = mesh(G.ico, M.moss, 0.8, 0.35, 0.8, false);
+      mossCap.position.y = 0.32;
+      rk.add(mossCap);
+    }
+    if (Math.random() < 0.4) {
+      var peb = mesh(G.sphere, Math.random() < 0.5 ? M.glowTeal : M.glowGold, 0.16, 0.16, 0.16, false);
+      peb.position.set(0.45, -0.15, 0.3);
+      rk.add(peb);
+    }
     scene.add(rk);
     rocks.push(rk);
   }
@@ -637,11 +773,124 @@
     scene.add(leafPts);
   }
 
+  /* ---- v7 poster magic: dense fireflies, god rays, dappled light ----
+     All render-only. Driven by its own rAF loop so the gameplay frame()
+     stays byte-identical to v6; this loop only READS state/speed. */
+  var MAGIC_GOLD_N = QT === 'high' ? 80 : QT === 'med' ? 56 : 26;
+  var MAGIC_TEAL_N = QT === 'high' ? 36 : QT === 'med' ? 26 : 12;
+  function magicSpawn(arr, ii, clustered) {
+    var j = ii * 3;
+    if (clustered && Math.random() < 0.45) {
+      // low clusters near the tree line, where the glowing mushrooms grow
+      arr[j] = (Math.random() < 0.5 ? -1 : 1) * (4.2 + Math.random() * 4.5);
+      arr[j + 1] = 0.4 + Math.random() * 1.3;
+    } else {
+      arr[j] = (Math.random() - 0.5) * 17;
+      arr[j + 1] = 0.5 + Math.random() * 5.2;
+    }
+    arr[j + 2] = -68 + Math.random() * 76;
+  }
+  function makeMagicPoints(n, color, size) {
+    var geo = new THREE.BufferGeometry();
+    var pos = new Float32Array(n * 3);
+    var seeds = [];
+    for (var i2 = 0; i2 < n; i2++) { magicSpawn(pos, i2, true); seeds.push(Math.random() * 6.28); }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var pts = new THREE.Points(geo, new THREE.PointsMaterial({
+      color: color, size: size, transparent: true, opacity: 0.8,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+      map: makeGlowTexture('rgba(255,255,255,1)', 'rgba(255,255,255,0)')
+    }));
+    pts.frustumCulled = false;
+    scene.add(pts);
+    return { pts: pts, geo: geo, seeds: seeds, n: n };
+  }
+  var magicGold = makeMagicPoints(MAGIC_GOLD_N, 0xffd76a, 0.82);
+  var magicTeal = makeMagicPoints(MAGIC_TEAL_N, 0x5ff2d0, 0.66);
+  function updateMagic(sys, dt, t) {
+    var arr = sys.geo.attributes.position.array;
+    var scroll = (state === 'playing') ? speed * dt * 0.92 : 0;
+    for (var i2 = 0; i2 < sys.n; i2++) {
+      var j = i2 * 3;
+      arr[j] += Math.sin(sys.seeds[i2] + t * 0.9) * dt * 0.55;
+      arr[j + 1] += Math.cos(sys.seeds[i2] * 1.7 + t * 0.6) * dt * 0.35;
+      arr[j + 2] += scroll;
+      if (arr[j + 2] > 9) { magicSpawn(arr, i2, true); arr[j + 2] = -68 - Math.random() * 6; }
+      if (arr[j + 1] < 0.25) arr[j + 1] = 0.25;
+      if (arr[j + 1] > 6.4) arr[j + 1] = 6.4;
+    }
+    sys.geo.attributes.position.needsUpdate = true;
+  }
+  /* god rays: additive translucent shafts hanging from canopy clusters
+     (they scroll + recycle with the canopy for free) + big distant shafts */
+  var rayMat = new THREE.MeshBasicMaterial({
+    color: 0xffe9a8, transparent: true, opacity: 0.09,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    side: THREE.DoubleSide, fog: false
+  });
+  function makeShaft(w, len) {
+    var m2 = new THREE.Mesh(G.plane, rayMat);
+    m2.scale.set(w, len, 1);
+    m2.castShadow = false;
+    m2.renderOrder = 3;
+    return m2;
+  }
+  for (var ci2 = 0; ci2 < canopy.length; ci2++) {
+    if (ci2 % 2 !== 0) continue;
+    var shaft = makeShaft(3.4, 13);
+    shaft.position.set(0.6, -5.2, 0.4);
+    shaft.rotation.set(0.22, 0.3, 0.42);
+    canopy[ci2].add(shaft);
+  }
+  [[-13, -58, 7, 34], [4, -78, 9, 40], [14, -46, 6, 30]].forEach(function (cs) {
+    var big = makeShaft(cs[2], cs[3]);
+    big.position.set(cs[0], 13, cs[1]);
+    big.rotation.set(0.18, 0.25, 0.42);
+    scene.add(big);
+  });
+  /* dappled light: soft gold spots riding on the path litter, scrolling
+     down the trail with the world like sunlight through leaves */
+  var dappleMat = new THREE.MeshBasicMaterial({
+    map: makeGlowTexture('rgba(255,232,160,0.9)', 'rgba(255,232,160,0)'),
+    transparent: true, opacity: 0.16,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  });
+  for (var di2 = 0; di2 < litter.length; di2++) {
+    if (di2 % 2 !== 0) continue;
+    var dap = new THREE.Mesh(G.plane, dappleMat);
+    dap.scale.set(6.5, 6.5, 1);
+    dap.position.z = 0.02;
+    dap.renderOrder = 1;
+    litter[di2].add(dap);
+  }
+  var fxLast = 0;
+  function posterFx(tms) {
+    requestAnimationFrame(posterFx);
+    var t = tms / 1000;
+    var dt = Math.min(0.05, fxLast ? (t - fxLast) : 0.016);
+    fxLast = t;
+    updateMagic(magicGold, dt, t);
+    updateMagic(magicTeal, dt, t * 0.8 + 2);
+    // slow twinkle / breathing on every magic layer
+    magicGold.pts.material.opacity = 0.7 + 0.3 * Math.sin(t * 2.3);
+    magicTeal.pts.material.opacity = 0.6 + 0.3 * Math.sin(t * 1.7 + 2);
+    rayMat.opacity = 0.11 + 0.045 * Math.sin(t * 0.45);
+    dappleMat.opacity = 0.13 + 0.05 * Math.sin(t * 0.8 + 1);
+    M.glowTeal.emissiveIntensity = 0.75 + 0.3 * Math.sin(t * 2.0);
+    M.glowGold.emissiveIntensity = 0.7 + 0.28 * Math.sin(t * 1.6 + 1.3);
+    M.shroomCap.emissiveIntensity = 0.45 + 0.2 * Math.sin(t * 1.8 + 0.6);
+  }
+  requestAnimationFrame(posterFx);
+
   function applyTheme(cfg) {
     scene.fog.color.setHex(cfg.fog);
     scene.fog.near = cfg.fogNear;
     scene.fog.far = cfg.fogFar;
     scene.background.setHex(cfg.fog);
+    // v7: poster mist — pull the level fog toward teal (grade only; the
+    // fog distances and decor visibility counts below are unchanged)
+    scene.fog.color.lerp(new THREE.Color(0x6fc7ae), 0.55);
+    scene.background.copy(scene.fog.color);
     // v6: swap in the level's sky gradient + light grade (golden -> deep dusk)
     var ti = 0;
     for (var li3 = 0; li3 < LEVELS.length; li3++) if (LEVELS[li3].fog === cfg.fog) ti = li3;
@@ -657,7 +906,7 @@
     flyPts.material.size = 0.42 + 0.12 * (flyGlow - 1);
     // photo grass takes the level tint gently — lerped toward white so the
     // photographic texture does not go muddy
-    M.grass.color.setHex(cfg.grass).lerp(new THREE.Color(0xffffff), 0.62);
+    M.grass.color.setHex(cfg.grass).lerp(new THREE.Color(0xffffff), 0.52); // v7: deeper green (was 0.62)
     M.grass.color.convertSRGBToLinear();
     for (var n = 0; n < nearTrees.length; n++) nearTrees[n].visible = n < cfg.near;
     for (var f = 0; f < farTrees.length; f++) farTrees[f].visible = f < cfg.far;
@@ -692,10 +941,11 @@
       leg.add(thigh);
       var shin = new THREE.Group();
       shin.position.y = -0.42;
+      // v7: poster legs — bare shins under the shorts, GREEN socks, boots
       var shinM = mesh(G.box, M.skin, 0.2, 0.36, 0.22);
       shinM.position.y = -0.18;
       shin.add(shinM);
-      var sock = mesh(G.box, M.shoe, 0.21, 0.1, 0.23);
+      var sock = mesh(G.box, M.cap, 0.21, 0.1, 0.23);
       sock.position.y = -0.33;
       shin.add(sock);
       var shoe = mesh(G.box, M.shoe, 0.27, 0.15, 0.46);
@@ -716,25 +966,27 @@
     torsoG.add(torso);
     var chest = mesh(G.box, M.shirtDark, 0.62, 0.2, 0.36); chest.position.y = 0.52;
     torsoG.add(chest);
-    // backpack: body, lid, bedroll, pocket and compression straps
-    var pack = mesh(G.box, M.pack, 0.44, 0.52, 0.24);
-    pack.position.set(0, 0.38, -0.3);
-    torsoG.add(pack);
-    var packTop = mesh(G.box, M.packDark, 0.46, 0.13, 0.26);
-    packTop.position.set(0, 0.66, -0.3);
-    torsoG.add(packTop);
-    var roll = mesh(G.cyl, M.packDark, 0.2, 0.5, 0.2);
-    roll.rotation.z = Math.PI / 2;
-    roll.position.set(0, 0.79, -0.3);
-    torsoG.add(roll);
-    var pocket = mesh(G.box, M.packDark, 0.3, 0.26, 0.06);
-    pocket.position.set(0, 0.3, -0.44);
-    torsoG.add(pocket);
-    [-0.13, 0.13].forEach(function (sx2) {
-      var strap = mesh(G.box, M.packDark, 0.09, 0.56, 0.27);
-      strap.position.set(sx2, 0.38, -0.3);
-      torsoG.add(strap);
-    });
+    // v7 poster kid: a short green cloak over the shoulders, a leather
+    // belt, and a little satchel on the hip with a strap across the back
+    // (replaces the v6 backpack — same torso pivot, same silhouette zone)
+    var cloak = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.54, 0.66, 9, 1, true), M.cloak);
+    cloak.castShadow = true;
+    cloak.position.set(0, 0.42, -0.05);
+    cloak.rotation.x = 0.16;
+    torsoG.add(cloak);
+    var belt = mesh(G.box, M.packDark, 0.62, 0.1, 0.36);
+    belt.position.y = 0.05;
+    torsoG.add(belt);
+    var satchel = mesh(G.box, M.pack, 0.16, 0.3, 0.3);
+    satchel.position.set(0.38, 0.14, -0.02);
+    torsoG.add(satchel);
+    var flap = mesh(G.box, M.packDark, 0.18, 0.14, 0.32);
+    flap.position.set(0.38, 0.28, -0.02);
+    torsoG.add(flap);
+    var strap = mesh(G.box, M.packDark, 0.09, 0.98, 0.05);
+    strap.position.set(0, 0.38, -0.19);
+    strap.rotation.z = 0.62;
+    torsoG.add(strap);
     torsoG.position.y = hipY;
     player.add(torsoG);
 
@@ -742,7 +994,7 @@
     function buildArm(sideX) {
       var arm = new THREE.Group();
       arm.position.set(sideX, hipY + 0.58, 0);
-      var upper = mesh(G.box, M.shirt, 0.19, 0.34, 0.2);
+      var upper = mesh(G.box, M.cap, 0.19, 0.34, 0.2); // v7: green hoodie sleeves
       upper.position.y = -0.17;
       arm.add(upper);
       var fore = new THREE.Group();
@@ -765,22 +1017,31 @@
     player.add(neck);
     var head = mesh(G.sphere, M.skin, 0.56, 0.6, 0.56); head.position.y = hipY + 1.02;
     player.add(head);
-    // hair mass under the cap + ponytail out the back (the camera's view)
-    var hair = mesh(G.sphere, M.hair, 0.58, 0.5, 0.58); hair.position.set(0, hipY + 1.1, -0.05);
-    player.add(hair);
-    var tail = mesh(G.cone, M.hair, 0.2, 0.5, 0.2); tail.position.set(0, hipY + 0.84, -0.3); tail.rotation.x = 0.5;
-    player.add(tail);
     [-0.29, 0.29].forEach(function (ex) {
       var ear = mesh(G.sphere, M.skin, 0.11, 0.13, 0.11);
       ear.position.set(ex, hipY + 1.02, 0);
       player.add(ear);
     });
-    var capTop = mesh(G.cyl, M.cap, 0.6, 0.22, 0.6); capTop.position.y = hipY + 1.3;
-    player.add(capTop);
-    var capBtn = mesh(G.sphere, M.cap, 0.1, 0.08, 0.1); capBtn.position.y = hipY + 1.43;
-    player.add(capBtn);
-    var brim = mesh(G.box, M.cap, 0.5, 0.08, 0.4); brim.position.set(0, hipY + 1.22, 0.42);
-    player.add(brim);
+    // v7: THE GREEN HOOD — shell over the top/back of the head with the
+    // face open at the front, a soft point flopping behind, and the hood
+    // drape down the back of the neck (the camera's main view, as poster)
+    var hood = new THREE.Mesh(new THREE.SphereGeometry(0.335, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.6), M.cap);
+    hood.castShadow = true;
+    hood.position.set(0, hipY + 1.04, -0.02);
+    hood.rotation.x = -0.25;
+    player.add(hood);
+    var hoodPoint = mesh(G.cone, M.cloak, 0.16, 0.42, 0.16);
+    hoodPoint.position.set(0, hipY + 1.3, -0.2);
+    hoodPoint.rotation.x = -0.9;
+    player.add(hoodPoint);
+    var hoodDrape = mesh(G.cone, M.cloak, 0.34, 0.5, 0.34);
+    hoodDrape.position.set(0, hipY + 0.86, -0.2);
+    hoodDrape.rotation.x = 0.35;
+    player.add(hoodDrape);
+    // brown fringe peeking out under the hood at the front
+    var fringe = mesh(G.box, M.hair, 0.4, 0.12, 0.1);
+    fringe.position.set(0, hipY + 1.2, 0.24);
+    player.add(fringe);
 
     player.rotation.y = Math.PI; // face away from camera (running into the forest)
   })();
@@ -815,6 +1076,17 @@
     stripe.position.y = 0.36;
     stripe.castShadow = false;
     g.add(stripe);
+    // v7 reskin: moss creeping over the log + tiny glowing shrooms on top
+    // (decor only — the log's size, position and hitbox are unchanged)
+    [-0.62, 0.55].forEach(function (mx) {
+      var mo = mesh(G.ico, M.moss, 0.62, 0.3, 0.55, false);
+      mo.position.set(mx, 0.62, 0.1);
+      g.add(mo);
+    });
+    var lsh = makeGlowShrooms();
+    lsh.scale.set(0.55, 0.55, 0.55);
+    lsh.position.set(0.82, 0.52, -0.12);
+    g.add(lsh);
     g.userData = { type: 'log' };
     return g;
   }
@@ -833,6 +1105,16 @@
       leaf.position.set(-1.0 + j * 0.5, 2.02, (Math.random() - 0.5) * 0.3);
       g.add(leaf);
     }
+    // v7 reskin: moss along the plank + short vines at the ends, clear of
+    // the slide path through the middle (decor only, hitbox unchanged)
+    var bmo = mesh(G.ico, M.moss, 1.5, 0.34, 0.42, false);
+    bmo.position.set(-0.3, 1.92, 0);
+    g.add(bmo);
+    [-1.05, 1.05].forEach(function (vx) {
+      var vv = makeVine(0.55);
+      vv.position.set(vx, 1.55, 0.1);
+      g.add(vv);
+    });
     g.userData = { type: 'branch' };
     return g;
   }
@@ -853,6 +1135,14 @@
     wStripe.position.set(0, 1.0, 0.46);
     wStripe.castShadow = false;
     g.add(wStripe);
+    // v7 reskin: extra moss + glowing shrooms at the wall's feet (decor only)
+    var wmo = mesh(G.ico, M.moss, 0.9, 0.4, 0.7, false);
+    wmo.position.set(-0.8, 2.32, 0.1);
+    g.add(wmo);
+    var wsh = makeGlowShrooms();
+    wsh.scale.set(0.7, 0.7, 0.7);
+    wsh.position.set(0.95, 0, 0.55);
+    g.add(wsh);
     g.userData = { type: 'wall' };
     return g;
   }
