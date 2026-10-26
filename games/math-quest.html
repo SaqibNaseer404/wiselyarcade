@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Math Quest — Free Math Game for Kids & Adults | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/math-quest">
+<meta name="description" content="Play Math Quest free online — addition, subtraction, multiplication and division games with 5 levels from Toddler to Expert. Easy steps that grow harder as you climb. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .lvl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 12px;max-width:760px}
+  .lvl-btn{border:2px solid rgba(14,116,110,.4);background:rgba(255,255,255,.85);color:#0b4f4a;cursor:pointer;
+    font:inherit;font-weight:800;padding:9px 16px;border-radius:999px}
+  .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#5f8f8a;letter-spacing:.04em}
+  .lvl-btn.lvl-sel{background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-color:#0d9488}
+  .lvl-btn.lvl-sel small{color:rgba(255,255,255,.78)}
+  .op-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 16px}
+  .op-btn{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
+    font:inherit;font-weight:800;padding:8px 15px;border-radius:999px}
+  .op-btn.op-sel{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;border-color:#f59e0b}
+  .mq-stage{
+    background:linear-gradient(180deg,#effcf5,#d8f7e4 60%,#c2efd2);
+    border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(10,110,80,.18), inset 0 2px 0 #fff}
+  .mq-stars{font-size:1.35rem;letter-spacing:.28em;min-height:1.6em;margin-bottom:4px}
+  .mq-pics{font-size:2rem;line-height:1.5;min-height:1.2em;letter-spacing:.15em}
+  .mq-pics .mq-away{opacity:.25;filter:grayscale(1)}
+  .mq-q{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:3.6rem;
+    letter-spacing:.03em;color:#173a5e;margin:8px 0 4px}
+  .mq-choices{display:flex;gap:14px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .mq-choice{min-width:84px;padding:14px 18px;border-radius:20px;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2.1rem;color:#fff;
+    background:linear-gradient(180deg,#0ea5a4,#0b7c7b);box-shadow:0 10px 20px rgba(8,110,105,.32), inset 0 2px 0 rgba(255,255,255,.45)}
+  .mq-choice:hover{transform:translateY(-3px)}
+  .mq-choice.mq-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:mqshake .3s ease}
+  .mq-choice.mq-right{background:linear-gradient(180deg,#4ade80,#16a34a)}
+  .mq-choice:disabled{opacity:.94;cursor:default;transform:none}
+  @keyframes mqshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .mq-msg{font-weight:800;font-size:1.15rem;min-height:1.6em;margin:16px 0 0;color:#0b4f4a}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Math Quest</h1>
+    <p>Addition, subtraction, multiplication and division — start easy, climb level by level, and watch hard sums turn simple.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="lvl-row" id="mq-levels" role="group" aria-label="Choose your level"></div>
+      <div class="op-row" id="mq-ops" role="group" aria-label="Choose the kind of sum"></div>
+      <div class="stats">
+        <div class="stat"><span>Question</span><div id="mq-round">1 / 10</div></div>
+        <div class="stat"><span>Stars</span><div id="mq-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="mq-best">—</div></div>
+      </div>
+      <div class="mq-stage">
+        <div class="mq-stars" id="mq-stars" aria-hidden="true"></div>
+        <div class="mq-pics" id="mq-pics"></div>
+        <div class="mq-q" id="mq-q">2 + 3 = ?</div>
+        <div class="mq-choices" id="mq-choices"></div>
+        <p class="mq-msg" id="mq-msg">Tap the right answer!</p>
+        <div class="overlay hidden" id="mq-done">
+          <h2>🏆 Quest Complete!</h2>
+          <p id="mq-done-stats"></p>
+          <button class="btn" id="mq-again">Play again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="mq-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Pick your level: <strong>Toddler</strong> counts apples up to 5, <strong>Kids</strong> learns the four kinds of sums, <strong>Teen</strong> takes on times tables to 12, <strong>Adults</strong> meets 3-digit sums and missing numbers, and <strong>Expert</strong> solves two-step problems.</li>
+        <li>Pick a kind of sum — ➕ add, ➖ subtract, ✖️ multiply, ➗ divide — or 🔀 Mixed for a bit of everything.</li>
+        <li>Read the sum and tap the right answer from the buttons.</li>
+        <li>A star is earned when you answer on your first try. Finish 10 questions (8 for Toddler) and see your score!</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click an answer button.</li>
+        <li><strong>Wrong answer?</strong> The button shakes and you can try again — no points lost, no timer chasing you.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Big problems break into small steps</h2>
+      <p>A sum like 48 × 6 looks scary — until you break it down: 48 × 6 is 40 × 6 plus 8 × 6. Two small steps you already know, and suddenly the "hard" problem is done. That is the secret of every level in this game: nothing here is one big jump, it is always small steps stacked up.</p>
+      <p>Life works the same way. Learning an instrument, saving money, building a business, getting fit — none of it happens in one leap. It happens one small, honest step at a time. So don't fear the big problem. Find its first small step, take it, and keep climbing — level by level, just like this quest.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/math-quest.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
