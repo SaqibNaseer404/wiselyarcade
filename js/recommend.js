@@ -166,6 +166,37 @@
     area.parentNode.insertBefore(wrap, area.nextSibling);
   }
 
+  /* ---------- Share + bookmark bar on game pages ---------- */
+  function buildShareBar() {
+    if (!inGamesDir || !currentSlug) return;
+    var g = bySlug(currentSlug);
+    if (!g || document.querySelector('.share-bar')) return;
+    var area = document.querySelector('.game-area');
+    if (!area) return;
+    var bar = document.createElement('div');
+    bar.className = 'share-bar';
+    bar.style.cssText = 'display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:18px auto 4px;max-width:640px';
+    var btn = 'style="border:0;cursor:pointer;font:inherit;font-weight:800;padding:11px 18px;border-radius:999px;background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;box-shadow:0 6px 16px rgba(122,96,178,.22)"';
+    var ghost = 'style="cursor:pointer;font-weight:800;padding:11px 18px;border-radius:999px;background:rgba(255,255,255,.85);color:inherit;border:2px solid rgba(122,96,178,.35)"';
+    bar.innerHTML =
+      '<button type="button" id="wa-share" ' + btn + '>\uD83D\uDCE4 Share this game</button>' +
+      '<button type="button" id="wa-save" ' + ghost + '>\u2B50 Save Wisely Arcade</button>' +
+      '<span id="wa-share-msg" style="font-weight:700;min-height:1em"></span>';
+    area.parentNode.insertBefore(bar, area.nextSibling);
+    var msg = bar.querySelector('#wa-share-msg');
+    bar.querySelector('#wa-share').addEventListener('click', function () {
+      var data = { title: g.name + ' — Wisely Arcade', text: 'Play ' + g.name + ' free on Wisely Arcade. ' + g.lesson, url: location.href };
+      if (navigator.share) { navigator.share(data).catch(function () {}); }
+      else if (navigator.clipboard) {
+        navigator.clipboard.writeText(data.url).then(function () { msg.textContent = 'Link copied — send it to a friend!'; });
+      }
+    });
+    bar.querySelector('#wa-save').addEventListener('click', function () {
+      var isMac = /Mac/i.test(navigator.userAgent);
+      msg.textContent = 'Press ' + (isMac ? 'Cmd' : 'Ctrl') + ' + D to bookmark us — then try today\'s Daily Sudoku!';
+    });
+  }
+
   /* ---------- Exit-intent popup ---------- */
   var shown = false;
   function buildModal() {
@@ -217,6 +248,7 @@
     buildTrending();
     buildRecent();
     buildMoreStrip();
+    buildShareBar();
     initExitIntent();
   }
   if (document.readyState === 'loading') {
