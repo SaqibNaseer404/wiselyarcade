@@ -590,3 +590,11 @@ footer.site{
 .collection-head{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
 .collection-head h3{margin:0}
 .collection-head span{color:var(--muted);font-size:.9rem;font-weight:700}
+
+/* ---------- Wide layout (2026-10-27): fill the screen, less empty side space ---------- */
+.wrap{max-width:1340px}
+@media(min-width:1024px){
+  .wrap.hub{max-width:1600px;grid-template-columns:300px minmax(0,1fr);gap:36px}
+}
+@media(min-width:640px){.cards.cols3{max-width:1340px}}
+@media(min-width:1400px){.shelf-card{flex-basis:196px}}
