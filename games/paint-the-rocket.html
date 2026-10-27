@@ -56,6 +56,16 @@
   .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#8a7bb5;letter-spacing:.04em}
   .lvl-btn.lvl-sel{background:linear-gradient(180deg,#8b6fd8,#6d4fc2);color:#fff;border-color:#6d4fc2}
   .lvl-btn.lvl-sel small{color:rgba(255,255,255,.75)}
+  .pr-levelbar{text-align:center;font-weight:800;color:#1e3a8a;margin:0 auto 10px;font-size:1.05rem}
+  .pr-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .pr-lvl{border:2px solid rgba(59,130,246,.4);background:rgba(255,255,255,.85);color:#1e3a8a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .pr-lvl.pr-done{background:#dcfce7;border-color:#22c55e}
+  .pr-lvl.pr-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .pr-lvl.pr-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .pr-mission{text-align:center;font-weight:700;color:#1e3a8a;background:rgba(255,255,255,.75);
+    border:2px dashed rgba(59,130,246,.45);border-radius:14px;padding:10px 14px;margin:0 auto 12px;max-width:640px}
+  .pr-mission:empty{display:none}
   .pr-palette.pr-big .pr-color{width:58px;height:58px}
   .game-area .overlay{border-radius:26px;padding:24px;
     background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
@@ -84,12 +94,13 @@
 <main>
   <div class="game-head">
     <h1>Paint the Rocket</h1>
-    <p>Your rocket is plain white and waiting for you. Pick a colour, tap a part, and make it yours — then launch it into space!</p>
+    <p>Your rocket is plain white and waiting for you. Pick a colour, tap a part, and make it yours — then launch it into space! <strong>100 levels</strong> — more detail, more colours, and a Colour Mission to solve on every flight from Level 6.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
-      <div class="lvl-row" id="pr-levels" role="group" aria-label="Choose your level"></div>
+      <div class="pr-levelbar">🚀 You are on <strong>Level <span id="pr-level-now">1</span></strong> · <span id="pr-progress-note"></span></div>
+      <div class="pr-map" id="pr-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Parts painted</span><div id="pr-count">0 / 15</div></div>
         <div class="stat"><span>Colour</span><div id="pr-colorname">Red</div></div>
@@ -137,10 +148,11 @@
         </svg>
         <div class="overlay hidden" id="pr-done">
           <h2>🚀 Blast off!</h2>
-          <p>Look at your rocket fly! Every colour was chosen by YOU. No two rockets in the world look like yours.</p>
+          <p id="pr-done-stats">Look at your rocket fly! Every colour was chosen by YOU. No two rockets in the world look like yours.</p>
           <button class="btn" id="pr-again">Paint a new rocket</button>
         </div>
       </div>
+      <p class="pr-mission" id="pr-mission" aria-live="polite"></p>
       <div class="pr-palette" id="pr-palette" aria-label="Colour palette"></div>
       <p class="pr-msg" id="pr-msg">Pick a colour, then tap part of the picture to paint it!</p>
       <div class="btn-row" style="justify-content:center;margin-top:10px">
@@ -154,8 +166,8 @@
       <ol>
         <li>Tap a colour in the palette below the picture.</li>
         <li>Tap any part of the picture — the rocket, the planets, the stars, even the sky — to paint it.</li>
-        <li>Pick your level at the top: <strong>Toddler</strong> paints a simple rocket with big colours, <strong>Kids</strong> adds planets and stars, and <strong>Teen, Adults and Expert</strong> keep adding details — satellites, comets, even an antenna — up to the full masterpiece scene.</li>
-        <li>Paint every part you can see, each any colour you like. There are no wrong colours!</li>
+        <li>There are <strong>100 levels</strong>. Higher levels add picture details — planets, stars, satellites, comets, even an antenna — and unlock new colours every 10 levels. Finish a rocket to unlock the next level.</li>
+        <li>Paint every part you can see. Free colours are yours to choose — but from Level 6, the <strong>🎯 Colour Mission</strong> names a few parts and colours: match them all to earn 3 stars!</li>
         <li>Press <strong>Launch my rocket!</strong> and watch your very own rocket fly into space.</li>
       </ol>
     </div>
@@ -195,7 +207,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/paint-rocket.js?v=2"></script>
+<script src="../js/paint-rocket.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
