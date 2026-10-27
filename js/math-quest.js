@@ -1,249 +1,213 @@
-// Wisely Arcade — Math Quest (addition, subtraction, multiplication, division — 5 levels)
+/* Math Quest — Wisely Arcade: 100 levels, 8 sums per level.
+   Finish a level to unlock the next. Numbers grow as you climb.
+   Missing numbers from L46; two-step problems from L66; master sums to L100. */
 (function () {
   'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var MAX_LEVEL = 100, PER_LEVEL = 8;
 
-  var LEVELS = {
-    toddler: { label: 'Toddler', sub: 'count to 5', rounds: 8, choices: 3 },
-    kids:    { label: 'Kids', sub: 'ages 5–9 · the four sums', rounds: 10, choices: 3 },
-    teen:    { label: 'Teen', sub: 'tables to 12 · hundreds', rounds: 10, choices: 4 },
-    adults:  { label: 'Adults', sub: '3-digit · missing numbers', rounds: 10, choices: 4 },
-    expert:  { label: 'Expert', sub: 'two-step problems', rounds: 10, choices: 4 }
-  };
-  var ORDER = ['toddler', 'kids', 'teen', 'adults', 'expert'];
   var OPS = [
-    { key: 'mix', label: '🔀 Mixed' },
-    { key: 'add', label: '➕ Add' },
-    { key: 'sub', label: '➖ Subtract' },
-    { key: 'mul', label: '✖️ Multiply' },
-    { key: 'div', label: '➗ Divide' }
+    { k: 'add', label: '➕ Add' },
+    { k: 'sub', label: '➖ Take away' },
+    { k: 'mul', label: '✖️ Times' },
+    { k: 'div', label: '➗ Share' },
+    { k: 'mix', label: '🎲 Mixed' }
   ];
-  var SYM = { add: '+', sub: '−', mul: '×', div: '÷' };
+  var TIERS = [
+    { to: 10, name: 'Counting steps' }, { to: 25, name: 'Number explorer' },
+    { to: 45, name: 'Number climber' }, { to: 65, name: 'Number thinker' },
+    { to: 80, name: 'Number master' }, { to: 100, name: 'Number wizard' }
+  ];
+  function tierName(l) { for (var i = 0; i < TIERS.length; i++) if (l <= TIERS[i].to) return TIERS[i].name; return TIERS[5].name; }
+  function band(l) { return l <= 10 ? 1 : l <= 25 ? 2 : l <= 45 ? 3 : l <= 65 ? 4 : l <= 80 ? 5 : 6; }
 
-  var qEl = document.getElementById('mq-q');
-  var picsEl = document.getElementById('mq-pics');
-  var choicesEl = document.getElementById('mq-choices');
-  var msgEl = document.getElementById('mq-msg');
-  var roundEl = document.getElementById('mq-round');
-  var scoreEl = document.getElementById('mq-score');
-  var bestEl = document.getElementById('mq-best');
-  var starsEl = document.getElementById('mq-stars');
-  var doneEl = document.getElementById('mq-done');
-  var doneStats = document.getElementById('mq-done-stats');
-  var levelsEl = document.getElementById('mq-levels');
-  var opsEl = document.getElementById('mq-ops');
-
-  var levelKey = 'kids', opKey = 'mix';
+  var cur = 1, unlocked = 1, starMap = {};
+  var opKey = 'mix';
   try {
-    levelKey = localStorage.getItem('wa_mq_level') || 'kids';
+    cur = parseInt(localStorage.getItem('wa_mq_current') || '1', 10) || 1;
+    unlocked = parseInt(localStorage.getItem('wa_mq_unlocked') || '1', 10) || 1;
+    starMap = JSON.parse(localStorage.getItem('wa_mq_stars') || '{}') || {};
     opKey = localStorage.getItem('wa_mq_op') || 'mix';
   } catch (e) {}
-  if (!LEVELS[levelKey]) levelKey = 'kids';
-  var L = LEVELS[levelKey];
+  if (cur < 1) cur = 1; if (cur > MAX_LEVEL) cur = MAX_LEVEL;
+  if (unlocked < cur) unlocked = cur; if (unlocked > MAX_LEVEL) unlocked = MAX_LEVEL;
+  if (!OPS.some(function (o) { return o.k === opKey; })) opKey = 'mix';
 
-  var round = 0, score = 0, answer = 0, locked = false, qMistake = false;
+  var round = 0, score = 0, wrongOnce = false, locked = false, currentQ = null, seen = [];
+  function save() {
+    try {
+      localStorage.setItem('wa_mq_current', String(cur));
+      localStorage.setItem('wa_mq_unlocked', String(unlocked));
+      localStorage.setItem('wa_mq_stars', JSON.stringify(starMap));
+      localStorage.setItem('wa_mq_op', opKey);
+    } catch (e) {}
+  }
+  function totalStars() { var t = 0; for (var k in starMap) t += starMap[k]; return t; }
 
-  function ri(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
+  /* ---------- question factory ---------- */
+  function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
   function pickOp() {
     if (opKey !== 'mix') return opKey;
-    if (levelKey === 'toddler') return Math.random() < 0.6 ? 'add' : 'sub';
-    var all = ['add', 'sub', 'mul', 'div'];
-    return all[Math.floor(Math.random() * all.length)];
+    var pool = ['add', 'sub'];
+    if (cur >= 11) pool.push('mul');
+    if (cur >= 16) pool.push('div');
+    return pool[rnd(0, pool.length - 1)];
   }
-
-  function makeQuestion() {
-    var op = pickOp();
-    var a, b, text, pics = '';
-    if (levelKey === 'toddler') {
-      if (op === 'add') {
-        a = ri(1, 4); b = ri(1, 5 - a);
-        pics = '🍎'.repeat(a) + ' ➕ ' + '🍎'.repeat(b);
-        text = a + ' + ' + b + ' = ?'; answer = a + b;
-      } else {
-        a = ri(2, 5); b = ri(1, a);
-        pics = '🍎'.repeat(a - b) + '<span class="mq-away">' + '🍎'.repeat(b) + '</span>';
-        text = a + ' − ' + b + ' = ?'; answer = a - b;
-      }
-    } else if (levelKey === 'kids') {
-      if (op === 'add') { a = ri(3, 20); b = ri(3, 20); answer = a + b; }
-      else if (op === 'sub') { a = ri(8, 30); b = ri(2, a); answer = a - b; }
-      else if (op === 'mul') { a = ri(2, 5); b = Math.random() < 0.2 ? 10 : ri(2, 5); answer = a * b; }
-      else { b = ri(2, 5); answer = ri(2, 5); a = b * answer; }
-      text = a + ' ' + SYM[op] + ' ' + b + ' = ?';
-    } else if (levelKey === 'teen') {
-      if (op === 'add') { a = ri(25, 200); b = ri(25, 200); answer = a + b; }
-      else if (op === 'sub') { a = ri(60, 250); b = ri(15, a); answer = a - b; }
-      else if (op === 'mul') { a = ri(3, 12); b = ri(3, 12); answer = a * b; }
-      else { b = ri(3, 12); answer = ri(3, 12); a = b * answer; }
-      text = a + ' ' + SYM[op] + ' ' + b + ' = ?';
-    } else if (levelKey === 'adults') {
-      if (Math.random() < 0.35) {
-        // missing number: a ? b = c, find the middle or the start
-        var kind = Math.random() < 0.5 ? 'add' : 'mul';
-        if (kind === 'add') {
-          a = ri(40, 400); answer = ri(30, 400);
-          text = a + ' + ? = ' + (a + answer);
-        } else {
-          b = ri(3, 12); answer = ri(3, 15);
-          text = '? × ' + b + ' = ' + (b * answer);
-        }
-        return { text: text, pics: '' };
-      }
-      if (op === 'add') { a = ri(120, 999); b = ri(120, 999); answer = a + b; }
-      else if (op === 'sub') { a = ri(200, 999); b = ri(60, a); answer = a - b; }
-      else if (op === 'mul') { a = ri(12, 99); b = ri(3, 9); answer = a * b; }
-      else { b = ri(6, 12); answer = ri(12, 25); a = b * answer; }
-      text = a + ' ' + SYM[op] + ' ' + b + ' = ?';
-    } else {
-      // expert: two-step problems
-      var style = Math.random();
-      if (style < 0.4) {
-        a = ri(5, 60); b = ri(3, 12); var c = ri(3, 12);
-        answer = a + b * c;
-        text = a + ' + ' + b + ' × ' + c + ' = ?';
-      } else if (style < 0.7) {
-        a = ri(4, 12); b = ri(4, 12); var c2 = ri(5, a * b - 1);
-        answer = a * b - c2;
-        text = a + ' × ' + b + ' − ' + c2 + ' = ?';
-      } else if (style < 0.85) {
-        b = ri(6, 15); answer = ri(11, 30);
-        text = '? × ' + b + ' = ' + (b * answer);
-      } else {
-        a = ri(1500, 9000); b = ri(1200, a - 100);
-        answer = a - b;
-        text = a + ' − ' + b + ' = ?';
-      }
+  function makeQ() {
+    var op = pickOp(), bd = band(cur), q = '', a = 0, pics = '';
+    var i;
+    if (op === 'add') {
+      var x, y;
+      if (bd === 1) { x = rnd(1, 7); y = rnd(1, 9 - x); pics = '🍎'.repeat(x) + ' &nbsp;+&nbsp; ' + '🍏'.repeat(y); }
+      else if (bd === 2) { x = rnd(6, 40); y = rnd(5, 35); }
+      else if (bd === 3) { x = rnd(25, 160); y = rnd(20, 140); }
+      else if (bd === 4) { x = rnd(120, 700); y = rnd(110, 650); }
+      else if (bd === 5) { if (rnd(0, 1)) { x = rnd(40, 300); y = rnd(40, 300); q = '? + ' + y + ' = ' + (x + y); a = x; } else { x = rnd(150, 900); y = rnd(150, 900); } }
+      else { if (rnd(0, 1)) { x = rnd(200, 1500); y = rnd(200, 1500); q = x + ' + ' + y + ' − ' + rnd(10, 99) + ' = ?'; a = x + y - parseInt(q.split('− ')[1], 10); q = q; } else { x = rnd(300, 2000); y = rnd(300, 2000); } }
+      if (!q) { q = x + ' + ' + y + ' = ?'; a = x + y; }
+    } else if (op === 'sub') {
+      var m, n;
+      if (bd === 1) { m = rnd(4, 10); n = rnd(1, m - 1); pics = '🎈'.repeat(m); }
+      else if (bd === 2) { m = rnd(15, 60); n = rnd(5, m - 5); }
+      else if (bd === 3) { m = rnd(60, 300); n = rnd(30, m - 20); }
+      else if (bd === 4) { m = rnd(300, 950); n = rnd(120, m - 100); }
+      else if (bd === 5) { if (rnd(0, 1)) { m = rnd(100, 500); n = rnd(40, m - 30); q = m + ' − ? = ' + (m - n); a = n; } else { m = rnd(400, 1200); n = rnd(200, m - 150); } }
+      else { m = rnd(800, 3000); n = rnd(300, m - 250); }
+      if (!q) { q = m + ' − ' + n + ' = ?'; a = m - n; }
+    } else if (op === 'mul') {
+      var f, g;
+      if (bd <= 2) { f = rnd(2, 5); g = rnd(2, 6); }
+      else if (bd === 3) { f = rnd(3, 9); g = rnd(3, 9); }
+      else if (bd === 4) { f = rnd(11, 40); g = rnd(2, 6); }
+      else if (bd === 5) { f = rnd(12, 60); g = rnd(3, 9); }
+      else { f = rnd(15, 99); g = rnd(4, 9); if (rnd(0, 1)) { q = f + ' × ' + g + ' + ' + rnd(2, 20) + ' = ?'; a = f * g + parseInt(q.split('+ ')[1], 10); } }
+      if (!q) { q = f + ' × ' + g + ' = ?'; a = f * g; }
+    } else { /* div */
+      var d, qt;
+      if (bd <= 2) { d = rnd(2, 5); qt = rnd(2, 6); }
+      else if (bd === 3) { d = rnd(3, 9); qt = rnd(3, 9); }
+      else if (bd === 4) { d = rnd(4, 12); qt = rnd(4, 12); }
+      else if (bd === 5) { d = rnd(6, 15); qt = rnd(6, 15); }
+      else { d = rnd(7, 19); qt = rnd(7, 19); if (rnd(0, 1)) { q = '? ÷ ' + d + ' = ' + qt; a = d * qt; } }
+      if (!q) { q = (d * qt) + ' ÷ ' + d + ' = ?'; a = qt; }
     }
-    return { text: text, pics: pics };
-  }
-
-  function makeChoices() {
-    var set = [answer];
-    var near = [1, -1, 2, -2, 10, -10, 5, -5, 3, -3, 11, -11, 20, -20];
-    var i = 0;
-    while (set.length < L.choices && i < 60) {
-      var cand = answer + near[Math.floor(Math.random() * near.length)];
-      if (cand >= 0 && set.indexOf(cand) === -1) set.push(cand);
-      i++;
+    /* distractors */
+    var nChoices = cur < 26 ? 3 : 4;
+    var opts = [a], guard = 0;
+    while (opts.length < nChoices && guard++ < 60) {
+      var delta = [1, -1, 2, -2, 10, -10, 5, -5, 3, -3][rnd(0, 9)];
+      var c = a + delta;
+      if (c >= 0 && opts.indexOf(c) === -1) opts.push(c);
     }
-    while (set.length < L.choices) set.push(answer + set.length * 7 + 3);
-    return set.sort(function () { return Math.random() - 0.5; });
+    while (opts.length < nChoices) opts.push(a + opts.length + 3);
+    for (i = opts.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
+    var key = q + '|' + a;
+    if (seen.indexOf(key) !== -1 && rnd(0, 2)) return makeQ();
+    seen.push(key);
+    return { q: q, a: a, opts: opts, pics: pics };
   }
 
-  function bestKey() { return 'wa_mq_best_' + levelKey; }
-  function loadBest() {
-    try { return parseInt(localStorage.getItem(bestKey()) || '0', 10) || 0; } catch (e) { return 0; }
-  }
-  function showBest() {
-    var b = loadBest();
-    bestEl.textContent = b > 0 ? b + ' ⭐' : '—';
-  }
-  function drawStars() {
-    var s = '';
-    for (var i = 0; i < L.rounds; i++) s += i < score ? '⭐' : '☆';
-    starsEl.textContent = s;
-  }
-
-  function buildLevelButtons() {
-    levelsEl.innerHTML = '';
-    ORDER.forEach(function (k) {
-      var lv = LEVELS[k];
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'lvl-btn' + (k === levelKey ? ' lvl-sel' : '');
-      b.innerHTML = lv.label + '<small>' + lv.sub + '</small>';
-      b.addEventListener('click', function () {
-        if (k === levelKey) return;
-        levelKey = k; L = LEVELS[k];
-        try { localStorage.setItem('wa_mq_level', k); } catch (e) {}
-        buildLevelButtons();
-        start();
-      });
-      levelsEl.appendChild(b);
-    });
-  }
-  function buildOpButtons() {
-    opsEl.innerHTML = '';
+  /* ---------- render ---------- */
+  function buildOps() {
+    var box = $('mq-ops'); if (!box) return;
+    box.innerHTML = '';
     OPS.forEach(function (o) {
-      if (levelKey === 'toddler' && (o.key === 'mul' || o.key === 'div')) return;
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'op-btn' + (o.key === opKey ? ' op-sel' : '');
+      b.className = 'op-btn' + (o.k === opKey ? ' op-sel' : '');
       b.textContent = o.label;
-      b.addEventListener('click', function () {
-        if (o.key === opKey) return;
-        opKey = o.key;
-        try { localStorage.setItem('wa_mq_op', opKey); } catch (e) {}
-        buildOpButtons();
-        start();
-      });
-      opsEl.appendChild(b);
+      b.addEventListener('click', function () { opKey = o.k; save(); buildOps(); });
+      box.appendChild(b);
     });
   }
-
-  function nextRound() {
-    locked = false; qMistake = false;
-    roundEl.textContent = (round + 1) + ' / ' + L.rounds;
-    var q = makeQuestion();
-    qEl.textContent = q.text;
-    picsEl.innerHTML = q.pics || '';
-    picsEl.style.display = q.pics ? '' : 'none';
-    choicesEl.innerHTML = '';
-    makeChoices().forEach(function (v) {
+  function buildMap() {
+    var map = $('mq-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (l < cur && starMap[l] != null) { b.className = 'mq-lvl mq-done'; b.textContent = l + (starMap[l] >= 6 ? ' ⭐' : ''); }
+        else if (l === cur) { b.className = 'mq-lvl mq-cur'; b.textContent = l; }
+        else if (l <= unlocked) { b.className = 'mq-lvl'; b.textContent = l; }
+        else { b.className = 'mq-lvl mq-lock'; b.textContent = '🔒'; }
+        b.disabled = l > unlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= unlocked) { cur = l; save(); startLevel(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    $('mq-level-now').textContent = cur;
+    var doneCount = 0; for (var k in starMap) doneCount++;
+    $('mq-progress-note').textContent = tierName(cur) + ' · ' + doneCount + ' of 100 levels completed';
+  }
+  function stars() {
+    var s = '', i;
+    for (i = 0; i < PER_LEVEL; i++) s += (i < score ? '⭐' : '☆') + ' ';
+    $('mq-stars').textContent = s.trim();
+  }
+  function startLevel() {
+    round = 0; score = 0; seen = [];
+    $('mq-done').classList.add('hidden');
+    buildMap();
+    next();
+  }
+  function next() {
+    locked = false; wrongOnce = false;
+    currentQ = makeQ();
+    $('mq-pics').innerHTML = currentQ.pics || '';
+    $('mq-q').textContent = currentQ.q;
+    $('mq-round').textContent = (round + 1) + ' / ' + PER_LEVEL;
+    $('mq-score').textContent = score;
+    $('mq-best').textContent = totalStars() + ' ⭐';
+    stars();
+    $('mq-msg').textContent = 'Tap the right answer!';
+    $('mq-msg').style.color = '';
+    var box = $('mq-choices'); box.innerHTML = '';
+    currentQ.opts.forEach(function (o) {
       var b = document.createElement('button');
       b.type = 'button';
       b.className = 'mq-choice';
-      b.textContent = v;
-      b.addEventListener('click', function () { choose(b, v, q.text); });
-      choicesEl.appendChild(b);
+      b.textContent = o;
+      b.addEventListener('click', function () { answer(b, o); });
+      box.appendChild(b);
     });
-    msgEl.textContent = 'Tap the right answer!';
   }
-
-  function choose(btn, value, qtext) {
+  function answer(btn, val) {
     if (locked) return;
-    if (value === answer) {
+    if (val === currentQ.a) {
       locked = true;
       btn.classList.add('mq-right');
-      choicesEl.querySelectorAll('.mq-choice').forEach(function (x) { x.disabled = true; });
-      if (!qMistake) { score++; scoreEl.textContent = score; drawStars(); }
-      msgEl.textContent = 'Correct! ' + qtext.replace('?', String(answer)) + (qMistake ? '' : ' ⭐ First try!');
-      setTimeout(function () {
-        round++;
-        if (round >= L.rounds) finish(); else nextRound();
-      }, 1200);
+      if (!wrongOnce) { score++; stars(); }
+      $('mq-score').textContent = score;
+      $('mq-msg').textContent = ['Brilliant! 🎉', 'Exactly right! 🌟', 'Number power! 💪'][rnd(0, 2)];
+      $('mq-msg').style.color = '#15803d';
+      round++;
+      setTimeout(function () { if (round >= PER_LEVEL) finish(); else next(); }, 800);
     } else {
-      qMistake = true;
       btn.classList.add('mq-wrong');
       btn.disabled = true;
-      msgEl.textContent = 'Not quite — take your time and try again.';
-      setTimeout(function () { btn.classList.remove('mq-wrong'); }, 350);
+      wrongOnce = true;
+      $('mq-msg').textContent = 'Not quite — try another one!';
+      $('mq-msg').style.color = '#b91c1c';
     }
   }
-
   function finish() {
-    var b = loadBest();
-    if (score > b) { try { localStorage.setItem(bestKey(), String(score)); } catch (e) {} }
-    showBest();
-    doneStats.textContent = 'You earned ' + score + ' of ' + L.rounds + ' stars on ' + L.label + '. ' +
-      (score === L.rounds ? 'Perfect quest — every answer first try!'
-        : score >= L.rounds * 0.7 ? 'Strong maths! Ready to climb a level?'
-        : score >= L.rounds * 0.4 ? 'Good climbing — small steps add up.'
-        : 'Good start! Every mathematician began with 1 + 1.');
-    doneEl.classList.remove('hidden');
+    if (starMap[cur] == null || score > starMap[cur]) starMap[cur] = score;
+    if (cur === unlocked && unlocked < MAX_LEVEL) unlocked++;
+    save();
+    buildMap();
+    $('mq-done-title').textContent = score >= 7 ? '🏆 Number Wizard!' : score >= 4 ? '🎉 Level ' + cur + ' Complete!' : '🌱 Level ' + cur + ' Done!';
+    $('mq-done-stats').textContent = 'You earned ' + score + ' of ' + PER_LEVEL + ' stars on Level ' + cur + '.' +
+      (cur < MAX_LEVEL ? ' Level ' + (cur + 1) + ' is now unlocked — keep climbing!' : ' You reached the top of Math Quest!');
+    $('mq-best').textContent = totalStars() + ' ⭐';
+    $('mq-done').classList.remove('hidden');
   }
-
-  function start() {
-    buildOpButtons();
-    round = 0; score = 0;
-    scoreEl.textContent = '0';
-    doneEl.classList.add('hidden');
-    drawStars();
-    showBest();
-    nextRound();
-  }
-
-  document.getElementById('mq-restart').addEventListener('click', start);
-  document.getElementById('mq-again').addEventListener('click', start);
-  buildLevelButtons();
-  start();
+  $('mq-again').addEventListener('click', function () {
+    if (cur < MAX_LEVEL) { cur++; save(); }
+    startLevel();
+  });
+  $('mq-restart').addEventListener('click', startLevel);
+  buildOps();
+  startLevel();
 })();
