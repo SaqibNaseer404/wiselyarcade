@@ -24,6 +24,13 @@
 <link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   .hidden{display:none!important}
+  .ns-levelbar{text-align:center;font-weight:800;color:#dbeafe;margin:0 auto 10px;font-size:1.05rem}
+  .ns-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .ns-lvl{border:2px solid rgba(110,231,255,.35);background:rgba(15,23,42,.85);color:#dbeafe;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .ns-lvl.ns-done{background:#14532d;border-color:#22c55e;color:#dcfce7}
+  .ns-lvl.ns-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .ns-lvl.ns-lock{background:rgba(30,41,59,.6);color:#64748b;cursor:not-allowed}
   #snakeCanvas{display:block;width:100%;height:auto;border-radius:12px;touch-action:none}
   .game-area{max-width:880px}
   /* v3 visual overhaul: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack) */
@@ -72,13 +79,16 @@
 <main>
   <div class="game-head">
     <h1>Neon Snake</h1>
-    <p>Eat the glowing orbs, grow longer, and survive. It gets faster — and greedier — the longer you last.</p>
+    <p>Eat the glowing orbs, grow longer, and survive. It gets faster — and greedier — the longer you last. Now with <strong>100 levels</strong>: clear the orb target to climb, and dodge the neon blocks from Level 11.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
+      <div class="ns-levelbar">🐍 You are on <strong>Level <span id="s-level-now">1</span></strong> · <span id="s-progress-note"></span></div>
+      <div class="ns-map" id="s-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Score</span><div id="s-score">0</div></div>
+        <div class="stat"><span>Target</span><div id="s-target">5</div></div>
         <div class="stat"><span>Best</span><div id="s-best">0</div></div>
       </div>
       <div class="stage">
@@ -100,8 +110,8 @@
       <h2>How to Play</h2>
       <ol>
         <li>Guide the snake to the glowing red orb to eat it and grow longer.</li>
-        <li>Every orb scores a point — and the snake gets a little faster.</li>
-        <li>The game ends if you hit a wall or bite your own tail.</li>
+        <li>Every orb scores a point — and the snake gets a little faster. Eat the <strong>target</strong> number of orbs to clear the level and unlock the next of <strong>100 levels</strong>.</li>
+        <li>The game ends if you hit a wall, bite your own tail — or crash into a <strong>neon block</strong> (they appear from Level 11 and grow into mazes).</li>
         <li>Plan your path: a long snake needs room to turn!</li>
       </ol>
     </div>
@@ -141,7 +151,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/neon-snake.js?v=3"></script>
+<script src="../js/neon-snake.js?v=4"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
