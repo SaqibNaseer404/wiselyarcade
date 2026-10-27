@@ -39,6 +39,13 @@
   .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#5f8f8a;letter-spacing:.04em}
   .lvl-btn.lvl-sel{background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-color:#0d9488}
   .lvl-btn.lvl-sel small{color:rgba(255,255,255,.78)}
+  .mq-levelbar{text-align:center;font-weight:800;color:#065f46;margin:0 auto 10px;font-size:1.05rem}
+  .mq-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .mq-lvl{border:2px solid rgba(5,150,105,.4);background:rgba(255,255,255,.85);color:#065f46;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .mq-lvl.mq-done{background:#dcfce7;border-color:#22c55e}
+  .mq-lvl.mq-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .mq-lvl.mq-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
   .op-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 16px}
   .op-btn{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
     font:inherit;font-weight:800;padding:8px 15px;border-radius:999px}
@@ -89,12 +96,13 @@
 <main>
   <div class="game-head">
     <h1>Math Quest</h1>
-    <p>Addition, subtraction, multiplication and division — start easy, climb level by level, and watch hard sums turn simple.</p>
+    <p>Addition, subtraction, multiplication and division — start easy, climb level by level, and watch hard sums turn simple. <strong>100 levels</strong> — the numbers grow with you.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
-      <div class="lvl-row" id="mq-levels" role="group" aria-label="Choose your level"></div>
+      <div class="mq-levelbar">🔢 You are on <strong>Level <span id="mq-level-now">1</span></strong> · <span id="mq-progress-note"></span></div>
+      <div class="mq-map" id="mq-map" role="group" aria-label="Choose your level"></div>
       <div class="op-row" id="mq-ops" role="group" aria-label="Choose the kind of sum"></div>
       <div class="stats">
         <div class="stat"><span>Question</span><div id="mq-round">1 / 10</div></div>
@@ -108,7 +116,7 @@
         <div class="mq-choices" id="mq-choices"></div>
         <p class="mq-msg" id="mq-msg">Tap the right answer!</p>
         <div class="overlay hidden" id="mq-done">
-          <h2>🏆 Quest Complete!</h2>
+          <h2 id="mq-done-title">🏆 Quest Complete!</h2>
           <p id="mq-done-stats"></p>
           <button class="btn" id="mq-again">Play again</button>
         </div>
@@ -121,10 +129,10 @@
     <div class="howto">
       <h2>How to Play</h2>
       <ol>
-        <li>Pick your level: <strong>Toddler</strong> counts apples up to 5, <strong>Kids</strong> learns the four kinds of sums, <strong>Teen</strong> takes on times tables to 12, <strong>Adults</strong> meets 3-digit sums and missing numbers, and <strong>Expert</strong> solves two-step problems.</li>
+        <li>There are <strong>100 levels</strong>. Level 1 counts apples; higher levels bring times tables, 3-digit sums, missing numbers (Level 46+) and two-step problems (Level 66+). Finish a level to unlock the next.</li>
         <li>Pick a kind of sum — ➕ add, ➖ subtract, ✖️ multiply, ➗ divide — or 🔀 Mixed for a bit of everything.</li>
         <li>Read the sum and tap the right answer from the buttons.</li>
-        <li>A star is earned when you answer on your first try. Finish 10 questions (8 for Toddler) and see your score!</li>
+        <li>Each level is 8 sums. A star is earned when you answer on your first try — how many can you collect?</li>
       </ol>
     </div>
 
@@ -163,7 +171,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/math-quest.js?v=1"></script>
+<script src="../js/math-quest.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
