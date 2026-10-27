@@ -64,6 +64,13 @@
   .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#8a7bb5;letter-spacing:.04em}
   .lvl-btn.lvl-sel{background:linear-gradient(180deg,#8b6fd8,#6d4fc2);color:#fff;border-color:#6d4fc2}
   .lvl-btn.lvl-sel small{color:rgba(255,255,255,.75)}
+  .ml-levelbar{text-align:center;font-weight:800;color:#43307a;margin:0 auto 10px;font-size:1.05rem}
+  .ml-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .ml-lvl{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .ml-lvl.ml-done{background:#dcfce7;border-color:#22c55e}
+  .ml-lvl.ml-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .ml-lvl.ml-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
   .game-area .overlay{border-radius:26px;padding:24px;
     background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
       linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
@@ -91,12 +98,13 @@
 <main>
   <div class="game-head">
     <h1>Missing Letters</h1>
-    <p>Oh no — a letter ran away from the word! Look at the picture, think about the word, and tap the letter that belongs.</p>
+    <p>Oh no — a letter ran away from the word! Look at the picture, think about the word, and tap the letter that belongs. <strong>100 levels</strong> — words grow longer and trickier the higher you climb.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
-      <div class="lvl-row" id="ml-levels" role="group" aria-label="Choose your level"></div>
+      <div class="ml-levelbar">🔤 You are on <strong>Level <span id="ml-level-now">1</span></strong> · <span id="ml-progress-note"></span></div>
+      <div class="ml-map" id="ml-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Word</span><div id="ml-round">1 / 10</div></div>
         <div class="stat"><span>Stars</span><div id="ml-score">0</div></div>
@@ -109,7 +117,7 @@
         <div class="ml-choices" id="ml-choices"></div>
         <p class="ml-msg" id="ml-msg">Which letter is missing?</p>
         <div class="overlay hidden" id="ml-done">
-          <h2>⭐ Word Wizard!</h2>
+          <h2 id="ml-done-title">⭐ Word Wizard!</h2>
           <p id="ml-done-stats"></p>
           <button class="btn" id="ml-again">Play again</button>
         </div>
@@ -125,8 +133,8 @@
         <li>Look at the big picture. What is it?</li>
         <li>Read the word below it — one letter is missing, shown as a yellow tile.</li>
         <li>Tap the letter, from the three big buttons, that finishes the word.</li>
-        <li>Pick your level at the top: <strong>Toddler</strong> (tiny words), <strong>Kids</strong>, <strong>Teen</strong>, <strong>Adults</strong>, up to <strong>Expert</strong> — two missing letters in long words!</li>
-        <li>Finish all the words. A star is earned when you find the letter on your first try — how many can you collect?</li>
+        <li>There are <strong>100 levels</strong>. Words start tiny (CAT, DOG) and grow longer as you climb — and from Level 66, <strong>two</strong> letters run away at once! Finish a level to unlock the next.</li>
+        <li>Each level is 5 words. A star is earned when you find the letter on your first try — how many can you collect?</li>
       </ol>
     </div>
 
@@ -165,7 +173,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/missing-letters.js?v=2"></script>
+<script src="../js/missing-letters.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
