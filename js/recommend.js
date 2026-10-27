@@ -16,6 +16,8 @@
       lesson: 'Big problems break into small steps.' },
     { slug: 'iq-quest', name: 'IQ Quest', ages: ['kids', 'teens'], seed: 30,
       lesson: 'Smart is not magic — it\'s noticing patterns.' },
+    { slug: 'gk-quest', name: 'GK Quest', ages: ['kids', 'teens'], seed: 31,
+      lesson: 'Smart is not magic — it\'s noticing patterns.' },
     { slug: 'bubble-pop',   name: 'Bubble Pop',           ages: ['kids', 'teens'], seed: 22,
       lesson: 'Aim with intention, not in a hurry.' },
     { slug: 'neon-snake',   name: 'Neon Snake',           ages: ['teens'], seed: 35,
