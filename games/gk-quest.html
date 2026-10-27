@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>GK Quest — Free General Knowledge Quiz Game, 100 Levels | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/gk-quest">
+<meta name="description" content="Play GK Quest free online — a general knowledge quiz with 100 levels of questions on animals, space, science, geography, history, sports and food. Every answer teaches a true fact. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .lvl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 16px;max-width:760px}
+  .lvl-btn{border:2px solid rgba(14,116,110,.4);background:rgba(255,255,255,.85);color:#0b4f4a;cursor:pointer;
+    font:inherit;font-weight:800;padding:9px 16px;border-radius:999px}
+  .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#5f8f8a;letter-spacing:.04em}
+  .lvl-btn.lvl-sel{background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-color:#0d9488}
+  .lvl-btn.lvl-sel small{color:rgba(255,255,255,.78)}
+  .gk-levelbar{text-align:center;font-weight:800;color:#0b4f4a;margin:0 auto 10px;font-size:1.05rem}
+  .gk-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .gk-lvl{border:2px solid rgba(14,116,110,.35);background:rgba(255,255,255,.85);color:#0b4f4a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .gk-lvl.gk-done{background:#dcfce7;border-color:#22c55e}
+  .gk-lvl.gk-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .gk-lvl.gk-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .gk-stage{
+    background:linear-gradient(180deg,#f4f0ff,#e4dcff 60%,#d3c6ff);
+    border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(90,60,180,.18), inset 0 2px 0 #fff}
+  .gk-stars{font-size:1.35rem;letter-spacing:.28em;min-height:1.6em;margin-bottom:4px}
+  .gk-kind{display:inline-block;background:#6d28d9;color:#fff;font-weight:800;font-size:.8rem;
+    letter-spacing:.08em;padding:4px 14px;border-radius:999px;text-transform:uppercase}
+  .gk-visual{font-size:2.6rem;line-height:1.45;letter-spacing:.12em;margin:14px 0 2px;min-height:1.2em}
+  .gk-visual .gk-qmark{display:inline-block;min-width:1.15em;border:3px dashed #6d28d9;border-radius:14px;color:#6d28d9;font-weight:900}
+  .gk-grid{display:inline-grid;grid-template-columns:repeat(3,64px);gap:8px;margin:14px 0 2px}
+  .gk-grid span{background:rgba(255,255,255,.75);border-radius:14px;font-size:2rem;line-height:64px}
+  .gk-grid span.gk-qmark{border:3px dashed #6d28d9;color:#6d28d9;font-weight:900}
+  .gk-prompt{font-weight:800;font-size:1.35rem;color:#2e1065;margin:10px auto 0;max-width:560px;line-height:1.45}
+  .gk-choices{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+  .gk-choice{min-width:76px;padding:13px 20px;border-radius:20px;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:1.7rem;color:#fff;
+    background:linear-gradient(180deg,#7c3aed,#5b21b6);box-shadow:0 10px 20px rgba(80,30,160,.3), inset 0 2px 0 rgba(255,255,255,.4)}
+  .gk-choice.gk-emoji{font-size:2.3rem;font-family:Nunito,sans-serif}
+  .gk-choice.gk-word{font-size:1.25rem;font-family:Nunito,sans-serif;font-weight:800;letter-spacing:.02em}
+  .gk-choice:hover{transform:translateY(-3px)}
+  .gk-choice.gk-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:iqshake .3s ease}
+  .gk-choice.gk-right{background:linear-gradient(180deg,#4ade80,#16a34a)}
+  .gk-choice:disabled{opacity:.94;cursor:default;transform:none}
+  @keyframes iqshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .gk-msg{font-weight:800;font-size:1.12rem;min-height:1.6em;margin:16px 0 0;color:#4c1d95}
+  .gk-why{font-weight:700;font-size:1rem;color:#5b21b6;min-height:1.4em;margin:4px auto 0;max-width:520px}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>GK Quest</h1>
+    <p>One quiz, the whole world: animals, space, science, geography, history, sports and food. <strong>100 levels</strong> of general knowledge — and every answer teaches you a true fact.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="gk-levelbar">🌍 You are on <strong>Level <span id="gk-level-now">1</span></strong> · <span id="gk-progress-note"></span></div>
+      <div class="gk-map" id="gk-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Question</span><div id="gk-round">1 / 5</div></div>
+        <div class="stat"><span>Stars</span><div id="gk-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="gk-best">—</div></div>
+      </div>
+      <div class="gk-stage">
+        <div class="gk-stars" id="gk-stars" aria-hidden="true"></div>
+        <span class="gk-kind" id="gk-cat">🌍 World</span>
+        <p class="gk-prompt" id="gk-q">Question</p>
+        <div class="gk-choices" id="gk-choices"></div>
+        <p class="gk-msg" id="gk-msg">Tap your answer!</p>
+        <p class="gk-why" id="gk-why"></p>
+        <div class="overlay hidden" id="gk-done">
+          <h2 id="gk-done-title">🌍 Level Complete!</h2>
+          <p id="gk-done-stats"></p>
+          <button class="btn" id="gk-again">Play again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="gk-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>There are <strong>100 levels</strong>. Every level mixes categories — 🌍 world, 🦁 animals, 🔬 science, 🚀 space, 🏛️ history, ⚽ sports, 🍎 food — and the facts get tougher the higher you climb.</li>
+        <li>Each level is 5 questions. Answer them all to unlock the next level — the map above shows your stars and what is still locked.</li>
+        <li>After every correct answer, the game shares the <em>true fact</em> behind it — that is where the real learning happens.</li>
+        <li>A star is earned when you answer on your first try. Replay any unlocked level to win more stars!</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click an answer button.</li>
+        <li><strong>Wrong answer?</strong> The button shakes and you can think again — no timer, no punishment.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Knowing a little about everything opens every door</h2>
+      <p>General knowledge looks like trivia, but it is really a map of the world. Every fact you pick up — how bees make honey, why Mars is red, who first stepped on the Moon — becomes a hook that the next fact can hang on. Curious people learn faster, not because they are smarter, but because they have more hooks.</p>
+      <p>So ask questions about everything. Wonder why the sky is blue and who built the pyramids. The world rewards the curious — one fact at a time.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/gk-quest.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
