@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>IQ Quest — Free Puzzle & Brain Game for Kids & Adults | Wisely Arcade</title>
 <link rel="canonical" href="https://wiselyarcade.com/games/iq-quest">
-<meta name="description" content="Play IQ Quest free online — solve patterns, number sequences, odd-one-out, analogies and logic puzzles across 5 levels from Toddler to Expert. No download, no sign-up.">
+<meta name="description" content="Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -39,6 +39,13 @@
   .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#5f8f8a;letter-spacing:.04em}
   .lvl-btn.lvl-sel{background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-color:#0d9488}
   .lvl-btn.lvl-sel small{color:rgba(255,255,255,.78)}
+  .iq-levelbar{text-align:center;font-weight:800;color:#0b4f4a;margin:0 auto 10px;font-size:1.05rem}
+  .iq-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .iq-lvl{border:2px solid rgba(14,116,110,.35);background:rgba(255,255,255,.85);color:#0b4f4a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .iq-lvl.iq-done{background:#dcfce7;border-color:#22c55e}
+  .iq-lvl.iq-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .iq-lvl.iq-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
   .iq-stage{
     background:linear-gradient(180deg,#f4f0ff,#e4dcff 60%,#d3c6ff);
     border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
@@ -92,12 +99,13 @@
 <main>
   <div class="game-head">
     <h1>IQ Quest</h1>
-    <p>Solve the puzzle — spot the pattern, finish the sequence, find the odd one out. Five levels from first pictures to Expert brain-benders.</p>
+    <p>Solve the puzzle — spot the pattern, finish the sequence, find the odd one out. <strong>100 levels</strong>, and the higher you climb, the tougher it gets.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
-      <div class="lvl-row" id="iq-levels" role="group" aria-label="Choose your level"></div>
+      <div class="iq-levelbar">🧠 You are on <strong>Level <span id="iq-level-now">1</span></strong> · <span id="iq-progress-note"></span></div>
+      <div class="iq-map" id="iq-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Puzzle</span><div id="iq-round">1 / 10</div></div>
         <div class="stat"><span>Stars</span><div id="iq-score">0</div></div>
@@ -112,7 +120,7 @@
         <p class="iq-msg" id="iq-msg">Think, then tap your answer.</p>
         <p class="iq-why" id="iq-why"></p>
         <div class="overlay hidden" id="iq-done">
-          <h2>🧠 Quest Complete!</h2>
+          <h2 id="iq-done-title">🧠 Level Complete!</h2>
           <p id="iq-done-stats"></p>
           <button class="btn" id="iq-again">Play again</button>
         </div>
@@ -125,10 +133,10 @@
     <div class="howto">
       <h2>How to Play</h2>
       <ol>
-        <li>Pick your level: <strong>Toddler</strong> solves picture patterns, <strong>Kids</strong> adds number sequences, <strong>Teen</strong> meets letter codes and trickier patterns, <strong>Adults</strong> takes on analogies and logic riddles, and <strong>Expert</strong> faces two-rule sequences and puzzle grids.</li>
-        <li>Each puzzle shows a pattern, a sequence, a riddle or a grid — read it carefully and tap the answer that fits.</li>
+        <li>There are <strong>100 levels</strong>. Level 1 starts with gentle picture patterns — and every level you climb adds something tougher: number sequences, letter codes, analogies, riddles, and finally Expert puzzle grids.</li>
+        <li>Each level is 5 puzzles. Solve them all to unlock the next level — the map above shows your stars and what is still locked.</li>
         <li>After every correct answer, the game tells you <em>why</em> it was right — that is where the real learning happens.</li>
-        <li>A star is earned when you solve a puzzle on your first try. Finish 10 puzzles (6 for Toddler) and see your score!</li>
+        <li>A star is earned when you solve a puzzle on your first try. Replay any unlocked level to win more stars!</li>
       </ol>
     </div>
 
@@ -167,7 +175,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/iq-quest.js?v=1"></script>
+<script src="../js/iq-quest.js?v=2"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
