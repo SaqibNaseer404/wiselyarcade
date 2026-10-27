@@ -598,3 +598,15 @@ footer.site{
 }
 @media(min-width:640px){.cards.cols3{max-width:1340px}}
 @media(min-width:1400px){.shelf-card{flex-basis:196px}}
+
+/* ---------- Extra-wide layout (2026-10-27): fill big monitors, >=1280px only ---------- */
+@media(min-width:1280px){
+  .wrap{max-width:min(1500px,94vw)}
+  .wrap.hub{max-width:min(1760px,94vw)}
+  .cards{grid-template-columns:repeat(3,1fr)}
+  .cards.cols3{grid-template-columns:repeat(3,1fr);max-width:none}
+  .hero p.lead{max-width:780px}
+  .hero-search{max-width:560px}
+  .age-picker{max-width:1080px}
+}
+@media(min-width:1600px){.shelf-card{flex-basis:212px}}
