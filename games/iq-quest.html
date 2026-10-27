@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>IQ Quest — Free Puzzle & Brain Game for Kids & Adults | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/iq-quest">
+<meta name="description" content="Play IQ Quest free online — solve patterns, number sequences, odd-one-out, analogies and logic puzzles across 5 levels from Toddler to Expert. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .lvl-row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 16px;max-width:760px}
+  .lvl-btn{border:2px solid rgba(14,116,110,.4);background:rgba(255,255,255,.85);color:#0b4f4a;cursor:pointer;
+    font:inherit;font-weight:800;padding:9px 16px;border-radius:999px}
+  .lvl-btn small{display:block;font-size:.68rem;font-weight:700;color:#5f8f8a;letter-spacing:.04em}
+  .lvl-btn.lvl-sel{background:linear-gradient(180deg,#14b8a6,#0d9488);color:#fff;border-color:#0d9488}
+  .lvl-btn.lvl-sel small{color:rgba(255,255,255,.78)}
+  .iq-stage{
+    background:linear-gradient(180deg,#f4f0ff,#e4dcff 60%,#d3c6ff);
+    border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(90,60,180,.18), inset 0 2px 0 #fff}
+  .iq-stars{font-size:1.35rem;letter-spacing:.28em;min-height:1.6em;margin-bottom:4px}
+  .iq-kind{display:inline-block;background:#6d28d9;color:#fff;font-weight:800;font-size:.8rem;
+    letter-spacing:.08em;padding:4px 14px;border-radius:999px;text-transform:uppercase}
+  .iq-visual{font-size:2.6rem;line-height:1.45;letter-spacing:.12em;margin:14px 0 2px;min-height:1.2em}
+  .iq-visual .iq-qmark{display:inline-block;min-width:1.15em;border:3px dashed #6d28d9;border-radius:14px;color:#6d28d9;font-weight:900}
+  .iq-grid{display:inline-grid;grid-template-columns:repeat(3,64px);gap:8px;margin:14px 0 2px}
+  .iq-grid span{background:rgba(255,255,255,.75);border-radius:14px;font-size:2rem;line-height:64px}
+  .iq-grid span.iq-qmark{border:3px dashed #6d28d9;color:#6d28d9;font-weight:900}
+  .iq-prompt{font-weight:800;font-size:1.35rem;color:#2e1065;margin:10px auto 0;max-width:560px;line-height:1.45}
+  .iq-choices{display:flex;gap:14px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+  .iq-choice{min-width:76px;padding:13px 20px;border-radius:20px;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:1.7rem;color:#fff;
+    background:linear-gradient(180deg,#7c3aed,#5b21b6);box-shadow:0 10px 20px rgba(80,30,160,.3), inset 0 2px 0 rgba(255,255,255,.4)}
+  .iq-choice.iq-emoji{font-size:2.3rem;font-family:Nunito,sans-serif}
+  .iq-choice.iq-word{font-size:1.25rem;font-family:Nunito,sans-serif;font-weight:800;letter-spacing:.02em}
+  .iq-choice:hover{transform:translateY(-3px)}
+  .iq-choice.iq-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:iqshake .3s ease}
+  .iq-choice.iq-right{background:linear-gradient(180deg,#4ade80,#16a34a)}
+  .iq-choice:disabled{opacity:.94;cursor:default;transform:none}
+  @keyframes iqshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .iq-msg{font-weight:800;font-size:1.12rem;min-height:1.6em;margin:16px 0 0;color:#4c1d95}
+  .iq-why{font-weight:700;font-size:1rem;color:#5b21b6;min-height:1.4em;margin:4px auto 0;max-width:520px}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>IQ Quest</h1>
+    <p>Solve the puzzle — spot the pattern, finish the sequence, find the odd one out. Five levels from first pictures to Expert brain-benders.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="lvl-row" id="iq-levels" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Puzzle</span><div id="iq-round">1 / 10</div></div>
+        <div class="stat"><span>Stars</span><div id="iq-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="iq-best">—</div></div>
+      </div>
+      <div class="iq-stage">
+        <div class="iq-stars" id="iq-stars" aria-hidden="true"></div>
+        <span class="iq-kind" id="iq-kind">Pattern</span>
+        <div class="iq-visual" id="iq-visual"></div>
+        <p class="iq-prompt" id="iq-prompt">What comes next?</p>
+        <div class="iq-choices" id="iq-choices"></div>
+        <p class="iq-msg" id="iq-msg">Think, then tap your answer.</p>
+        <p class="iq-why" id="iq-why"></p>
+        <div class="overlay hidden" id="iq-done">
+          <h2>🧠 Quest Complete!</h2>
+          <p id="iq-done-stats"></p>
+          <button class="btn" id="iq-again">Play again</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="iq-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Pick your level: <strong>Toddler</strong> solves picture patterns, <strong>Kids</strong> adds number sequences, <strong>Teen</strong> meets letter codes and trickier patterns, <strong>Adults</strong> takes on analogies and logic riddles, and <strong>Expert</strong> faces two-rule sequences and puzzle grids.</li>
+        <li>Each puzzle shows a pattern, a sequence, a riddle or a grid — read it carefully and tap the answer that fits.</li>
+        <li>After every correct answer, the game tells you <em>why</em> it was right — that is where the real learning happens.</li>
+        <li>A star is earned when you solve a puzzle on your first try. Finish 10 puzzles (6 for Toddler) and see your score!</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click an answer button.</li>
+        <li><strong>Wrong answer?</strong> The button shakes and you can think again — no timer, no punishment.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Smart is not magic — it's noticing patterns</h2>
+      <p>Nobody is born knowing the answer. Smart people just look longer. They notice that the numbers grow by 3 each time, that one picture doesn't belong, that the same trick keeps repeating. IQ is not a gift you either have or don't — it is a habit of paying attention, and habits can be trained, one puzzle at a time.</p>
+      <p>Life is full of patterns too. The friend who always shows up. The habit that always costs you money at month's end. The small choice that always leads somewhere good. Learn to spot patterns in puzzles, and you start spotting them in life — and that is when you start making wiser moves.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/iq-quest.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
