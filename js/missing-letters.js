@@ -1,67 +1,54 @@
-// Wisely Arcade — Missing Letters v2 (5 levels: Toddler, Kids, Teen, Adults, Expert)
+// Wisely Arcade — Missing Letters v3 (100 levels — words grow longer, blanks grow bolder)
 (function () {
   'use strict';
 
-  var LEVELS = {
-    toddler: {
-      label: 'Toddler', sub: 'ages 3–4 · 3-letter words', rounds: 5, choices: 3, blanks: 1,
-      bank: [
-        { word: 'CAT', emoji: '🐱' }, { word: 'DOG', emoji: '🐶' }, { word: 'PIG', emoji: '🐷' },
-        { word: 'COW', emoji: '🐮' }, { word: 'EGG', emoji: '🥚' }, { word: 'BUS', emoji: '🚌' },
-        { word: 'SUN', emoji: '🌞' }, { word: 'HEN', emoji: '🐔' }, { word: 'BEE', emoji: '🐝' },
-        { word: 'ANT', emoji: '🐜' }, { word: 'FOX', emoji: '🦊' }, { word: 'BAT', emoji: '🦇' }
-      ]
-    },
-    kids: {
-      label: 'Kids', sub: 'ages 5–9 · first words', rounds: 10, choices: 3, blanks: 1,
-      bank: [
-        { word: 'CAT', emoji: '🐱' }, { word: 'DOG', emoji: '🐶' }, { word: 'PIG', emoji: '🐷' },
-        { word: 'COW', emoji: '🐮' }, { word: 'EGG', emoji: '🥚' }, { word: 'BUS', emoji: '🚌' },
-        { word: 'SUN', emoji: '🌞' }, { word: 'FISH', emoji: '🐟' }, { word: 'BIRD', emoji: '🐦' },
-        { word: 'DUCK', emoji: '🦆' }, { word: 'FROG', emoji: '🐸' }, { word: 'LION', emoji: '🦁' },
-        { word: 'BEAR', emoji: '🐻' }, { word: 'CAKE', emoji: '🎂' }, { word: 'BOOK', emoji: '📕' },
-        { word: 'TREE', emoji: '🌳' }, { word: 'MILK', emoji: '🥛' }, { word: 'BALL', emoji: '⚽' },
-        { word: 'BOAT', emoji: '⛵' }, { word: 'STAR', emoji: '⭐' }, { word: 'MOON', emoji: '🌙' },
-        { word: 'APPLE', emoji: '🍎' }, { word: 'CRAB', emoji: '🦀' }, { word: 'CORN', emoji: '🌽' }
-      ]
-    },
-    teen: {
-      label: 'Teen', sub: 'ages 10–17 · longer words', rounds: 10, choices: 4, blanks: 1,
-      bank: [
-        { word: 'PLANET', emoji: '🪐' }, { word: 'ROCKET', emoji: '🚀' }, { word: 'SCHOOL', emoji: '🏫' },
-        { word: 'PENCIL', emoji: '✏️' }, { word: 'ORANGE', emoji: '🍊' }, { word: 'BANANA', emoji: '🍌' },
-        { word: 'GARDEN', emoji: '🌻' }, { word: 'CASTLE', emoji: '🏰' }, { word: 'BRIDGE', emoji: '🌉' },
-        { word: 'KITTEN', emoji: '🐱' }, { word: 'PUPPY', emoji: '🐶' }, { word: 'RABBIT', emoji: '🐰' },
-        { word: 'TURTLE', emoji: '🐢' }, { word: 'DOLPHIN', emoji: '🐬' }, { word: 'POPCORN', emoji: '🍿' },
-        { word: 'CUPCAKE', emoji: '🧁' }, { word: 'RAINBOW', emoji: '🌈' }, { word: 'VOLCANO', emoji: '🌋' },
-        { word: 'DIAMOND', emoji: '💎' }, { word: 'FRIEND', emoji: '👫' }
-      ]
-    },
-    adults: {
-      label: 'Adults', sub: 'words worth living by', rounds: 10, choices: 4, blanks: 1,
-      bank: [
-        { word: 'FREEDOM', emoji: '🕊️' }, { word: 'BALANCE', emoji: '⚖️' }, { word: 'PATIENCE', emoji: '⏳' },
-        { word: 'WISDOM', emoji: '🦉' }, { word: 'HARVEST', emoji: '🌾' }, { word: 'FORTUNE', emoji: '🍀' },
-        { word: 'LANTERN', emoji: '🏮' }, { word: 'COMPASS', emoji: '🧭' }, { word: 'PYRAMID', emoji: '🔺' },
-        { word: 'GLACIER', emoji: '🧊' }, { word: 'DESERT', emoji: '🏜️' }, { word: 'COURAGE', emoji: '🦁' },
-        { word: 'JOURNEY', emoji: '🧳' }, { word: 'SILENCE', emoji: '🤫' }, { word: 'VICTORY', emoji: '🏆' },
-        { word: 'JUSTICE', emoji: '⚖️' }, { word: 'HONESTY', emoji: '👐' }, { word: 'TRUST', emoji: '🤝' }
-      ]
-    },
-    expert: {
-      label: 'Expert', sub: '2 missing letters · long words', rounds: 8, choices: 4, blanks: 2,
-      bank: [
-        { word: 'PERSEVERANCE', emoji: '🏆' }, { word: 'GRATITUDE', emoji: '🙏' },
-        { word: 'DISCIPLINE', emoji: '🎯' }, { word: 'CONFIDENCE', emoji: '💪' },
-        { word: 'LEADERSHIP', emoji: '👑' }, { word: 'CREATIVITY', emoji: '🎨' },
-        { word: 'KNOWLEDGE', emoji: '📚' }, { word: 'ADVENTURE', emoji: '🗺️' },
-        { word: 'BUTTERFLY', emoji: '🦋' }, { word: 'STRAWBERRY', emoji: '🍓' },
-        { word: 'PINEAPPLE', emoji: '🍍' }, { word: 'HELICOPTER', emoji: '🚁' },
-        { word: 'CROCODILE', emoji: '🐊' }
-      ]
-    }
+  var MAX_LEVEL = 100;
+  var WORDS_PER_LEVEL = 5;
+
+  var BANKS = {
+    t1: [
+      { word: 'CAT', emoji: '🐱' }, { word: 'DOG', emoji: '🐶' }, { word: 'PIG', emoji: '🐷' },
+      { word: 'COW', emoji: '🐮' }, { word: 'EGG', emoji: '🥚' }, { word: 'BUS', emoji: '🚌' },
+      { word: 'SUN', emoji: '🌞' }, { word: 'HEN', emoji: '🐔' }, { word: 'BEE', emoji: '🐝' },
+      { word: 'ANT', emoji: '🐜' }, { word: 'FOX', emoji: '🦊' }, { word: 'BAT', emoji: '🦇' }
+    ],
+    t2: [
+      { word: 'CAT', emoji: '🐱' }, { word: 'DOG', emoji: '🐶' }, { word: 'PIG', emoji: '🐷' },
+      { word: 'COW', emoji: '🐮' }, { word: 'EGG', emoji: '🥚' }, { word: 'BUS', emoji: '🚌' },
+      { word: 'SUN', emoji: '🌞' }, { word: 'FISH', emoji: '🐟' }, { word: 'BIRD', emoji: '🐦' },
+      { word: 'DUCK', emoji: '🦆' }, { word: 'FROG', emoji: '🐸' }, { word: 'LION', emoji: '🦁' },
+      { word: 'BEAR', emoji: '🐻' }, { word: 'CAKE', emoji: '🎂' }, { word: 'BOOK', emoji: '📕' },
+      { word: 'TREE', emoji: '🌳' }, { word: 'MILK', emoji: '🥛' }, { word: 'BALL', emoji: '⚽' },
+      { word: 'BOAT', emoji: '⛵' }, { word: 'STAR', emoji: '⭐' }, { word: 'MOON', emoji: '🌙' },
+      { word: 'APPLE', emoji: '🍎' }, { word: 'CRAB', emoji: '🦀' }, { word: 'CORN', emoji: '🌽' }
+    ],
+    t3: [
+      { word: 'PLANET', emoji: '🪐' }, { word: 'ROCKET', emoji: '🚀' }, { word: 'SCHOOL', emoji: '🏫' },
+      { word: 'PENCIL', emoji: '✏️' }, { word: 'ORANGE', emoji: '🍊' }, { word: 'BANANA', emoji: '🍌' },
+      { word: 'GARDEN', emoji: '🌻' }, { word: 'CASTLE', emoji: '🏰' }, { word: 'BRIDGE', emoji: '🌉' },
+      { word: 'KITTEN', emoji: '🐱' }, { word: 'PUPPY', emoji: '🐶' }, { word: 'RABBIT', emoji: '🐰' },
+      { word: 'TURTLE', emoji: '🐢' }, { word: 'DOLPHIN', emoji: '🐬' }, { word: 'POPCORN', emoji: '🍿' },
+      { word: 'CUPCAKE', emoji: '🧁' }, { word: 'RAINBOW', emoji: '🌈' }, { word: 'VOLCANO', emoji: '🌋' },
+      { word: 'DIAMOND', emoji: '💎' }, { word: 'FRIEND', emoji: '👫' }
+    ],
+    t4: [
+      { word: 'FREEDOM', emoji: '🕊️' }, { word: 'BALANCE', emoji: '⚖️' }, { word: 'PATIENCE', emoji: '⏳' },
+      { word: 'WISDOM', emoji: '🦉' }, { word: 'HARVEST', emoji: '🌾' }, { word: 'FORTUNE', emoji: '🍀' },
+      { word: 'LANTERN', emoji: '🏮' }, { word: 'COMPASS', emoji: '🧭' }, { word: 'PYRAMID', emoji: '🔺' },
+      { word: 'GLACIER', emoji: '🧊' }, { word: 'DESERT', emoji: '🏜️' }, { word: 'COURAGE', emoji: '🦁' },
+      { word: 'JOURNEY', emoji: '🧳' }, { word: 'SILENCE', emoji: '🤫' }, { word: 'VICTORY', emoji: '🏆' },
+      { word: 'JUSTICE', emoji: '⚖️' }, { word: 'HONESTY', emoji: '👐' }, { word: 'TRUST', emoji: '🤝' }
+    ],
+    t5: [
+      { word: 'PERSEVERANCE', emoji: '🏆' }, { word: 'GRATITUDE', emoji: '🙏' },
+      { word: 'DISCIPLINE', emoji: '🎯' }, { word: 'CONFIDENCE', emoji: '💪' },
+      { word: 'LEADERSHIP', emoji: '👑' }, { word: 'CREATIVITY', emoji: '🎨' },
+      { word: 'KNOWLEDGE', emoji: '📚' }, { word: 'ADVENTURE', emoji: '🗺️' },
+      { word: 'BUTTERFLY', emoji: '🦋' }, { word: 'STRAWBERRY', emoji: '🍓' },
+      { word: 'PINEAPPLE', emoji: '🍍' }, { word: 'HELICOPTER', emoji: '🚁' },
+      { word: 'CROCODILE', emoji: '🐊' }
+    ]
   };
-  var ORDER = ['toddler', 'kids', 'teen', 'adults', 'expert'];
   var ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
   var emojiEl = document.getElementById('ml-emoji');
@@ -74,16 +61,34 @@
   var starsEl = document.getElementById('ml-stars');
   var doneEl = document.getElementById('ml-done');
   var doneStats = document.getElementById('ml-done-stats');
-  var levelsEl = document.getElementById('ml-levels');
+  var doneTitle = document.getElementById('ml-done-title');
+  var againBtn = document.getElementById('ml-again');
+  var mapEl = document.getElementById('ml-map');
+  var levelNowEl = document.getElementById('ml-level-now');
+  var noteEl = document.getElementById('ml-progress-note');
 
-  var levelKey = 'kids';
-  try { levelKey = localStorage.getItem('wa_ml_level') || 'kids'; } catch (e) {}
-  if (!LEVELS[levelKey]) levelKey = 'kids';
-  var L = LEVELS[levelKey];
+  var level = 1, unlocked = 1, starsMap = {};
+  try {
+    level = parseInt(localStorage.getItem('wa_ml_current') || '1', 10) || 1;
+    unlocked = parseInt(localStorage.getItem('wa_ml_unlocked') || '1', 10) || 1;
+    starsMap = JSON.parse(localStorage.getItem('wa_ml_stars') || '{}') || {};
+  } catch (e) {}
+  if (level < 1) level = 1;
+  if (level > MAX_LEVEL) level = MAX_LEVEL;
+  if (unlocked < 1) unlocked = 1;
+  if (unlocked > MAX_LEVEL) unlocked = MAX_LEVEL;
+  if (level > unlocked) level = unlocked;
 
   var queue = [], round = 0, score = 0, locked = false;
   var blanks = [], blankIdx = 0, wordMistake = false, currentItem = null;
 
+  function save() {
+    try {
+      localStorage.setItem('wa_ml_current', String(level));
+      localStorage.setItem('wa_ml_unlocked', String(unlocked));
+      localStorage.setItem('wa_ml_stars', JSON.stringify(starsMap));
+    } catch (e) {}
+  }
   function shuffle(a) {
     var x = a.slice();
     for (var i = x.length - 1; i > 0; i--) {
@@ -92,48 +97,63 @@
     }
     return x;
   }
-  function bestKey() { return 'wa_ml_best_' + levelKey; }
-  function loadBest() {
-    try { return parseInt(localStorage.getItem(bestKey()) || '0', 10) || 0; } catch (e) { return 0; }
+  function tierName(n) {
+    if (n <= 10) return 'First letters';
+    if (n <= 25) return 'Word explorer';
+    if (n <= 45) return 'Word climber';
+    if (n <= 65) return 'Word thinker';
+    if (n <= 80) return 'Word master';
+    return 'Word wizard';
   }
-  function saveBest(v) { try { localStorage.setItem(bestKey(), String(v)); } catch (e) {} }
+  function bankFor(n) {
+    if (n <= 10) return BANKS.t1;
+    if (n <= 25) return BANKS.t2;
+    if (n <= 45) return BANKS.t3;
+    if (n <= 65) return BANKS.t4;
+    if (n <= 80) return BANKS.t4.concat(BANKS.t5);
+    return BANKS.t5;
+  }
+  function blanksFor(n) { return n >= 66 ? 2 : 1; }
+  function choicesFor(n) { return n >= 26 ? 4 : 3; }
+
+  function buildMap() {
+    mapEl.innerHTML = '';
+    for (var n = 1; n <= MAX_LEVEL; n++) {
+      (function (n) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        var st = starsMap[n] || 0;
+        b.className = 'ml-lvl' + (n === level ? ' ml-cur' : '') + (st > 0 ? ' ml-done' : '');
+        b.textContent = st > 0 ? n + ' ⭐' : String(n);
+        b.title = 'Level ' + n + ' — ' + tierName(n) + (st > 0 ? ' · best ' + st + '/5 stars' : '');
+        if (n > unlocked) { b.disabled = true; b.classList.add('ml-lock'); b.textContent = '🔒'; b.title = 'Level ' + n + ' — finish level ' + (n - 1) + ' to unlock'; }
+        b.addEventListener('click', function () { if (n <= unlocked && n !== level) { level = n; save(); start(); } });
+        mapEl.appendChild(b);
+      })(n);
+    }
+    levelNowEl.textContent = level;
+    var doneCount = Object.keys(starsMap).length;
+    noteEl.textContent = tierName(level) + ' · ' + doneCount + ' of 100 levels completed';
+  }
   function showBest() {
-    var b = loadBest();
-    bestEl.textContent = b > 0 ? b + ' ⭐' : '—';
+    var b = starsMap[level] || 0;
+    bestEl.textContent = b > 0 ? b + ' / 5 ⭐' : '—';
   }
   function drawStars() {
     var s = '';
-    for (var i = 0; i < L.rounds; i++) s += i < score ? '⭐' : '☆';
+    for (var i = 0; i < WORDS_PER_LEVEL; i++) s += i < score ? '⭐' : '☆';
     starsEl.textContent = s;
-  }
-
-  function buildLevelButtons() {
-    levelsEl.innerHTML = '';
-    ORDER.forEach(function (k) {
-      var lv = LEVELS[k];
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'lvl-btn' + (k === levelKey ? ' lvl-sel' : '');
-      b.innerHTML = lv.label + '<small>' + lv.sub + '</small>';
-      b.addEventListener('click', function () {
-        if (k === levelKey) return;
-        levelKey = k; L = LEVELS[k];
-        try { localStorage.setItem('wa_ml_level', k); } catch (e) {}
-        buildLevelButtons();
-        start();
-      });
-      levelsEl.appendChild(b);
-    });
   }
 
   function nextRound() {
     locked = false; wordMistake = false; blankIdx = 0;
     currentItem = queue[round];
     var item = currentItem;
-    roundEl.textContent = (round + 1) + ' / ' + L.rounds;
+    var nb = blanksFor(level);
+    roundEl.textContent = (round + 1) + ' / ' + WORDS_PER_LEVEL;
     emojiEl.textContent = item.emoji;
 
-    var positions = shuffle(item.word.split('').map(function (_, i) { return i; })).slice(0, L.blanks).sort();
+    var positions = shuffle(item.word.split('').map(function (_, i) { return i; })).slice(0, nb).sort();
     blanks = positions.map(function (pos) { return { pos: pos, letter: item.word.charAt(pos), tile: null }; });
 
     wordEl.innerHTML = '';
@@ -151,15 +171,16 @@
       wordEl.appendChild(t);
     });
     renderChoices();
-    msgEl.textContent = L.blanks > 1 ? 'Two letters ran away! Find the first one.' : 'Which letter is missing?';
+    msgEl.textContent = nb > 1 ? 'Two letters ran away! Find the first one.' : 'Which letter is missing?';
   }
 
   function renderChoices() {
     var answer = blanks[blankIdx].letter;
+    var count = choicesFor(level);
     var picks = [answer];
-    while (picks.length < L.choices) {
+    while (picks.length < count) {
       var c = ALPHABET.charAt(Math.floor(Math.random() * 26));
-      if (picks.indexOf(c) === -1 && currentItem.word.indexOf(c) === -1) picks.push(c);
+      if (picks.indexOf(c) === -1) picks.push(c);
     }
     choicesEl.innerHTML = '';
     shuffle(picks).forEach(function (letter) {
@@ -174,60 +195,67 @@
 
   function choose(btn, letter) {
     if (locked) return;
-    var cur = blanks[blankIdx];
-    if (letter === cur.letter) {
-      btn.classList.add('ml-right');
-      choicesEl.querySelectorAll('.ml-choice').forEach(function (x) { x.disabled = true; });
-      cur.tile.textContent = cur.letter;
-      cur.tile.classList.remove('ml-blank');
-      cur.tile.classList.add('ml-filled');
+    var target = blanks[blankIdx];
+    if (letter === target.letter) {
+      target.tile.textContent = letter;
+      target.tile.classList.remove('ml-blank');
+      target.tile.classList.add('ml-filled');
       blankIdx++;
       if (blankIdx < blanks.length) {
-        msgEl.textContent = 'That\'s one! Now find the next missing letter.';
-        setTimeout(renderChoices, 450);
+        msgEl.textContent = 'Yes! Now the second letter.';
+        renderChoices();
         return;
       }
       locked = true;
+      choicesEl.querySelectorAll('.ml-choice').forEach(function (x) { x.disabled = true; });
+      btn.classList.add('ml-right');
       if (!wordMistake) { score++; scoreEl.textContent = score; drawStars(); }
-      msgEl.textContent = 'Yes! ' + currentItem.word.split('').join('-') + ' spells ' + currentItem.word + '!' +
-        (wordMistake ? '' : ' ⭐ First try!');
+      msgEl.textContent = 'You found it — ' + currentItem.word + '!' + (wordMistake ? '' : ' ⭐ First try!');
       setTimeout(function () {
         round++;
-        if (round >= L.rounds) finish(); else nextRound();
-      }, 1300);
+        if (round >= WORDS_PER_LEVEL) finish(); else nextRound();
+      }, 1100);
     } else {
       wordMistake = true;
       btn.classList.add('ml-wrong');
       btn.disabled = true;
-      msgEl.textContent = 'Good try! That letter doesn\'t fit. Look at the picture and try again.';
+      msgEl.textContent = 'Not that one — look at the picture and try again.';
       setTimeout(function () { btn.classList.remove('ml-wrong'); }, 350);
     }
   }
 
   function finish() {
-    var b = loadBest();
-    if (score > b) { saveBest(score); }
+    var prev = starsMap[level] || 0;
+    if (score > prev) starsMap[level] = score;
+    var wasLast = level >= MAX_LEVEL;
+    if (!wasLast && level + 1 > unlocked) unlocked = level + 1;
+    save();
     showBest();
-    doneStats.textContent = 'You collected ' + score + ' of ' + L.rounds + ' stars on ' + L.label + '. ' +
-      (score === L.rounds ? 'Perfect — every word on the first try!'
-        : score >= L.rounds * 0.7 ? 'Wonderful reading!'
-        : score >= L.rounds * 0.4 ? 'Good job — keep practising, one letter at a time!'
-        : 'Good trying! Every try makes you a stronger reader.');
+    buildMap();
+    if (doneTitle) doneTitle.textContent = wasLast ? '👑 Level 100 — Word Wizard Supreme!' : '🎉 Level ' + level + ' Complete!';
+    doneStats.textContent = 'You earned ' + score + ' of ' + WORDS_PER_LEVEL + ' stars on Level ' + level + ' (' + tierName(level) + '). ' +
+      (wasLast ? 'You climbed all 100 levels — every word found!'
+        : score === WORDS_PER_LEVEL ? 'Perfect level! Level ' + (level + 1) + ' is unlocked.'
+        : 'Level complete — Level ' + (level + 1) + ' is unlocked. Replay any level to earn more stars.');
+    againBtn.textContent = wasLast ? 'Play again' : 'Next level →';
     doneEl.classList.remove('hidden');
   }
 
   function start() {
-    queue = shuffle(L.bank).slice(0, L.rounds);
+    queue = shuffle(bankFor(level)).slice(0, WORDS_PER_LEVEL);
     round = 0; score = 0;
     scoreEl.textContent = '0';
     doneEl.classList.add('hidden');
+    buildMap();
     drawStars();
     showBest();
     nextRound();
   }
 
   document.getElementById('ml-restart').addEventListener('click', start);
-  document.getElementById('ml-again').addEventListener('click', start);
-  buildLevelButtons();
+  againBtn.addEventListener('click', function () {
+    if (level < MAX_LEVEL) { level = level + 1; save(); }
+    start();
+  });
   start();
 })();
