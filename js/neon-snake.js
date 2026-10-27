@@ -15,6 +15,112 @@
   var againBtn = document.getElementById('s-again-btn');
 
   var BEST_KEY = 'wisely_snake_best';
+
+  // ---- 100-level campaign: eat the target number of orbs to clear the level.
+  // Speed rises with level; neon blocks appear from Level 11 and thicken into mazes.
+  var MAX_LEVEL = 100;
+  var lvl = 1, lvlUnlocked = 1, lvlStars = {}, lvlAttempts = {}, obstacles = [], pendingNext = false, levelStartT = 0;
+  try {
+    lvl = parseInt(localStorage.getItem('wa_ns_current') || '1', 10) || 1;
+    lvlUnlocked = parseInt(localStorage.getItem('wa_ns_unlocked') || '1', 10) || 1;
+    lvlStars = JSON.parse(localStorage.getItem('wa_ns_stars') || '{}') || {};
+    lvlAttempts = JSON.parse(localStorage.getItem('wa_ns_attempts') || '{}') || {};
+  } catch (e) {}
+  if (lvl < 1) lvl = 1; if (lvl > MAX_LEVEL) lvl = MAX_LEVEL;
+  if (lvlUnlocked < lvl) lvlUnlocked = lvl; if (lvlUnlocked > MAX_LEVEL) lvlUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_ns_current', String(lvl));
+      localStorage.setItem('wa_ns_unlocked', String(lvlUnlocked));
+      localStorage.setItem('wa_ns_stars', JSON.stringify(lvlStars));
+      localStorage.setItem('wa_ns_attempts', JSON.stringify(lvlAttempts));
+    } catch (e) {}
+  }
+  function target() { return Math.min(22, 5 + Math.floor((lvl - 1) / 5)); }
+  function tierName(l) { return l <= 10 ? 'Warm-up' : l <= 25 ? 'Speeding up' : l <= 45 ? 'First walls' : l <= 65 ? 'The maze' : l <= 85 ? 'Tight corners' : 'Neon master'; }
+  function seeded(seed) { var t = seed * 2654435761 % 4294967296; return function () { t = (t * 1664525 + 1013904223) % 4294967296; return t / 4294967296; }; }
+  function buildObstacles() {
+    obstacles = [];
+    if (lvl < 11) return;
+    var mid = Math.floor(CELLS / 2), i, x, y;
+    function add(x, y) {
+      if (x < 0 || y < 0 || x >= CELLS || y >= CELLS) return;
+      if (y === mid && x >= mid - 3 && x <= mid + 1) return; /* keep the spawn row clear */
+      obstacles.push({ x: x, y: y });
+    }
+    if (lvl <= 25) { for (i = -3; i <= 3; i++) { if (i !== 0) add(mid + i, mid - 4); } }
+    else if (lvl <= 45) { for (i = -4; i <= 4; i++) { if (Math.abs(i) > 1) { add(mid + i, mid - 5); add(mid - 5, mid + i); } } }
+    else if (lvl <= 65) {
+      [[3, 3], [3, 15], [15, 3], [15, 15]].forEach(function (c) { add(c[0], c[1]); add(c[0] + 1, c[1]); add(c[0], c[1] + 1); add(c[0] + 1, c[1] + 1); });
+      for (i = -2; i <= 2; i++) { if (i) add(mid + i, mid - 6); }
+    } else {
+      var rng = seeded(lvl * 31 + 7), want = lvl <= 85 ? 16 : 26, placed = 0, guard = 0;
+      while (placed < want && guard++ < 500) {
+        x = 1 + Math.floor(rng() * (CELLS - 2)); y = 1 + Math.floor(rng() * (CELLS - 2));
+        if (Math.abs(x - mid) <= 2 && Math.abs(y - mid) <= 2) continue;
+        if (obstacles.some(function (o) { return o.x === x && o.y === y; })) continue;
+        add(x, y); placed++;
+      }
+    }
+  }
+  function onObstacle(x, y) { return obstacles.some(function (o) { return o.x === x && o.y === y; }); }
+  function buildMap() {
+    var map = document.getElementById('s-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (lvlStars[l] != null && l !== lvl) { b.className = 'ns-lvl ns-done'; b.textContent = l + (lvlStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === lvl) { b.className = 'ns-lvl ns-cur'; b.textContent = l; }
+        else if (l <= lvlUnlocked) { b.className = 'ns-lvl'; b.textContent = l; }
+        else { b.className = 'ns-lvl ns-lock'; b.textContent = '🔒'; }
+        b.disabled = l > lvlUnlocked || running;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= lvlUnlocked && !running) { lvl = l; saveCampaign(); reset(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('s-level-now'); if (ln) ln.textContent = lvl;
+    var pn = document.getElementById('s-progress-note');
+    if (pn) { var dc = 0; for (var k in lvlStars) dc++; pn.textContent = tierName(lvl) + ' · ' + dc + ' of 100 levels completed'; }
+    var tg = document.getElementById('s-target'); if (tg) tg.textContent = target();
+    var sp = startOverlay.querySelector('p');
+    if (sp && !running) sp.textContent = 'Level ' + lvl + ': eat ' + target() + ' orbs to clear it. Don\'t hit the walls, the neon blocks — or yourself.';
+  }
+  function drawObstacles() {
+    if (!obstacles.length) return;
+    ctx.save();
+    for (var i = 0; i < obstacles.length; i++) {
+      var o = obstacles[i], px = o.x * CELL, py = o.y * CELL;
+      ctx.fillStyle = '#232f57';
+      ctx.strokeStyle = 'rgba(110,231,255,.85)';
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = 'rgba(110,231,255,.7)';
+      ctx.shadowBlur = 7;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(px + 2, py + 2, CELL - 4, CELL - 4, 4); else ctx.rect(px + 2, py + 2, CELL - 4, CELL - 4);
+      ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function levelComplete() {
+    dead = true; running = false;
+    clearTimeout(timerId);
+    var elapsed = performance.now() - levelStartT;
+    var par = target() * (stepMsBase() + 300) * 2.4;
+    var stars = 1 + ((lvlAttempts[lvl] || 0) === 0 ? 1 : 0) + (elapsed <= par ? 1 : 0);
+    if (lvlStars[lvl] == null || stars > lvlStars[lvl]) lvlStars[lvl] = stars;
+    if (lvl === lvlUnlocked && lvlUnlocked < MAX_LEVEL) lvlUnlocked++;
+    pendingNext = lvl < MAX_LEVEL;
+    saveCampaign();
+    buildMap();
+    overOverlay.querySelector('h2').textContent = '🏆 Level ' + lvl + ' Complete!';
+    overStats.innerHTML = 'Orbs: <strong>' + score + ' / ' + target() + '</strong> · Stars: <strong>' + '⭐'.repeat(stars) + '</strong><br>' +
+      (lvl < MAX_LEVEL ? 'Level ' + (lvl + 1) + ' unlocked — faster, and the arena changes again.' : 'You cleared all 100 levels. Neon master!');
+    againBtn.textContent = lvl < MAX_LEVEL ? 'Next Level →' : 'Play again';
+    overOverlay.classList.remove('hidden');
+  }
   var SIZE = 400;          // canvas pixels (square)
   var CELLS = 20;          // grid is CELLS x CELLS
   var CELL = SIZE / CELLS;
@@ -58,12 +164,12 @@
     bestEl.textContent = best;
   }
 
-  // Speed: starts relaxed, gets faster the more you eat (min 70ms per step).
-  function stepMs() {
-    return Math.max(70, 150 - score * 4);
-  }
+  // Speed: rises with level and with every orb eaten.
+  function stepMsBase() { return Math.max(72, 150 - (lvl - 1)); }
+  function stepMs() { return Math.max(52, stepMsBase() - score * 2); }
 
   function reset() {
+    buildObstacles();
     var mid = Math.floor(CELLS / 2);
     snake = [
       { x: mid, y: mid },
@@ -76,6 +182,7 @@
     dead = false;
     placeFood();
     renderScores();
+    buildMap();
     draw();
   }
 
@@ -86,7 +193,7 @@
         y: Math.floor(Math.random() * CELLS)
       };
       var onSnake = snake.some(function (s) { return s.x === f.x && s.y === f.y; });
-      if (!onSnake) { food = f; return; }
+      if (!onSnake && !onObstacle(f.x, f.y)) { food = f; return; }
     }
   }
 
@@ -97,6 +204,8 @@
 
     // Wall collision.
     if (head.x < 0 || head.y < 0 || head.x >= CELLS || head.y >= CELLS) return gameOver();
+    // Neon block collision.
+    if (onObstacle(head.x, head.y)) return gameOver();
     // Self collision (check against body; tail moves away unless growing).
     var eating = (head.x === food.x && head.y === food.y);
     var body = eating ? snake : snake.slice(0, -1);
@@ -110,6 +219,7 @@
       spawnSparks(head.x * CELL + CELL / 2, head.y * CELL + CELL / 2);
       if (score > best) { best = score; setBest(best); }
       renderScores();
+      if (score >= target()) { draw(); return levelComplete(); }
       placeFood();
     } else {
       snake.pop();
@@ -454,6 +564,7 @@
     }
 
     drawBoard(now);
+    drawObstacles();
 
     // Food: juicy glowing orb with a soft halo, a gentle pulse, an
     // expanding pulse ring and a slow sparkle.
@@ -653,6 +764,7 @@
 
   function start() {
     reset();
+    levelStartT = performance.now();
     running = true;
     startOverlay.classList.add('hidden');
     overOverlay.classList.add('hidden');
@@ -664,7 +776,13 @@
     dead = true;
     running = false;
     clearTimeout(timerId);
-    overStats.innerHTML = 'Score: <strong>' + score + '</strong><br>Best: <strong>' + best + '</strong>';
+    lvlAttempts[lvl] = (lvlAttempts[lvl] || 0) + 1;
+    pendingNext = false;
+    saveCampaign();
+    buildMap();
+    overOverlay.querySelector('h2').textContent = 'Game Over';
+    overStats.innerHTML = 'Level ' + lvl + ' — orbs: <strong>' + score + ' / ' + target() + '</strong><br>Best run: <strong>' + best + '</strong>';
+    againBtn.textContent = 'Retry Level ' + lvl;
     overOverlay.classList.remove('hidden');
   }
 
@@ -744,6 +862,7 @@
   againBtn.addEventListener('click', function () {
     startOverlay.querySelector('h2').textContent = 'Neon Snake';
     startBtn.textContent = 'Start';
+    if (pendingNext && lvl < MAX_LEVEL) { lvl++; pendingNext = false; saveCampaign(); }
     start();
   });
 
