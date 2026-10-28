@@ -1,5 +1,7 @@
-/* Paint the Rocket — Wisely Arcade: 100 levels.
-   Detail and colours grow as you climb; from Level 6 each level sets a
+/* Paint the Rocket — Wisely Arcade: 100 levels, FIVE pictures.
+   A new picture every 20 levels (Rocket, Castle, Under the Sea, Robot,
+   Garden); inside each block the picture grows a detail stage every 4
+   levels and the palette keeps growing. From Level 6 each level sets a
    Colour Mission — paint named parts in the named colours for 3 stars. */
 (function () {
   'use strict';
@@ -15,13 +17,31 @@
     { name: 'Gold', hex: '#d4af37' }, { name: 'Lavender', hex: '#c4b5fd' },
     { name: 'Peach', hex: '#fdba74' }, { name: 'Magenta', hex: '#d946ef' }
   ];
-  var TIERS = [
-    { to: 20, name: 'First flights' }, { to: 40, name: 'Sky painter' },
-    { to: 60, name: 'Orbit artist' }, { to: 80, name: 'Star designer' },
-    { to: 100, name: 'Master of colour' }
+  var SCENES = [
+    { name: 'The Rocket', emoji: '🚀', tier: 'First flights', noun: 'rocket',
+      btn: '🚀 Launch my rocket!',
+      readyMsg: 'Press Launch and watch YOUR rocket fly! 🚀',
+      flyMsg: '3… 2… 1… BLAST OFF! 🚀', doneTitle: '🚀 Blast off!' },
+    { name: 'The Castle', emoji: '🏰', tier: 'Kingdom colours', noun: 'castle',
+      btn: 'Raise the flag 🏰',
+      readyMsg: 'Press “Raise the flag” and see your castle shine! 🏰',
+      flyMsg: 'Hooray! The flag is flying over your castle! 🏰', doneTitle: '🏰 The flag is flying!' },
+    { name: 'Under the Sea', emoji: '🐠', tier: 'Ocean artist', noun: 'sea picture',
+      btn: 'Open the treasure 🐠',
+      readyMsg: 'Press “Open the treasure” and dive into your sea! 🐠',
+      flyMsg: 'Splash! You opened the treasure chest! 🐠', doneTitle: '🐠 Treasure found!' },
+    { name: 'The Friendly Robot', emoji: '🤖', tier: 'Star designer', noun: 'robot',
+      btn: 'Switch on 🤖',
+      readyMsg: 'Press “Switch on” and wake your robot up! 🤖',
+      flyMsg: 'Beep boop! Your robot is switched ON! 🤖', doneTitle: '🤖 Robot switched on!' },
+    { name: 'The Garden', emoji: '🌻', tier: 'Master of colour', noun: 'garden',
+      btn: 'Bloom 🌻',
+      readyMsg: 'Press “Bloom” and watch your garden grow! 🌻',
+      flyMsg: 'Bloom! Your garden is full of colour! 🌻', doneTitle: '🌻 In full bloom!' }
   ];
-  function tierName(l) { for (var i = 0; i < TIERS.length; i++) if (l <= TIERS[i].to) return TIERS[i].name; return TIERS[4].name; }
-  function maxLvl(l) { return Math.ceil(l / 20); }
+  function sceneOf(l) { return Math.ceil(l / 20); }
+  function stageOf(l) { return Math.ceil(((l - 1) % 20 + 1) / 4); }
+  function sceneInfo(l) { return SCENES[sceneOf(l) - 1]; }
   function paletteSize(l) { return Math.min(18, 8 + Math.floor((l - 1) / 10)); }
   function missionCount(l) { return l < 6 ? 0 : l <= 20 ? 1 : l <= 40 ? 2 : l <= 60 ? 3 : l <= 80 ? 4 : 5; }
   function seeded(seed) { var t = seed * 2654435761 % 4294967296; return function () { t = (t * 1664525 + 1013904223) % 4294967296; return t / 4294967296; }; }
@@ -31,7 +51,23 @@
   var countEl = document.getElementById('pr-count');
   var colorNameEl = document.getElementById('pr-colorname');
   var missionEl = document.getElementById('pr-mission');
+  var launchBtn = document.getElementById('pr-launch');
+  var againBtn = document.getElementById('pr-again');
+  var svgEl = document.getElementById('pr-svg');
+  var doneTitle = document.getElementById('pr-done-title');
   var parts = Array.prototype.slice.call(document.querySelectorAll('.pr-part'));
+  var sceneGroups = Array.prototype.slice.call(document.querySelectorAll('.pr-scene'));
+  parts.forEach(function (p) {
+    var g = p;
+    while (g && !(g.classList && g.classList.contains('pr-scene'))) g = g.parentNode;
+    p._scene = g ? parseInt(g.getAttribute('data-scene'), 10) : 1;
+  });
+  function sceneGroup(s) {
+    for (var i = 0; i < sceneGroups.length; i++) {
+      if (parseInt(sceneGroups[i].getAttribute('data-scene'), 10) === s) return sceneGroups[i];
+    }
+    return null;
+  }
 
   var cur = 1, unlocked = 1, starMap = {};
   try {
@@ -52,12 +88,19 @@
   }
 
   function visibleParts() {
-    var m = maxLvl(cur);
-    return parts.filter(function (p) { return parseInt(p.dataset.lvl || '2', 10) <= m; });
+    var s = sceneOf(cur), st = stageOf(cur);
+    return parts.filter(function (p) { return p._scene === s && parseInt(p.dataset.lvl || '2', 10) <= st; });
   }
   function applyLevelVisibility() {
-    var m = maxLvl(cur);
-    parts.forEach(function (p) { p.style.display = parseInt(p.dataset.lvl || '2', 10) <= m ? '' : 'none'; });
+    var s = sceneOf(cur), st = stageOf(cur);
+    sceneGroups.forEach(function (g) { g.style.display = parseInt(g.getAttribute('data-scene'), 10) === s ? '' : 'none'; });
+    parts.forEach(function (p) { p.style.display = (p._scene === s && parseInt(p.dataset.lvl || '2', 10) <= st) ? '' : 'none'; });
+  }
+  function applySceneChrome() {
+    var info = sceneInfo(cur);
+    launchBtn.textContent = info.btn;
+    againBtn.textContent = sceneOf(cur) === 1 ? 'Paint a new rocket' : 'Paint the next picture';
+    if (svgEl) svgEl.setAttribute('aria-label', 'A colouring picture: ' + info.name);
   }
   function buildMission() {
     mission = [];
@@ -128,7 +171,8 @@
     }
     document.getElementById('pr-level-now').textContent = cur;
     var doneCount = 0; for (var k in starMap) doneCount++;
-    document.getElementById('pr-progress-note').textContent = tierName(cur) + ' · ' + doneCount + ' of 100 levels completed';
+    var info = sceneInfo(cur);
+    document.getElementById('pr-progress-note').textContent = info.emoji + ' ' + info.name + ' · ' + info.tier + ' · ' + doneCount + ' of 100 levels completed';
   }
   function paintedCount() { return visibleParts().filter(function (p) { return p.dataset.painted === '1'; }).length; }
   function refreshCount() {
@@ -144,6 +188,7 @@
       delete p.dataset.color;
     });
     document.getElementById('pr-rocket').classList.remove('pr-fly');
+    sceneGroups.forEach(function (g) { g.classList.remove('pr-celebrate'); });
     document.getElementById('pr-done').classList.add('hidden');
     refreshCount();
     renderMission();
@@ -151,6 +196,7 @@
   }
   function startLevel() {
     applyLevelVisibility();
+    applySceneChrome();
     buildPalette();
     buildMap();
     buildMission();
@@ -159,7 +205,8 @@
 
   parts.forEach(function (p) {
     p.addEventListener('click', function () {
-      if (parseInt(p.dataset.lvl || '2', 10) > maxLvl(cur)) return;
+      if (p._scene !== sceneOf(cur)) return;
+      if (parseInt(p.dataset.lvl || '2', 10) > stageOf(cur)) return;
       if (p.dataset.paint === 'stroke') p.style.stroke = current.hex;
       else p.setAttribute('fill', current.hex);
       p.dataset.painted = '1';
@@ -172,21 +219,22 @@
       var name = p.getAttribute('data-name') || 'that part';
       renderMission();
       msg.textContent = n === total
-        ? 'You painted everything! Press Launch and watch YOUR rocket fly! 🚀'
+        ? 'You painted everything! ' + sceneInfo(cur).readyMsg
         : 'You painted ' + name + ' ' + current.name + '! ' + (total - n) + ' parts to go.';
     });
   });
 
   document.getElementById('pr-reset').addEventListener('click', reset);
-  document.getElementById('pr-again').addEventListener('click', function () {
+  againBtn.addEventListener('click', function () {
     if (cur < MAX_LEVEL) { cur++; save(); }
     startLevel();
   });
-  document.getElementById('pr-launch').addEventListener('click', function () {
+  launchBtn.addEventListener('click', function () {
+    var info = sceneInfo(cur);
     var total = visibleParts().length;
     var n = paintedCount();
     if (n < total) {
-      msg.textContent = 'Your rocket is almost ready — ' + (total - n) + ' white parts are still waiting for colour!';
+      msg.textContent = 'Your ' + info.noun + ' is almost ready — ' + (total - n) + ' white parts are still waiting for colour!';
       return;
     }
     var stars = 3;
@@ -198,12 +246,22 @@
     if (cur === unlocked && unlocked < MAX_LEVEL) unlocked++;
     save();
     buildMap();
-    document.getElementById('pr-rocket').classList.add('pr-fly');
-    msg.textContent = '3… 2… 1… BLAST OFF! 🚀';
+    if (sceneOf(cur) === 1) {
+      document.getElementById('pr-rocket').classList.add('pr-fly');
+    } else {
+      var g = sceneGroup(sceneOf(cur));
+      if (g) { g.classList.remove('pr-celebrate'); void g.getBoundingClientRect(); g.classList.add('pr-celebrate'); }
+    }
+    if (doneTitle) doneTitle.textContent = info.doneTitle;
+    msg.textContent = info.flyMsg;
     var stats = document.getElementById('pr-done-stats');
     if (stats) stats.textContent = 'Level ' + cur + ' complete — ' + stars + ' of 3 stars!' +
       (mission.length ? ' Colour Mission: ' + missionMatched() + ' of ' + mission.length + ' matched.' : '') +
-      (cur < MAX_LEVEL ? ' Level ' + (cur + 1) + ' is unlocked — a bigger, more colourful rocket awaits!' : ' You painted all 100 rockets. Master of colour!');
+      (cur < MAX_LEVEL
+        ? ' Level ' + (cur + 1) + ' is unlocked — ' + (sceneOf(cur + 1) !== sceneOf(cur)
+          ? 'a brand-new picture awaits: ' + sceneInfo(cur + 1).name + '!'
+          : 'the same picture grows — new details to paint!')
+        : ' You painted all 100 pictures. Master of colour!');
     setTimeout(function () { document.getElementById('pr-done').classList.remove('hidden'); }, 1500);
   });
 
