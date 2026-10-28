@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Paint the Rocket — Free Colouring Game for Kids | Wisely Arcade</title>
 <link rel="canonical" href="https://wiselyarcade.com/games/paint-the-rocket">
-<meta name="description" content="Play Paint the Rocket free online — a tap-to-colour space adventure for kids ages 5–9. Pick colours, paint your rocket, then launch it into space. No download, no sign-up.">
+<meta name="description" content="Play Paint the Rocket free online — a tap-to-colour adventure for kids ages 5–9 with five big pictures to paint: a rocket, a castle, under the sea, a friendly robot and a garden. No download, no sign-up.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
@@ -45,6 +45,8 @@
   .pr-pop{animation:prpop .25s ease;transform-origin:center;transform-box:fill-box}
   #pr-rocket{transition:transform 1.6s cubic-bezier(.5,-0.1,.3,1)}
   #pr-rocket.pr-fly{transform:translateY(-560px)}
+  @keyframes prcelebrate{0%{transform:translateY(0)}30%{transform:translateY(-16px)}55%{transform:translateY(0)}78%{transform:translateY(-9px)}100%{transform:translateY(0)}}
+  .pr-celebrate{animation:prcelebrate 1.25s ease;transform-origin:center;transform-box:fill-box}
   .pr-palette{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:16px auto 4px;max-width:560px}
   .pr-color{width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,.95);
     box-shadow:0 4px 10px rgba(30,30,60,.25), inset 0 -4px 8px rgba(0,0,0,.15);cursor:pointer;padding:0}
@@ -94,7 +96,7 @@
 <main>
   <div class="game-head">
     <h1>Paint the Rocket</h1>
-    <p>Your rocket is plain white and waiting for you. Pick a colour, tap a part, and make it yours — then launch it into space! <strong>100 levels</strong> — more detail, more colours, and a Colour Mission to solve on every flight from Level 6.</p>
+    <p>Five big pictures are plain white and waiting for you — a rocket, a castle, under the sea, a friendly robot and a garden! Pick a colour, tap a part, and make each one yours. <strong>100 levels</strong> — a new picture every 20 levels, more detail, more colours, and a Colour Mission to solve from Level 6.</p>
   </div>
 
   <div class="wrap">
@@ -106,7 +108,8 @@
         <div class="stat"><span>Colour</span><div id="pr-colorname">Red</div></div>
       </div>
       <div class="pr-stage" style="position:relative">
-        <svg class="pr-canvas" id="pr-svg" viewBox="0 0 640 480" role="img" aria-label="A rocket colouring picture">
+        <svg class="pr-canvas" id="pr-svg" viewBox="0 0 640 480" role="img" aria-label="A colouring picture">
+          <g class="pr-scene" data-scene="1">
           <rect class="pr-part" data-lvl="1" data-name="the sky" x="6" y="6" width="628" height="468" rx="20" fill="#ffffff"/>
           <circle class="pr-part" data-lvl="1" data-name="the big planet" cx="540" cy="86" r="48" fill="#ffffff"/>
           <circle class="pr-part" data-lvl="2" data-name="the small planet" cx="86" cy="120" r="26" fill="#ffffff"/>
@@ -145,10 +148,160 @@
           <path class="pr-part" data-lvl="5" data-name="a tiny star" d="M96 268 l5 11 12 1 -9 8 2 12 -10 -6 -10 6 2 -12 -9 -8 12 -1 z" fill="#ffffff"/>
           <ellipse class="pr-part" data-lvl="1" data-name="a cloud" cx="150" cy="428" rx="86" ry="24" fill="#ffffff"/>
           <ellipse class="pr-part" data-lvl="2" data-name="a cloud" cx="500" cy="440" rx="104" ry="26" fill="#ffffff"/>
+                  </g>
+          <g class="pr-scene" data-scene="2">
+            <rect class="pr-part" data-lvl="1" data-name="the sky" x="6" y="6" width="628" height="468" rx="20" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="the sun" cx="84" cy="76" r="34" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-paint="stroke" data-name="the sun rays" d="M84 22 L84 34 M36 76 L48 76 M120 76 L132 76 M50 42 L59 51 M118 42 L109 51" fill="none" stroke="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="2" data-name="a cloud" cx="520" cy="84" rx="64" ry="22" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="2" data-name="a cloud" cx="140" cy="150" rx="52" ry="18" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-paint="stroke" data-name="the rainbow band" d="M468 402 Q536 282 604 402" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-paint="stroke" data-name="the rainbow" d="M448 402 Q536 250 624 402" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="a bird" d="M138 102 Q150 90 162 102 Q174 90 186 102" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="a bird" d="M452 158 Q462 148 472 158 Q482 148 492 158" fill="none" stroke="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="1" data-name="the left hill" cx="110" cy="452" rx="150" ry="42" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="1" data-name="the right hill" cx="540" cy="456" rx="160" ry="40" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="4" data-name="a bush" cx="176" cy="416" rx="26" ry="14" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="4" data-name="a bush" cx="470" cy="412" rx="26" ry="14" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the left tower" x="202" y="176" width="58" height="224" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the right tower" x="380" y="176" width="58" height="224" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the castle" x="252" y="210" width="136" height="190" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="the tower stripe" x="202" y="252" width="58" height="14" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="the tower stripe" x="380" y="252" width="58" height="14" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="the left roof" d="M198 178 L231 116 L264 178 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="the right roof" d="M376 178 L409 116 L442 178 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="the middle roof" d="M252 212 L320 140 L388 212 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="the castle stripe" x="252" y="238" width="136" height="14" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the castle flag" d="M320 138 L320 100 L356 111 L320 124 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the left flag" d="M231 114 L231 84 L258 94 L231 103 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the right flag" d="M409 114 L409 84 L436 94 L409 103 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="a window" x="221" y="212" width="20" height="30" rx="9" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="a window" x="399" y="212" width="20" height="30" rx="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="the top window" cx="320" cy="272" r="16" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the gate" d="M290 400 L290 330 Q320 306 350 330 L350 400 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="the round window" cx="320" cy="322" r="12" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-name="the path" d="M296 400 L344 400 L362 474 L278 474 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a flower" cx="120" cy="418" r="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a flower" cx="512" cy="418" r="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a flower" cx="88" cy="402" r="8" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a flower" cx="584" cy="410" r="7" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="the grass" d="M56 464 q4 -14 8 0 M72 466 q4 -12 8 0 M540 468 q4 -14 8 0 M556 470 q4 -12 8 0" fill="none" stroke="#ffffff"/>
+          </g>
+          <g class="pr-scene" data-scene="3">
+            <rect class="pr-part" data-lvl="1" data-name="the sea" x="6" y="6" width="628" height="468" rx="20" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the sand" d="M6 430 Q160 405 320 428 Q480 450 634 425 L634 474 L6 474 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the seaweed" d="M376 474 C364 430 388 406 376 362 L394 362 C404 408 392 440 396 474 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="the seaweed" d="M52 474 C42 436 62 414 54 376 L72 374 C80 418 68 442 70 474 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-paint="stroke" data-name="the coral" d="M602 472 L602 428 M602 446 L586 430 M602 440 L618 424 M586 430 L582 416 M618 424 L622 410" fill="none" stroke="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="1" data-name="the big fish" cx="245" cy="215" rx="92" ry="55" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the fish tail" d="M330 214 L388 168 Q372 214 388 258 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-name="the fish fin" d="M222 166 Q248 136 280 164 Q250 155 222 166 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-paint="stroke" data-name="a fish stripe" d="M238 170 Q228 215 238 260" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-paint="stroke" data-name="a fish stripe" d="M278 168 Q268 215 278 262" fill="none" stroke="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="the fish eye" cx="205" cy="200" r="10" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="1" data-name="the turtle shell" cx="480" cy="330" rx="70" ry="46" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a shell spot" cx="462" cy="316" r="11" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a shell spot" cx="502" cy="346" r="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="1" data-name="the turtle head" cx="562" cy="320" r="20" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="2" data-name="a flipper" cx="438" cy="374" rx="22" ry="10" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="2" data-name="a flipper" cx="522" cy="378" rx="22" ry="10" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the octopus head" d="M120 330 C120 295 155 272 185 272 C215 272 250 295 250 330 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="the octopus eye" cx="166" cy="300" r="8" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="the octopus eye" cx="204" cy="300" r="8" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="an octopus tentacle" d="M130 330 C120 356 140 366 134 392 L156 392 C160 366 150 350 154 330 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-name="an octopus tentacle" d="M172 332 C166 358 182 368 178 394 L200 394 C202 366 196 350 198 332 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="an octopus tentacle" d="M216 330 C210 356 226 366 222 392 L244 392 C246 366 240 350 242 330 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="the treasure chest" x="452" y="392" width="104" height="58" rx="8" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the chest lid" d="M452 392 L452 374 Q504 350 556 374 L556 392 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="the treasure lock" x="494" y="382" width="20" height="24" rx="4" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="4" data-name="the crab" cx="250" cy="442" rx="30" ry="16" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a claw" cx="210" cy="430" r="11" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a claw" cx="290" cy="430" r="11" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the starfish" d="M150 408 l6 14 15 2 -11 10 3 15 -13 -8 -13 8 3 -15 -11 -10 15 -2 z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="a shell" d="M308 452 C304 430 318 416 330 416 C342 416 356 430 352 452 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="a bubble" cx="118" cy="118" r="14" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a bubble" cx="420" cy="92" r="12" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-name="a tiny fish" d="M60 255 L78 240 Q100 238 112 250 L126 238 L121 255 L126 272 L112 260 Q100 272 78 270 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a tiny bubble" cx="520" cy="150" r="8" fill="#ffffff"/>
+          </g>
+          <g class="pr-scene" data-scene="4">
+            <rect class="pr-part" data-lvl="1" data-name="the room" x="6" y="6" width="628" height="468" rx="20" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="the floor line" d="M40 448 L600 448" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-name="a gear" d="M98 366 h24 v64 h-24 Z M78 386 h64 v24 h-64 Z M84 398 a26 26 0 1 0 52 0 a26 26 0 1 0 -52 0 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="the gear middle" cx="110" cy="398" r="10" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-name="a gear" d="M512 384 h20 v56 h-20 Z M494 402 h56 v20 h-56 Z M502 412 a20 20 0 1 0 40 0 a20 20 0 1 0 -40 0 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="the gear middle" cx="522" cy="412" r="8" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the left leg" x="262" y="356" width="34" height="64" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the right leg" x="344" y="356" width="34" height="64" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="4" data-name="the left foot" x="250" y="420" width="56" height="22" rx="8" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="4" data-name="the right foot" x="334" y="420" width="56" height="22" rx="8" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the left arm" x="196" y="224" width="30" height="104" rx="14" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the right arm" x="414" y="224" width="30" height="104" rx="14" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="an arm stripe" x="196" y="254" width="30" height="10" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="an arm stripe" x="414" y="254" width="30" height="10" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="the left hand" cx="211" cy="346" r="18" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="the right hand" cx="429" cy="346" r="18" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the robot body" x="238" y="216" width="164" height="140" rx="16" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="4" data-name="the tummy stripe" x="252" y="312" width="136" height="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="a button" cx="296" cy="332" r="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="a button" cx="344" cy="332" r="9" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-name="the star badge" d="M258 246 l5 11 12 1 -9 8 2 12 -10 -6 -10 6 2 -12 -9 -8 12 -1 z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="the chest panel" x="272" y="240" width="96" height="64" rx="10" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the heart light" d="M320 293 C294 270 302 246 320 260 C338 246 346 270 320 293 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="the neck" x="296" y="192" width="48" height="24" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the robot head" x="255" y="88" width="130" height="104" rx="18" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="the left ear" x="240" y="118" width="17" height="44" rx="6" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="the right ear" x="387" y="118" width="17" height="44" rx="6" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="5" data-name="the head stripe" x="263" y="94" width="114" height="10" rx="5" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-paint="stroke" data-name="the antenna" d="M320 88 L320 54" fill="none" stroke="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="the antenna light" cx="320" cy="42" r="11" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="the left eye" cx="292" cy="132" r="13" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="the right eye" cx="348" cy="132" r="13" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a cheek" cx="270" cy="158" r="8" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a cheek" cx="370" cy="158" r="8" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="the robot mouth" x="292" y="160" width="56" height="12" rx="6" fill="#ffffff"/>
+          </g>
+          <g class="pr-scene" data-scene="5">
+            <rect class="pr-part" data-lvl="1" data-name="the sky" x="6" y="6" width="628" height="468" rx="20" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="1" data-name="the sun" cx="566" cy="72" r="32" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="the sun rays" d="M566 22 L566 32 M520 38 L528 46 M612 38 L604 46 M516 82 L526 82 M616 82 L606 82" fill="none" stroke="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="1" data-name="a cloud" cx="130" cy="84" rx="66" ry="22" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="5" data-name="a cloud" cx="330" cy="132" rx="44" ry="15" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-paint="stroke" data-name="a bird" d="M250 108 Q262 94 274 108 Q286 94 298 108" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="a bird" d="M330 72 Q340 62 350 72 Q360 62 370 72" fill="none" stroke="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="4" data-name="a butterfly wing" cx="402" cy="118" rx="16" ry="10" fill="#ffffff"/>
+            <ellipse class="pr-part" data-lvl="4" data-name="a butterfly wing" cx="438" cy="118" rx="16" ry="10" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="4" data-name="the butterfly body" x="416" y="102" width="8" height="32" rx="4" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the grass" d="M6 392 Q170 372 330 390 Q490 406 634 388 L634 474 L6 474 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the fence" d="M6 348 h78 v10 h-78 Z M6 372 h78 v10 h-78 Z M14 340 h12 v56 h-12 Z M44 340 h12 v56 h-12 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-name="the fence" d="M540 348 h94 v10 h-94 Z M540 372 h94 v10 h-94 Z M548 340 h12 v56 h-12 Z M578 340 h12 v56 h-12 Z M608 340 h12 v56 h-12 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="1" data-name="the little house" x="92" y="262" width="150" height="130" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the house roof" d="M78 262 L167 196 L256 262 Z" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="a window" x="104" y="284" width="30" height="30" rx="4" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="a window" x="200" y="284" width="30" height="30" rx="4" fill="#ffffff"/>
+            <rect class="pr-part" data-lvl="2" data-name="the door" x="148" y="316" width="38" height="76" rx="4" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="the door knob" cx="178" cy="354" r="6" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="1" data-name="the tree trunk" d="M452 392 L462 300 L478 300 L488 392 Z" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="1" data-name="the tree leaves" cx="470" cy="238" r="66" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="an apple" cx="438" cy="222" r="11" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="an apple" cx="466" cy="196" r="10" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="2" data-name="a sunflower" cx="312" cy="330" r="16" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="2" data-paint="stroke" data-name="the sunflower stem" d="M312 346 L312 400" fill="none" stroke="#ffffff"/>
+            <circle class="pr-part" data-lvl="3" data-name="a sunflower" cx="352" cy="344" r="13" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="3" data-paint="stroke" data-name="the sunflower stem" d="M352 357 L352 402" fill="none" stroke="#ffffff"/>
+            <rect class="pr-part" data-lvl="3" data-name="the watering can" x="386" y="368" width="44" height="30" rx="5" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-name="the spout" d="M388 376 L362 362 L368 350 L392 364 Z" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="4" data-paint="stroke" data-name="the handle" d="M430 368 Q454 376 430 398" fill="none" stroke="#ffffff"/>
+            <circle class="pr-part" data-lvl="4" data-name="a flower" cx="70" cy="424" r="9" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a flower" cx="120" cy="446" r="8" fill="#ffffff"/>
+            <circle class="pr-part" data-lvl="5" data-name="a flower" cx="470" cy="442" r="8" fill="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="a grass tuft" d="M180 452 q4 -14 8 0 M196 454 q4 -12 8 0 M212 452 q4 -14 8 0" fill="none" stroke="#ffffff"/>
+            <path class="pr-part" data-lvl="5" data-paint="stroke" data-name="a grass tuft" d="M516 458 q4 -14 8 0 M532 460 q4 -12 8 0" fill="none" stroke="#ffffff"/>
+          </g>
         </svg>
         <div class="overlay hidden" id="pr-done">
-          <h2>🚀 Blast off!</h2>
-          <p id="pr-done-stats">Look at your rocket fly! Every colour was chosen by YOU. No two rockets in the world look like yours.</p>
+          <h2 id="pr-done-title">🚀 Blast off!</h2>
+          <p id="pr-done-stats">Every colour was chosen by YOU. No two pictures in the world look the same — yours is one of a kind!</p>
           <button class="btn" id="pr-again">Paint a new rocket</button>
         </div>
       </div>
@@ -166,9 +319,9 @@
       <ol>
         <li>Tap a colour in the palette below the picture.</li>
         <li>Tap any part of the picture — the rocket, the planets, the stars, even the sky — to paint it.</li>
-        <li>There are <strong>100 levels</strong>. Higher levels add picture details — planets, stars, satellites, comets, even an antenna — and unlock new colours every 10 levels. Finish a rocket to unlock the next level.</li>
+        <li>There are <strong>100 levels</strong> and <strong>five pictures</strong>: the Rocket (Levels 1–20), the Castle (21–40), Under the Sea (41–60), the Friendly Robot (61–80) and the Garden (81–100). Inside every picture, new details appear every 4 levels, and new colours unlock every 10 levels. Finish a picture to unlock the next level.</li>
         <li>Paint every part you can see. Free colours are yours to choose — but from Level 6, the <strong>🎯 Colour Mission</strong> names a few parts and colours: match them all to earn 3 stars!</li>
-        <li>Press <strong>Launch my rocket!</strong> and watch your very own rocket fly into space.</li>
+        <li>Press the big finish button — <strong>Launch</strong>, <strong>Raise the flag</strong>, <strong>Open the treasure</strong>, <strong>Switch on</strong> or <strong>Bloom</strong> — and celebrate your finished picture!</li>
       </ol>
     </div>
 
@@ -207,7 +360,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/paint-rocket.js?v=3"></script>
+<script src="../js/paint-rocket.js?v=4"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
