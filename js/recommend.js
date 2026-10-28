@@ -30,6 +30,8 @@
       lesson: 'Small smart steps add up to big wins.' },
     { slug: 'daily-sudoku', name: 'Daily Sudoku',         ages: ['adults'], seed: 28,
       lesson: 'Big problems break into small steps.' },
+    { slug: 'daily-word-guess', name: 'Daily Word Guess', ages: ['teens', 'adults'], seed: 24,
+      lesson: 'Never give up — every wrong guess teaches you something.' },
     { slug: 'minesweeper',   name: 'Minesweeper',          ages: ['adults'], seed: 14,
       lesson: 'Think before you act — every click counts.' },
     { slug: 'mind-meter',    name: 'Mind Meter',           ages: ['teens', 'adults'], seed: 25,
