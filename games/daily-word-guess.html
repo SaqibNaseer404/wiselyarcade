@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Daily Word Guess — Free Daily Word Game Online | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/daily-word-guess">
+<meta name="description" content="Play Daily Word Guess free online — one new word to crack every day, plus a 100-level word climb from 4-letter starters to 7-letter giants. Green, gold, grey — every wrong guess teaches you something. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .wg-tabrow{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 auto 16px;max-width:720px}
+  .wg-tab{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
+    font:inherit;font-weight:800;padding:9px 18px;border-radius:999px}
+  .wg-tab small{display:block;font-size:.68rem;font-weight:700;color:#8a7bb5;letter-spacing:.04em}
+  .wg-tab.wg-sel{background:linear-gradient(180deg,#8b6fd8,#6d4fc2);color:#fff;border-color:#6d4fc2}
+  .wg-tab.wg-sel small{color:rgba(255,255,255,.75)}
+  .wg-levelbar{text-align:center;font-weight:800;color:#43307a;margin:0 auto 10px;font-size:1.05rem}
+  .wg-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .wg-lvl{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .wg-lvl.wg-done{background:#dcfce7;border-color:#22c55e}
+  .wg-lvl.wg-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .wg-lvl.wg-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .wg-stage{
+    background:linear-gradient(180deg,#fff8ec,#ffefdb 60%,#ffe6c7);
+    border-radius:26px;padding:24px 12px 28px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(140,90,20,.20), inset 0 2px 0 #fff}
+  .wg-board{display:flex;flex-direction:column;gap:6px;align-items:center}
+  .wg-row{display:flex;gap:6px}
+  .wg-tile{width:min(54px,13vw);height:min(54px,13vw);border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:min(2rem,8vw);text-transform:uppercase;
+    color:#312e81;background:linear-gradient(180deg,#ffffff,#f4f0ff);border:2px solid #cfc4ec;
+    box-shadow:0 4px 8px rgba(90,60,160,.12), inset 0 2px 0 #fff}
+  .wg-board[data-len="6"] .wg-tile{width:min(48px,12.4vw);height:min(48px,12.4vw);font-size:min(1.8rem,7.4vw)}
+  .wg-board[data-len="7"] .wg-tile{width:min(42px,11.6vw);height:min(42px,11.6vw);font-size:min(1.6rem,6.8vw)}
+  .wg-tile.wg-filled{border-color:#8a7bb5;color:#1e1b4b}
+  .wg-tile.wg-pop{animation:wgpop .12s ease}
+  @keyframes wgpop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .wg-tile.wg-green{background:linear-gradient(180deg,#4ade80,#22c55e);border-color:#15803d;color:#fff}
+  .wg-tile.wg-gold{background:linear-gradient(180deg,#fcd34d,#f59e0b);border-color:#b45309;color:#fff}
+  .wg-tile.wg-grey{background:linear-gradient(180deg,#9aa7ba,#64748b);border-color:#475569;color:#fff}
+  .wg-tile.wg-flip{animation:wgflip .45s ease}
+  @keyframes wgflip{0%{transform:rotateX(0)}50%{transform:rotateX(88deg)}100%{transform:rotateX(0)}}
+  .wg-row.wg-shake{animation:wgshake .32s ease}
+  @keyframes wgshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}60%{transform:translateX(7px)}80%{transform:translateX(-4px)}}
+  .wg-kb{display:flex;flex-direction:column;gap:6px;align-items:center;margin-top:18px}
+  .wg-krow{display:flex;gap:5px;justify-content:center}
+  .wg-key{min-width:38px;height:52px;padding:0 7px;border-radius:9px;cursor:pointer;
+    border:2px solid rgba(122,96,178,.35);background:linear-gradient(180deg,#ffffff,#efeaff);
+    font-family:Nunito,sans-serif;font-weight:800;font-size:1.02rem;color:#43307a;
+    box-shadow:0 3px 0 rgba(90,60,160,.28), inset 0 1px 0 #fff}
+  .wg-key:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(90,60,160,.28)}
+  .wg-key.wg-wide{min-width:60px;font-size:.82rem;letter-spacing:.02em}
+  .wg-key.wg-green{background:linear-gradient(180deg,#4ade80,#22c55e);border-color:#15803d;color:#fff}
+  .wg-key.wg-gold{background:linear-gradient(180deg,#fcd34d,#f59e0b);border-color:#b45309;color:#fff}
+  .wg-key.wg-grey{background:linear-gradient(180deg,#9aa7ba,#64748b);border-color:#475569;color:#fff}
+  @media(max-width:520px){.wg-key{min-width:30px;height:48px;padding:0 4px;font-size:.92rem}.wg-key.wg-wide{min-width:48px;font-size:.72rem}}
+  .wg-msg{font-weight:800;font-size:1.12rem;min-height:1.6em;margin:14px 0 0;color:#5b3a8a;text-align:center}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Daily Word Guess</h1>
+    <p>One hidden word. Six tries. Every guess paints a clue — <strong>green</strong> is the right place, <strong>gold</strong> is the right letter in the wrong place. Crack today's word, keep your streak alive, then climb <strong>100 levels</strong> of longer and trickier words.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="wg-tabrow" role="group" aria-label="Choose a mode">
+        <button class="wg-tab wg-sel" id="wg-tab-daily" type="button">📅 Today's Word<small>one word a day, for everyone</small></button>
+        <button class="wg-tab" id="wg-tab-levels" type="button">🧗 Level Climb<small>100 levels · 4 → 7 letters</small></button>
+      </div>
+
+      <div id="wg-daily-head">
+        <div class="wg-levelbar">📅 Today's word · <span id="wg-d-date">—</span> · the same word for everyone, everywhere</div>
+        <div class="stats">
+          <div class="stat"><span>Streak</span><div id="wg-d-streak">🔥 0</div></div>
+          <div class="stat"><span>Tries</span><div id="wg-d-tries">0 / 6</div></div>
+          <div class="stat"><span>Status</span><div id="wg-d-status">Playing</div></div>
+        </div>
+      </div>
+
+      <div id="wg-level-head" style="display:none">
+        <div class="wg-levelbar">🧗 You are on <strong>Level <span id="wg-level-now">1</span></strong> · <span id="wg-progress-note"></span></div>
+        <div class="wg-map" id="wg-map" role="group" aria-label="Choose your level"></div>
+        <div class="stats">
+          <div class="stat"><span>Level</span><div id="wg-l-level">1</div></div>
+          <div class="stat"><span>Letters</span><div id="wg-l-len">4</div></div>
+          <div class="stat"><span>Stars</span><div id="wg-l-stars">0</div></div>
+        </div>
+      </div>
+
+      <div class="wg-stage" id="wg-stage">
+        <div class="wg-board" id="wg-board" aria-label="Guess board"></div>
+        <div class="overlay hidden" id="wg-done">
+          <h2 id="wg-done-title">🎉 You cracked it!</h2>
+          <p id="wg-done-stats"></p>
+          <button class="btn" id="wg-primary" type="button">Next</button>
+          <button class="btn ghost" id="wg-secondary" type="button" style="display:none">Close</button>
+        </div>
+      </div>
+
+      <div class="wg-kb" id="wg-kb" aria-label="On-screen keyboard"></div>
+      <p class="wg-msg" id="wg-msg" aria-live="polite">Type a word and press Enter — every guess teaches you something.</p>
+
+      <div class="btn-row" style="justify-content:center;margin-top:12px">
+        <button class="btn ghost" id="wg-restart" type="button" style="display:none">Restart this level</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li><strong>📅 Today's Word:</strong> one hidden 5-letter word per day — the same word for everyone. Guess it in 6 tries. Win days in a row to build your 🔥 streak, and come back tomorrow for a new word.</li>
+        <li>Type letters with the on-screen keyboard (or your real keyboard) and press <strong>Enter</strong> to guess.</li>
+        <li>After each guess the tiles flip: <strong>green</strong> = right letter, right place · <strong>gold</strong> = right letter, wrong place · <strong>grey</strong> = not in the word at all. Watch out — a letter can appear twice!</li>
+        <li><strong>🧗 Level Climb:</strong> 100 levels that grow with you. Levels 1–25 use 4-letter words (5 tries), 26–50 use 5 letters, 51–75 use 6 letters, and 76–100 use mighty 7-letter words. Finish a word quickly to earn up to ⭐⭐⭐ per level.</li>
+        <li>Any word of the right length counts as a guess — so think out loud, try bold guesses, and let the colours teach you.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap the letter keys, <span class="kbd">⌫</span> deletes and <span class="kbd">Enter</span> guesses.</li>
+        <li><strong>Keyboard:</strong> type letters, <span class="kbd">Backspace</span> to delete, <span class="kbd">Enter</span> to guess.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Never give up — every wrong guess teaches you something</h2>
+      <p>A wrong guess in this game is never wasted. A grey letter crosses out a dead end. A gold letter whispers "I'm in the word — just not here." Every try, even the ones that miss, hands you a clue you did not have before.</p>
+      <p>Life works exactly the same way. The attempt that "fails" is quietly teaching you where the answer isn't — and narrowing down where it is. The only true loss is the guess you never make. So keep guessing, keep learning, and never give up: the word is always findable, one honest try at a time.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/daily-word-guess.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
