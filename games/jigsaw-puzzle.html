@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Jigsaw Puzzle — Free Online Game for Kids | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/jigsaw-puzzle">
+<meta name="description" content="Play Jigsaw Puzzle free online — drag the pieces and rebuild posters from your favourite Wisely Arcade games. 100 levels for kids ages 5–9 that teach patience, piece by piece. No download.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  /* dark-glass stat chips with amber numbers (site game style) */
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  /* level bar + 100-level map */
+  .jg-levelbar{text-align:center;font-weight:800;color:#1e3a8a;margin:0 auto 10px;font-size:1.05rem}
+  .jg-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .jg-lvl{border:2px solid rgba(59,130,246,.4);background:rgba(255,255,255,.85);color:#1e3a8a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .jg-lvl.jg-done{background:#dcfce7;border-color:#22c55e}
+  .jg-lvl.jg-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .jg-lvl.jg-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  /* play area */
+  .jg-play{position:relative}
+  .jg-cap{font-weight:900;color:#43307a;letter-spacing:.04em;font-size:.85rem;text-transform:uppercase;margin:0 0 6px}
+  .jg-boardbox{margin:0 auto}
+  .jg-board{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;background:#101a30;
+    border:3px solid rgba(67,48,122,.55);
+    box-shadow:0 16px 34px rgba(35,22,80,.3), inset 0 0 0 2px rgba(255,255,255,.15)}
+  .jg-ghost{position:absolute;inset:0;border-radius:11px;background-repeat:no-repeat;opacity:.28}
+  .jg-peekimg{position:absolute;inset:0;border-radius:11px;background-repeat:no-repeat;
+    opacity:0;pointer-events:none;transition:opacity .12s ease;z-index:60}
+  .jg-peekimg.on{opacity:1}
+  .jg-tray{position:relative;border:2px dashed rgba(90,70,160,.5);border-radius:14px;
+    background:rgba(255,255,255,.45);margin-top:14px;
+    box-shadow:inset 0 2px 10px rgba(80,60,160,.12)}
+  .jg-piece{position:absolute;border-radius:6px;background-repeat:no-repeat;cursor:grab;touch-action:none;
+    box-shadow:0 3px 8px rgba(30,20,60,.35), inset 0 0 0 1px rgba(255,255,255,.35), inset 0 0 0 2px rgba(20,16,40,.14);
+    transition:box-shadow .15s ease;z-index:5}
+  .jg-piece.drag{cursor:grabbing;
+    box-shadow:0 16px 30px rgba(20,12,44,.5), inset 0 0 0 2px rgba(255,196,77,.95)}
+  .jg-piece.locked{cursor:default;box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+  @keyframes jgpop{0%{transform:scale(1.14)}100%{transform:scale(1)}}
+  .jg-piece.pop{animation:jgpop .18s ease}
+  .jg-msg{text-align:center;font-weight:800;font-size:1.05rem;min-height:1.5em;margin:10px 0 2px;color:#3b2f63}
+  /* win overlay: dark trophy card (site game style) — must sit above dragged pieces */
+  .game-area .overlay{z-index:50;border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5);
+    -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+  .game-area .overlay p strong{color:#ffc46b}
+  /* amber primary / dark ghost buttons (page scope) */
+  .game-area .btn{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;
+    border-bottom:4px solid #b45309;text-shadow:none;
+    box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 2px 0 rgba(255,255,255,.6)}
+  .game-area .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.96),rgba(11,17,29,.96));
+    color:#ffc46b;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.5);
+    box-shadow:0 10px 22px rgba(10,16,30,.35);text-shadow:none}
+  .game-area .btn:disabled{opacity:.45;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Jigsaw Puzzle</h1>
+    <p>Your favourite Wisely Arcade posters, cut into pieces! Drag each piece home and watch the picture come together. <strong>100 levels</strong> — bigger pictures, smaller pieces, and one lesson all the way: patience.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="jg-levelbar">🧩 You are on <strong>Level <span id="jg-level-now">1</span></strong> · <span id="jg-progress-note"></span></div>
+      <div class="jg-map" id="jg-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Pieces home</span><div id="jg-placed">0 / 9</div></div>
+        <div class="stat"><span>Moves</span><div id="jg-moves">0</div></div>
+        <div class="stat"><span>Time</span><div id="jg-time">0:00</div></div>
+      </div>
+      <div class="stage">
+        <div class="jg-play" id="jg-play">
+          <div class="jg-boardbox" id="jg-boardbox">
+            <p class="jg-cap">The picture</p>
+            <div class="jg-board" id="jg-board">
+              <div class="jg-ghost" id="jg-ghost"></div>
+              <div class="jg-peekimg" id="jg-peekimg"></div>
+            </div>
+          </div>
+          <p class="jg-cap" style="margin-top:14px">Your pieces — drag them up!</p>
+          <div class="jg-tray" id="jg-tray"></div>
+        </div>
+        <div class="overlay hidden" id="jg-win">
+          <h2>🧩 Picture complete!</h2>
+          <p id="jg-win-stats"></p>
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn" id="jg-next">Next level →</button>
+            <button class="btn ghost" id="jg-again">Play again</button>
+          </div>
+        </div>
+      </div>
+      <p class="jg-msg" id="jg-msg">Drag a piece onto the picture. Drop it near its home and it snaps in!</p>
+      <div class="btn-row" style="justify-content:center;margin-top:10px">
+        <button class="btn" id="jg-peek">👁 Hold to peek</button>
+        <button class="btn ghost" id="jg-restart">Restart level</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Look at the pale ghost picture on the board — that is the picture you are building.</li>
+        <li>Drag a piece from the tray onto the board with your mouse or finger.</li>
+        <li>Drop a piece near its true home and it <strong>snaps in with a pop</strong> and locks there.</li>
+        <li>Stuck? Hold the <strong>👁 Peek</strong> button to see the finished picture — but peeking costs you a star, so peek only when you truly need to!</li>
+        <li>Finish the picture to earn stars and unlock the next level. There are <strong>100 levels</strong>: six posters from your favourite Wisely Arcade games, and the pieces get smaller and trickier as you climb.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> press a piece, drag it, and let go to drop it.</li>
+        <li><strong>Peek:</strong> press and hold the 👁 Peek button; let go to hide the picture again.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Patience — the picture comes together piece by piece</h2>
+      <p>A jigsaw never gets solved by shaking the box. It happens quietly: one piece, then another, then another — and every piece you place makes the next one easier to find. Forcing a piece where it doesn't belong never works; looking carefully and waiting for the right fit always does.</p>
+      <p>That is true far beyond this board. Big homework, a new skill, even a friendship — they all come together piece by piece, not all at once. So when something feels too big, don't panic and don't rush. Pick up one small piece, put it where it belongs, and trust the picture to appear. Patience wins, every time.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/jigsaw-puzzle.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
