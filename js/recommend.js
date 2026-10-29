@@ -12,6 +12,8 @@
       lesson: 'There are no wrong colours — your ideas can fly.' },
     { slug: 'spot-the-difference', name: 'Spot the Difference', ages: ['kids'], seed: 26,
       lesson: 'Slow down and really look.' },
+    { slug: 'jigsaw-puzzle', name: 'Jigsaw Puzzle', ages: ['kids'], seed: 33,
+      lesson: 'Patience — the picture comes together piece by piece.' },
     { slug: 'missing-letters', name: 'Missing Letters', ages: ['kids'], seed: 28,
       lesson: 'Reading grows one letter at a time.' },
     { slug: 'math-quest', name: 'Math Quest', ages: ['kids', 'teens'], seed: 29,
