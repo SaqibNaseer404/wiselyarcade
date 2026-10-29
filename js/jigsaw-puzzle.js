@@ -1,5 +1,5 @@
 /* Jigsaw Puzzle — Wisely Arcade: 100 levels.
-   Six of the arcade's own posters, sliced into growing grids.
+   Twelve pictures — arcade posters, storybook scenes and real NASA photos — sliced into growing grids.
    Drag pieces from the tray; drop near home to snap. Patience wins. */
 (function () {
   'use strict';
@@ -10,7 +10,13 @@
     { src: '../images/thumbs/memory-match.jpg', name: 'Animal Memory Match' },
     { src: '../images/thumbs/neon-snake.jpg', name: 'Neon Snake' },
     { src: '../images/thumbs/tower-stack.jpg', name: 'Tower Stack' },
-    { src: '../images/thumbs/ludo.jpg', name: 'Ludo' }
+    { src: '../images/thumbs/ludo.jpg', name: 'Ludo' },
+    { src: '../images/thumbs/jigsaw-ocean.jpg', name: 'Ocean World' },
+    { src: '../images/thumbs/jigsaw-earth.jpg', name: 'Planet Earth' },
+    { src: '../images/thumbs/jigsaw-robot.jpg', name: 'Robot Friend' },
+    { src: '../images/thumbs/jigsaw-nebula.jpg', name: 'Starry Nebula' },
+    { src: '../images/thumbs/jigsaw-cars.jpg', name: 'Super Cars' },
+    { src: '../images/thumbs/jigsaw-balloons.jpg', name: 'Balloon Valley' }
   ];
   function gridFor(l) {
     if (l <= 10) return { c: 3, r: 3 };
