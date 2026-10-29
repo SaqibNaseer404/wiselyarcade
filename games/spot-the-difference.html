@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Spot the Difference — Free Puzzle Game for Kids | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/spot-the-difference">
+<meta name="description" content="Play Spot the Difference free online — a sharp-eyes puzzle game for kids ages 5–9. Two pictures, five scenes, 100 levels of hidden differences to find. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:1040px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .sd-stage{
+    background:linear-gradient(180deg,#fdf6ff,#e8f4ff 55%,#d9ecff);
+    border-radius:26px;padding:16px;
+    box-shadow:0 24px 48px rgba(70,50,140,.22), inset 0 2px 0 #fff}
+  .sd-pics{display:flex;gap:14px}
+  .sd-picwrap{flex:1;min-width:0;background:#fff;border-radius:18px;padding:8px;
+    box-shadow:inset 0 0 0 2px rgba(59,130,246,.15)}
+  .sd-piclabel{text-align:center;font-weight:900;color:#43307a;margin:2px 0 8px;font-size:.95rem;letter-spacing:.03em}
+  .sd-svg{width:100%;height:auto;display:block;border-radius:12px;cursor:pointer;touch-action:manipulation}
+  .sd-part{stroke:#33415e;stroke-width:4;stroke-linejoin:round}
+  @keyframes sdpop{0%{transform:scale(.4);opacity:.4}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .sd-ring{fill:rgba(34,197,94,.20);stroke:#16a34a;stroke-width:5;pointer-events:none;
+    transform-origin:center;transform-box:fill-box;animation:sdpop .3s ease}
+  @keyframes sdhint{0%,100%{opacity:.95}50%{opacity:.35}}
+  .sd-hintring{fill:rgba(250,204,21,.14);stroke:#d97706;stroke-width:4;stroke-dasharray:9 7;pointer-events:none;
+    transform-origin:center;transform-box:fill-box;animation:sdhint 1.1s ease-in-out infinite}
+  @keyframes sdwob{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .sd-wobble{animation:sdwob .28s ease}
+  @media(max-width:760px){.sd-pics{flex-direction:column}}
+  .sd-msg{text-align:center;font-weight:800;font-size:1.1rem;min-height:1.5em;margin:12px 0 2px;color:#3b2f63}
+  .sd-levelbar{text-align:center;font-weight:800;color:#1e3a8a;margin:0 auto 10px;font-size:1.05rem}
+  .sd-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .sd-lvl{border:2px solid rgba(59,130,246,.4);background:rgba(255,255,255,.85);color:#1e3a8a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .sd-lvl.sd-done{background:#dcfce7;border-color:#22c55e}
+  .sd-lvl.sd-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .sd-lvl.sd-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Spot the Difference</h1>
+    <p>Two pictures that look exactly the same… but they're NOT! Sneaky differences are hiding in the right-hand picture — a changed colour, a missing moon, an extra star. Use your sharpest eyes to find them all! <strong>100 levels</strong> across five pictures: a rocket, a castle, under the sea, a friendly robot and a garden.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="sd-levelbar">🔍 You are on <strong>Level <span id="sd-level-now">1</span></strong> · <span id="sd-progress-note"></span></div>
+      <div class="sd-map" id="sd-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Found</span><div id="sd-count">0 / 5</div></div>
+        <div class="stat"><span>Time</span><div id="sd-time">0:00</div></div>
+        <div class="stat"><span>Mistakes</span><div id="sd-mistakes">0</div></div>
+      </div>
+      <div class="sd-stage" style="position:relative">
+        <div class="sd-pics">
+          <div class="sd-picwrap" id="sd-wrap-l">
+            <p class="sd-piclabel">The real picture ⭐</p>
+            <svg class="sd-svg" id="sd-svg-l" viewBox="0 0 640 480" role="img" aria-label="The original picture"></svg>
+          </div>
+          <div class="sd-picwrap" id="sd-wrap-r">
+            <p class="sd-piclabel">Spot the differences 🔍</p>
+            <svg class="sd-svg" id="sd-svg-r" viewBox="0 0 640 480" role="img" aria-label="The picture with hidden differences"></svg>
+          </div>
+        </div>
+        <div class="overlay hidden" id="sd-done">
+          <h2 id="sd-done-title">⭐ You did it!</h2>
+          <p id="sd-done-stats">You found every difference!</p>
+          <button class="btn" id="sd-next">Next level →</button>
+          <button class="btn ghost" id="sd-again">Play this level again</button>
+        </div>
+      </div>
+      <p class="sd-msg" id="sd-msg" aria-live="polite">Look carefully at both pictures!</p>
+      <div class="btn-row" style="justify-content:center;margin-top:10px">
+        <button class="btn" id="sd-hint">💡 Hint</button>
+        <button class="btn ghost" id="sd-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Look at the two pictures. They look the same — but the right-hand picture is hiding some <strong>differences</strong>!</li>
+        <li>When you spot one, <strong>tap it</strong> — on either picture. A green ring appears on both pictures and your Found counter goes up.</li>
+        <li>There are <strong>100 levels</strong> and <strong>five pictures</strong>: the Rocket, the Castle, Under the Sea, the Friendly Robot and the Garden. Higher levels hide more differences — 5 at first, then 6, 7, 8, and 10 in the last levels!</li>
+        <li>Find every difference to finish the level. <strong>Stars:</strong> finish with no mistakes for 3 stars. Tapping a wrong spot is okay — it just counts as a mistake, so slow down and look carefully.</li>
+        <li>Stuck? Press <strong>💡 Hint</strong> and a golden ring shows you where one difference is hiding — but a hint means the level can earn at most 2 stars.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click a difference on either picture.</li>
+        <li><strong>No timer pressure:</strong> the clock only counts up, so take as long as you like. Careful eyes beat fast fingers!</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Slow down and really look</h2>
+      <p>The differences in this game are never hidden by magic — they are hiding in plain sight. The moon that vanished, the flag that changed colour… they were there all along, waiting for someone patient enough to notice.</p>
+      <p>That is true far beyond this game. Careful eyes find what rushing misses: the small print, the friend who looks sad, the one wrong number in your homework. Slow down, look twice, and trust what you see. Your attention is a superpower — use it slowly.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/spot-the-difference.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
