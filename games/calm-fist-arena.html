@@ -49,6 +49,10 @@
     box-shadow:0 18px 40px rgba(35,22,80,.35), inset 0 0 0 2px rgba(255,255,255,.12)}
   @keyframes cfashake{0%,100%{transform:translate(0,0)}20%{transform:translate(-7px,2px)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,-1px)}}
   .cfa-arena.shake{animation:cfashake .28s ease}
+  #cfa-bg{position:absolute;inset:-4%;z-index:0;background-size:cover;background-position:center 62%;
+    animation:cfaDrift 30s ease-in-out infinite alternate}
+  @keyframes cfaDrift{from{transform:scale(1.02) translate(-.6%,-.4%)}to{transform:scale(1.09) translate(.8%,.6%)}}
+  #cfa-weather{position:absolute;inset:0;width:100%;height:100%;z-index:12;pointer-events:none}
   /* HUD */
   .cfa-hud{position:absolute;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:10px;
     padding:12px 14px;z-index:20;pointer-events:none}
@@ -143,7 +147,7 @@
 <main>
   <div class="game-head">
     <h1>Calm Fist Arena</h1>
-    <p>A martial-arts fighting game with real painted fighters on a big-screen stage. Face <strong>100 rivals</strong> — from Zara the Swift to Master Roku — across <strong>50 lively places</strong> — street markets, ship decks, train tops, waterfalls and snowy peaks, with crowds watching. The secret weapon is not anger. It is <strong>Calm</strong>: block to build it, then unleash the Focus Strike.</p>
+    <p>A martial-arts fighting game with real painted fighters on a big-screen stage. Face <strong>100 rivals</strong> — from Zara the Swift to Master Roku — across <strong>50 lively places</strong> — street markets, ship decks, train tops, waterfalls and snowy peaks, with crowds watching. Now every place <strong>moves</strong> — fountains spray, rain falls, snow drifts, petals float — and every rival is a <strong>different fighter</strong> with their own face and style. The secret weapon is not anger. It is <strong>Calm</strong>: block to build it, then unleash the Focus Strike.</p>
   </div>
 
   <div class="wrap">
@@ -157,6 +161,8 @@
       </div>
       <div class="stage">
         <div class="cfa-arena" id="cfa-arena">
+          <div id="cfa-bg"></div>
+          <canvas id="cfa-weather"></canvas>
           <div class="cfa-hud">
             <div class="cfa-side">
               <div class="cfa-name" id="cfa-p-name">Kai — You</div>
@@ -263,7 +269,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/calm-fist-arena.js?v=2"></script>
+<script src="../js/calm-fist-arena.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
