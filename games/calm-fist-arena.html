@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Calm Fist Arena — Free Online Fighting Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/calm-fist-arena">
+<meta name="description" content="Play Calm Fist Arena free online — a martial-arts fighting game with real painted fighters and big-screen arenas. Block to build Calm, then strike with focus. Beat 100 rivals across a sunset dojo, a dusk beach, a mountain temple and a neon rooftop — and learn that real strength is self-control. No download.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:1080px}
+  /* dark-glass stat chips with amber numbers (site game style) */
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  /* level bar + 100-level map */
+  .cfa-levelbar{text-align:center;font-weight:800;color:#1e3a8a;margin:0 auto 10px;font-size:1.05rem}
+  .cfa-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .cfa-lvl{border:2px solid rgba(59,130,246,.4);background:rgba(255,255,255,.85);color:#1e3a8a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .cfa-lvl.cfa-done{background:#dcfce7;border-color:#22c55e}
+  .cfa-lvl.cfa-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .cfa-lvl.cfa-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  /* the arena */
+  .cfa-arena{position:relative;width:100%;aspect-ratio:2/1;border-radius:18px;overflow:hidden;
+    background-size:cover;background-position:center 62%;
+    border:3px solid rgba(67,48,122,.55);
+    box-shadow:0 18px 40px rgba(35,22,80,.35), inset 0 0 0 2px rgba(255,255,255,.12)}
+  @keyframes cfashake{0%,100%{transform:translate(0,0)}20%{transform:translate(-7px,2px)}40%{transform:translate(6px,-2px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,-1px)}}
+  .cfa-arena.shake{animation:cfashake .28s ease}
+  /* HUD */
+  .cfa-hud{position:absolute;top:0;left:0;right:0;display:flex;align-items:flex-start;gap:10px;
+    padding:12px 14px;z-index:20;pointer-events:none}
+  .cfa-side{flex:1}
+  .cfa-side.right{text-align:right}
+  .cfa-name{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:1.15rem;
+    letter-spacing:.05em;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.75);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cfa-bar{height:16px;border-radius:9px;background:rgba(5,8,16,.72);border:1px solid rgba(255,255,255,.35);overflow:hidden}
+  .cfa-bar>i{display:block;height:100%;width:100%;border-radius:9px;transition:width .18s ease;
+    background:linear-gradient(180deg,#7ee787,#22c55e)}
+  .cfa-side.right .cfa-bar>i{background:linear-gradient(180deg,#fda4af,#e11d48);float:right}
+  .cfa-calmbar{height:8px;margin-top:5px;border-radius:5px;background:rgba(5,8,16,.72);border:1px solid rgba(255,255,255,.25);overflow:hidden}
+  .cfa-calmbar>i{display:block;height:100%;width:0;border-radius:5px;transition:width .15s ease;
+    background:linear-gradient(90deg,#67e8f9,#0ea5e9)}
+  .cfa-side.right .cfa-calmbar>i{float:right}
+  .cfa-calmlabel{font-size:.66rem;font-weight:900;letter-spacing:.14em;color:rgba(224,242,254,.92);text-shadow:0 1px 5px rgba(0,0,0,.8)}
+  .cfa-timer{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:1.9rem;line-height:1;
+    color:#ffd98a;background:rgba(5,8,16,.78);border:2px solid rgba(245,166,35,.6);border-radius:14px;
+    padding:6px 14px;min-width:64px;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+  /* fighters */
+  .cfa-fighter{position:absolute;height:64%;z-index:10;transform-origin:50% 100%}
+  .cfa-fighter img{height:100%;width:auto;display:block;position:relative;z-index:2}
+  .cfa-fighter::after{content:'';position:absolute;left:50%;bottom:-1.5%;transform:translateX(-50%);
+    width:72%;height:4.5%;border-radius:50%;z-index:1;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,.45), rgba(0,0,0,0) 68%)}
+  .cfa-fighter.ko img{transition:transform .5s ease;transform-origin:50% 92%}
+  @keyframes cfabob{0%,100%{margin-bottom:0}50%{margin-bottom:4px}}
+  /* effects + announcements */
+  .cfa-fx{position:absolute;inset:0;z-index:15;pointer-events:none}
+  @keyframes cfaspark{0%{transform:translate(-50%,0) scale(.4) rotate(0deg);opacity:1}100%{transform:translate(-50%,-46px) scale(1.7) rotate(50deg);opacity:0}}
+  .cfa-spark{position:absolute;font-size:2rem;color:#ffd34d;text-shadow:0 0 14px rgba(255,170,0,.95),0 2px 4px rgba(0,0,0,.5);
+    transform:translate(-50%,0);animation:cfaspark .42s ease-out forwards;z-index:16}
+  .cfa-spark.block{color:#7dd3fc;text-shadow:0 0 14px rgba(56,189,248,.95),0 2px 4px rgba(0,0,0,.5)}
+  .cfa-spark.big{font-size:3.4rem;color:#fff3c4}
+  .cfa-announce{position:absolute;left:0;right:0;top:34%;z-index:30;text-align:center;pointer-events:none;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:4.2rem;letter-spacing:.06em;
+    color:#ffd98a;text-shadow:0 4px 0 rgba(120,53,15,.85),0 10px 30px rgba(0,0,0,.65);opacity:0}
+  @keyframes cfaann{0%{opacity:0;transform:scale(1.7)}18%{opacity:1;transform:scale(1)}78%{opacity:1}100%{opacity:0;transform:scale(.96)}}
+  .cfa-announce.show{animation:cfaann 1.5s ease forwards}
+  .cfa-msg{text-align:center;font-weight:800;font-size:1.05rem;min-height:1.5em;margin:10px 0 2px;color:#3b2f63}
+  /* overlays (site dark trophy-card style) */
+  .game-area .overlay{z-index:40;border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5);
+    -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+  .game-area .overlay p strong{color:#ffc46b}
+  .cfa-vs{font-size:2.6rem;text-align:center;margin:2px 0}
+  /* amber primary / dark ghost buttons (page scope) */
+  .game-area .btn{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;
+    border-bottom:4px solid #b45309;text-shadow:none;
+    box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 2px 0 rgba(255,255,255,.6)}
+  .game-area .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.96),rgba(11,17,29,.96));
+    color:#ffc46b;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.5);
+    box-shadow:0 10px 22px rgba(10,16,30,.35);text-shadow:none}
+  .game-area .btn:disabled{opacity:.45;cursor:not-allowed}
+  /* touch controls */
+  .cfa-touch{display:none;justify-content:space-between;gap:8px;margin-top:12px}
+  @media (pointer:coarse){ .cfa-touch{display:flex} }
+  .cfa-touch .grp{display:flex;gap:8px}
+  .cfa-tbtn{width:58px;height:58px;border-radius:50%;border:2px solid rgba(245,166,35,.55);
+    background:linear-gradient(180deg,rgba(21,30,48,.94),rgba(11,17,29,.94));color:#ffc46b;
+    font-size:1.35rem;font-weight:900;cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+  .cfa-tbtn:active{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a}
+  .cfa-tbtn small{display:block;font-size:.5rem;letter-spacing:.08em}
+  @media (max-width:640px){
+    .cfa-name{font-size:.85rem}
+    .cfa-timer{font-size:1.3rem;min-width:48px;padding:4px 9px}
+    .cfa-announce{font-size:2.6rem}
+    .cfa-bar{height:12px}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Calm Fist Arena</h1>
+    <p>A martial-arts fighting game with real painted fighters on a big-screen stage. Face <strong>100 rivals</strong> — from Zara the Swift to Master Roku — across a sunset dojo, a dusk beach, a mountain temple and a neon rooftop. The secret weapon is not anger. It is <strong>Calm</strong>: block to build it, then unleash the Focus Strike.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="cfa-levelbar">🥋 You are on <strong>Level <span id="cfa-level-now">1</span></strong> · <span id="cfa-progress-note"></span></div>
+      <div class="cfa-map" id="cfa-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Rivals beaten</span><div id="cfa-wins">0</div></div>
+        <div class="stat"><span>Stars earned</span><div id="cfa-stars">0</div></div>
+        <div class="stat"><span>Highest level</span><div id="cfa-best">1</div></div>
+      </div>
+      <div class="stage">
+        <div class="cfa-arena" id="cfa-arena">
+          <div class="cfa-hud">
+            <div class="cfa-side">
+              <div class="cfa-name" id="cfa-p-name">Kai — You</div>
+              <div class="cfa-bar"><i id="cfa-p-hp"></i></div>
+              <div class="cfa-calmbar"><i id="cfa-p-calm"></i></div>
+              <div class="cfa-calmlabel">CALM — FOCUS STRIKE AT 50</div>
+            </div>
+            <div class="cfa-timer" id="cfa-timer">60</div>
+            <div class="cfa-side right">
+              <div class="cfa-name" id="cfa-e-name">Rival</div>
+              <div class="cfa-bar"><i id="cfa-e-hp"></i></div>
+              <div class="cfa-calmbar"><i id="cfa-e-calm"></i></div>
+              <div class="cfa-calmlabel">CALM</div>
+            </div>
+          </div>
+          <div class="cfa-fighter" id="cfa-p"><img id="cfa-p-img" alt="Kai, your fighter"></div>
+          <div class="cfa-fighter" id="cfa-e"><img id="cfa-e-img" alt="Your rival"></div>
+          <div class="cfa-fx" id="cfa-fx"></div>
+          <div class="cfa-announce" id="cfa-announce"></div>
+        </div>
+        <div class="overlay hidden" id="cfa-intro">
+          <h2 id="cfa-intro-title">Level 1</h2>
+          <div class="cfa-vs">🥋 ⚔️ 🥋</div>
+          <p id="cfa-intro-rival"></p>
+          <p id="cfa-intro-tip"></p>
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn" id="cfa-start">Start Fight ▶</button>
+          </div>
+        </div>
+        <div class="overlay hidden" id="cfa-end">
+          <h2 id="cfa-end-title"></h2>
+          <p id="cfa-end-stats"></p>
+          <div class="btn-row" style="justify-content:center">
+            <button class="btn" id="cfa-next">Next rival →</button>
+            <button class="btn ghost" id="cfa-again">Fight again</button>
+          </div>
+        </div>
+      </div>
+      <p class="cfa-msg" id="cfa-msg"></p>
+      <div class="cfa-touch" aria-hidden="true">
+        <div class="grp">
+          <button class="cfa-tbtn" id="cfa-t-left">◀</button>
+          <button class="cfa-tbtn" id="cfa-t-block">🛡<small>BLOCK</small></button>
+          <button class="cfa-tbtn" id="cfa-t-right">▶</button>
+        </div>
+        <div class="grp">
+          <button class="cfa-tbtn" id="cfa-t-jump">⬆<small>JUMP</small></button>
+          <button class="cfa-tbtn" id="cfa-t-punch">👊<small>PUNCH</small></button>
+          <button class="cfa-tbtn" id="cfa-t-kick">🦶<small>KICK</small></button>
+          <button class="cfa-tbtn" id="cfa-t-focus">🔥<small>FOCUS</small></button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:10px">
+        <button class="btn ghost" id="cfa-restart">Restart level</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Press <strong>Start Fight</strong> and face your rival across the arena. Beat them before the 60-second timer runs out — if time ends, the fighter with more health left wins.</li>
+        <li><strong>Move</strong> with A / D, <strong>jump</strong> with W, and strike with <strong>J (punch)</strong> and <strong>K (kick)</strong>. Kicks are slower but reach further and hit harder.</li>
+        <li>Hold <strong>S to block</strong>. Blocked hits barely scratch you — and every block fills your blue <strong>Calm meter</strong>.</li>
+        <li>At 50 Calm, press <strong>L</strong> for the <strong>Focus Strike</strong>: a dashing blow that deals huge damage. Calm is power — the fighter who keeps their cool wins.</li>
+        <li>Win to earn up to <strong>3 stars</strong> (finish with high health) and unlock the next rival. There are <strong>100 levels</strong>: rivals return stronger with new Dans, champions wait every 10 levels, and the Level 100 rival is… your own anger.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Move:</strong> A / D or ← / →</li>
+        <li><strong>Jump:</strong> W or ↑ (attack in the air for a flying knee)</li>
+        <li><strong>Block:</strong> hold S or ↓ — blocking builds Calm</li>
+        <li><strong>Punch:</strong> J or F · <strong>Kick:</strong> K or G · <strong>Focus Strike:</strong> L or H (needs 50 Calm)</li>
+        <li><strong>Touch screens:</strong> use the on-screen buttons under the arena.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Real strength is self-control</h2>
+      <p>Every martial art teaches the same secret: the fighter who loses their temper loses the fight. Anger makes you swing wild and leave yourself open. Calm makes you watch, breathe, block — and strike once, cleanly, at exactly the right moment. That is why blocking builds your power in this arena: staying cool is not passive, it is how champions charge up.</p>
+      <p>It works far beyond the arena. In an argument, in traffic, in a hard exam — the person who keeps their calm keeps their power. So breathe out, hold your guard, and choose your moment. Strength that cannot control itself is not strength at all.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/calm-fist-arena.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
