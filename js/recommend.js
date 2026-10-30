@@ -14,6 +14,8 @@
       lesson: 'Slow down and really look.' },
     { slug: 'jigsaw-puzzle', name: 'Jigsaw Puzzle', ages: ['kids'], seed: 33,
       lesson: 'Patience — the picture comes together piece by piece.' },
+    { slug: 'calm-fist-arena', name: 'Calm Fist Arena', ages: ['teens'], seed: 47,
+      lesson: 'Real strength is self-control — stay calm and strike with focus.' },
     { slug: 'missing-letters', name: 'Missing Letters', ages: ['kids'], seed: 28,
       lesson: 'Reading grows one letter at a time.' },
     { slug: 'math-quest', name: 'Math Quest', ages: ['kids', 'teens'], seed: 29,
