@@ -1,5 +1,5 @@
 /* Calm Fist Arena — a 1v1 martial-arts sparring game.
-   Real painted fighters (AI art, chroma-keyed sprites), 4 arenas, 100 rivals.
+   Real painted fighters (AI art, chroma-keyed sprites), 50 places, 100 rivals.
    The lesson is the mechanic: blocking builds CALM, calm powers the Focus Strike.
    Real strength is self-control. */
 (function () {
@@ -20,9 +20,55 @@
   var POSES = ['idle', 'punch', 'kick', 'block', 'hurt', 'crouch', 'jump', 'win'];
   var ARENAS = [
     { src: '../images/arenas/arena-dojo.jpg', name: 'Sunset Dojo' },
+    { src: '../images/arenas/arena-school-yard.jpg', name: 'School Yard' },
+    { src: '../images/arenas/arena-town-square.jpg', name: 'Town Square' },
+    { src: '../images/arenas/arena-street-market.jpg', name: 'Street Market' },
+    { src: '../images/arenas/arena-fountain-plaza.jpg', name: 'Fountain Plaza' },
+    { src: '../images/arenas/arena-city-alley.jpg', name: 'City Alley' },
+    { src: '../images/arenas/arena-canal-street.jpg', name: 'Canal Street' },
+    { src: '../images/arenas/arena-harbor-pier.jpg', name: 'Harbor Pier' },
+    { src: '../images/arenas/arena-fishing-village.jpg', name: 'Fishing Village' },
     { src: '../images/arenas/arena-beach.jpg', name: 'Dusk Beach' },
-    { src: '../images/arenas/arena-temple.jpg', name: 'Mountain Temple' },
-    { src: '../images/arenas/arena-neon.jpg', name: 'Neon Rooftop' }
+    { src: '../images/arenas/arena-lake-dock.jpg', name: 'Lake Dock' },
+    { src: '../images/arenas/arena-farm-yard.jpg', name: 'Farm Yard' },
+    { src: '../images/arenas/arena-windmill-field.jpg', name: 'Windmill Field' },
+    { src: '../images/arenas/arena-grass-steppe.jpg', name: 'Grass Steppe' },
+    { src: '../images/arenas/arena-blossom-park.jpg', name: 'Blossom Park' },
+    { src: '../images/arenas/arena-bamboo-forest.jpg', name: 'Bamboo Forest' },
+    { src: '../images/arenas/arena-pine-forest.jpg', name: 'Pine Forest' },
+    { src: '../images/arenas/arena-autumn-forest.jpg', name: 'Autumn Forest' },
+    { src: '../images/arenas/arena-river-rocks.jpg', name: 'River Rocks' },
+    { src: '../images/arenas/arena-waterfall-bridge.jpg', name: 'Waterfall Bridge' },
+    { src: '../images/arenas/arena-rice-terraces.jpg', name: 'Rice Terraces' },
+    { src: '../images/arenas/arena-mountain-cliff.jpg', name: 'Mountain Cliff' },
+    { src: '../images/arenas/arena-snow-village.jpg', name: 'Snow Village' },
+    { src: '../images/arenas/arena-snow-peak.jpg', name: 'Snow Peak' },
+    { src: '../images/arenas/arena-canyon-rim.jpg', name: 'Canyon Rim' },
+    { src: '../images/arenas/arena-desert-bazaar.jpg', name: 'Desert Bazaar' },
+    { src: '../images/arenas/arena-jungle-ruins.jpg', name: 'Jungle Ruins' },
+    { src: '../images/arenas/arena-volcano-slope.jpg', name: 'Volcano Slope' },
+    { src: '../images/arenas/arena-crystal-cave.jpg', name: 'Crystal Cave' },
+    { src: '../images/arenas/arena-castle-courtyard.jpg', name: 'Castle Courtyard' },
+    { src: '../images/arenas/arena-construction-site.jpg', name: 'Construction Site' },
+    { src: '../images/arenas/arena-bus-depot.jpg', name: 'Bus Depot' },
+    { src: '../images/arenas/arena-train-station.jpg', name: 'Train Station' },
+    { src: '../images/arenas/arena-train-inside.jpg', name: 'Inside the Train' },
+    { src: '../images/arenas/arena-train-top.jpg', name: 'Train Top' },
+    { src: '../images/arenas/arena-ferry-deck.jpg', name: 'Ferry Deck' },
+    { src: '../images/arenas/arena-ship-deck.jpg', name: 'Ship Deck' },
+    { src: '../images/arenas/arena-port-cranes.jpg', name: 'Port Cranes' },
+    { src: '../images/arenas/arena-lighthouse-rocks.jpg', name: 'Lighthouse Rocks' },
+    { src: '../images/arenas/arena-airport-tarmac.jpg', name: 'Airport Tarmac' },
+    { src: '../images/arenas/arena-cable-car.jpg', name: 'Cable Car Station' },
+    { src: '../images/arenas/arena-city-bridge.jpg', name: 'City Bridge' },
+    { src: '../images/arenas/arena-highway-overpass.jpg', name: 'Highway Overpass' },
+    { src: '../images/arenas/arena-city-rooftop.jpg', name: 'City Rooftop' },
+    { src: '../images/arenas/arena-festival-street.jpg', name: 'Festival Street' },
+    { src: '../images/arenas/arena-night-market.jpg', name: 'Night Market' },
+    { src: '../images/arenas/arena-lantern-festival.jpg', name: 'Lantern Festival' },
+    { src: '../images/arenas/arena-circus-yard.jpg', name: 'Circus Yard' },
+    { src: '../images/arenas/arena-neon.jpg', name: 'Neon Rooftop' },
+    { src: '../images/arenas/arena-temple.jpg', name: 'Mountain Temple' }
   ];
   var RIVALS = [
     { name: 'Zara', title: 'the Swift' }, { name: 'Kenji', title: 'the Stone Wall' },
@@ -71,7 +117,7 @@
     return { name: r.name, title: r.title, dan: dan, idx: idx, mirror: false,
              champion: L % 10 === 0 };
   }
-  function arenaFor(L) { return ARENAS[Math.min(3, Math.floor((L - 1) / 25))]; }
+  function arenaFor(L) { return ARENAS[Math.min(49, Math.floor((L - 1) / 2))]; }
   function spriteSet(who, pose) { return IMG + who + '-' + pose + '.webp'; }
   function preload(who) {
     POSES.forEach(function (p) { var i = new Image(); i.src = spriteSet(who, p); });
