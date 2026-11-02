@@ -33,6 +33,44 @@
   ];
   var PHASE = 1.7;
 
+  // Trails 4-100 are generated from the same recipe: longer, hillier,
+  // faster, with more ramps, hurdles and (later) spike strips.
+  function levelFor(n) {
+    if (n <= LEVELS.length) return LEVELS[n - 1];
+    var t = n - 3;
+    return {
+      n: n,
+      len: Math.min(12000, 4300 + t * 160),
+      a1: Math.min(150, 102 + t * 1.2), f1: Math.min(0.008, 0.0062 + t * 0.00004),
+      a2: Math.min(70, 46 + t * 0.6), f2: Math.min(0.02, 0.0155 + t * 0.0001),
+      flat: Math.max(150, 210 - t), maxSpeed: Math.min(520, 390 + t * 3)
+    };
+  }
+  var _obCache = {};
+  function obstaclesFor(n) {
+    if (OBSTACLES[n]) return OBSTACLES[n];
+    if (_obCache[n]) return _obCache[n];
+    var Lv = levelFor(n), t = n - 3;
+    var nRamps = Math.min(9, 4 + Math.floor(t / 8));
+    var ramps = [], hurdles = [], spikes = [], i, j, k;
+    var span = Lv.len - Lv.flat - 500;
+    for (i = 0; i < nRamps; i++) {
+      var x = Math.round(Lv.flat + 350 + span * (i + 0.5) / nRamps + (hash(n * 31 + i) - 0.5) * 120);
+      ramps.push({ x: x, w: 110, h: 60 });
+      if (i % 3 !== 2) hurdles.push({ x: x + 145, w: 28, h: 30 });
+    }
+    var nSpikes = Math.min(5, Math.floor(t / 6));
+    for (j = 0; j < nSpikes; j++) {
+      var sx = Math.round(Lv.flat + 600 + (Lv.len - Lv.flat - 900) * (j + 0.5) / Math.max(1, nSpikes) + (hash(n * 57 + j) - 0.5) * 150);
+      var clash = false;
+      for (k = 0; k < ramps.length; k++) if (Math.abs(sx - ramps[k].x) < 260) clash = true;
+      if (!clash) spikes.push({ x: sx, w: 34 });
+    }
+    var ob = { ramps: ramps, hurdles: hurdles, spikes: spikes };
+    _obCache[n] = ob;
+    return ob;
+  }
+
   // ---------- Obstacles: launch ramps, hurdles, spike strips ----------
   // Ramps: wedge {x, w, h} — ride up, launch off the lip.
   // Hurdles: barrier {x, w, h} placed after a ramp; clear it for +100.
@@ -71,7 +109,7 @@
 
   // Ramp wedge height above the terrain at world x (0 when not on a ramp).
   function rampH(x) {
-    var ob = OBSTACLES[cur];
+    var ob = obstaclesFor(cur);
     if (!ob) return 0;
     var h = 0;
     for (var i = 0; i < ob.ramps.length; i++) {
@@ -88,7 +126,7 @@
   // matching the visual. Returns the surface y at world x.
   function effGroundY(x) {
     var base = terrainY(x, L);
-    var ob = OBSTACLES[cur];
+    var ob = obstaclesFor(cur);
     if (!ob) return base;
     for (var i = 0; i < ob.ramps.length; i++) {
       var r = ob.ramps[i];
@@ -103,7 +141,47 @@
 
 
   // ---------- State ----------
-  var cur = 1;               // current trail (1..3), session-unlocked in order
+  var cur = 1;               // current trail (1..100)
+  // ---- 100-trail campaign: finishing a trail unlocks the next. Stars from
+  // your stunt bonus: 200+ = 2 stars, 400+ = 3 stars.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {};
+  try {
+    camp = parseInt(localStorage.getItem('wa_tst_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_tst_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_tst_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_tst_current', String(camp));
+      localStorage.setItem('wa_tst_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_tst_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function tierName(l) { return l <= 15 ? 'Rolling hills' : l <= 35 ? 'Bigger air' : l <= 55 ? 'Steep country' : l <= 75 ? 'Spike trails' : l <= 90 ? 'Pro stunt league' : 'Trail legend'; }
+  function buildMap() {
+    var map = document.getElementById('tst-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'tst-lvl tst-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'tst-lvl tst-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'tst-lvl'; b.textContent = l; }
+        else { b.className = 'tst-lvl tst-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Trail ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) startLevel(l); });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('tst-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('tst-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + dc + ' of 100 trails completed'; }
+  }
   var state = 'play';        // 'play' | 'crashed' | 'finished'
   var L = LEVELS[0];
   var bike, startT, elapsed, popups, parts, hintT, trailHintT, hintShown;
@@ -135,8 +213,9 @@
 
   function startLevel(n) {
     cur = n;
-    L = LEVELS[n - 1];
-    var ob = OBSTACLES[n];
+    if (n <= campUnlocked) { camp = n; saveCampaign(); }
+    L = levelFor(n);
+    var ob = obstaclesFor(n);
     for (var i = 0; i < ob.hurdles.length; i++) ob.hurdles[i].cleared = false;
     hintShown = false;
     resetBike();
@@ -150,7 +229,8 @@
     crashReason = '';
     overlay.classList.add('hidden');
     btnNext.classList.add('hidden');
-    elLevel.textContent = n + ' / 3';
+    elLevel.textContent = n + ' / 100';
+    buildMap();
     refreshBest();
     elTime.textContent = '0:00.0';
   }
@@ -253,7 +333,7 @@
     state = 'crashed';
     crashReason = reason;
     overTitle.textContent = 'Wipeout!';
-    overStats.textContent = reason + '  ·  Trail ' + cur + ' of 3  ·  Time ' + fmtTime(elapsed);
+    overStats.textContent = reason + '  ·  Trail ' + cur + ' of 100  ·  Time ' + fmtTime(elapsed);
     btnAgain.textContent = 'Ride again';
     btnNext.classList.add('hidden');
     overlay.classList.remove('hidden');
@@ -266,15 +346,20 @@
     var isBest = prev === null || elapsed < prev;
     if (isBest) setBest(cur, elapsed);
     refreshBest();
-    if (cur < 3) {
-      overTitle.textContent = 'Trail ' + cur + ' complete!';
+    var stars = 1 + (bike.bonus >= 200 ? 1 : 0) + (bike.bonus >= 400 ? 1 : 0);
+    if (campStars[cur] == null || stars > campStars[cur]) campStars[cur] = stars;
+    if (cur === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+    saveCampaign();
+    if (cur < MAX_LEVEL) {
+      overTitle.textContent = 'Trail ' + cur + ' complete! ⭐ ' + stars + ' star' + (stars > 1 ? 's' : '');
       btnNext.classList.remove('hidden');
       btnAgain.textContent = 'Ride again';
     } else {
-      overTitle.textContent = 'You conquered all 3 trails!';
+      overTitle.textContent = 'You conquered all 100 trails!';
       btnNext.classList.add('hidden');
-      btnAgain.textContent = 'Ride trail 3 again';
+      btnAgain.textContent = 'Ride trail 100 again';
     }
+    buildMap();
     var stats = 'Time ' + fmtTime(elapsed) + '  ·  Best ' + fmtTime(getBest(cur));
     if (isBest) stats += '  ·  New best!';
     if (bike.bonus > 0) stats += '  ·  Flip bonus +' + bike.bonus;
@@ -334,7 +419,7 @@
     // Lip-pop: crossing a ramp lip fires a vertical kick (arcade launch).
     // The pop flag resets once the bike leaves the lip zone.
     if (state === 'play') {
-      var ob2 = OBSTACLES[cur];
+      var ob2 = obstaclesFor(cur);
       if (ob2) {
         for (var li = 0; li < ob2.ramps.length; li++) {
           var lr = ob2.ramps[li];
@@ -427,7 +512,7 @@
 
     // ---- obstacle collisions: hurdles & spike strips ----
     if (state === 'play') {
-      var ob = OBSTACLES[cur];
+      var ob = obstaclesFor(cur);
       var fW = wheels[1], rW = wheels[0];
       var hr = rot(6, -30, bike.ang);
       var headX = bike.x + hr.x, headY = bike.y + hr.y;
@@ -482,7 +567,7 @@
 
     // first-hurdle hint toast
     if (!hintShown && state === 'play') {
-      var ob2 = OBSTACLES[cur];
+      var ob2 = obstaclesFor(cur);
       for (var qi = 0; qi < ob2.hurdles.length; qi++) {
         if (ob2.hurdles[qi].x - camX < W + 80 && ob2.hurdles[qi].x > camX) {
           hintShown = true;
@@ -781,7 +866,7 @@
     drawTerrain(cam);
 
     // obstacles
-    var ob = OBSTACLES[cur];
+    var ob = obstaclesFor(cur);
     for (var ri = 0; ri < ob.ramps.length; ri++) drawRamp(ob.ramps[ri], cam);
     for (var si2 = 0; si2 < ob.spikes.length; si2++) drawSpike(ob.spikes[si2], cam);
     for (var hi2 = 0; hi2 < ob.hurdles.length; hi2++) drawHurdle(ob.hurdles[hi2], cam);
@@ -1481,7 +1566,7 @@
 
   // ---------- UI wiring ----------
   btnAgain.addEventListener('click', function () { startLevel(cur); });
-  btnNext.addEventListener('click', function () { if (cur < 3) startLevel(cur + 1); });
+  btnNext.addEventListener('click', function () { if (cur < MAX_LEVEL) startLevel(cur + 1); });
   btnRestart.addEventListener('click', function () { startLevel(cur); });
   canvas.addEventListener('mousedown', function () { canvas.focus(); });
 
@@ -1492,7 +1577,7 @@
     bike: function () { return bike; },
     bikeAngN: function () { return normAng(bike.ang); },
     obstacles: function () {
-      var ob = OBSTACLES[cur];
+      var ob = obstaclesFor(cur);
       return {
         hurdles: ob.hurdles.map(function (h) { return { x: h.x, cleared: !!h.cleared }; }),
         ramps: ob.ramps.map(function (r) { return { x: r.x, w: r.w, h: r.h }; }),
@@ -1503,6 +1588,7 @@
   };
 
   // go
-  startLevel(1);
+  startLevel(camp);
+  buildMap();
   requestAnimationFrame(frame);
 })();
