@@ -34,6 +34,13 @@
   .overlay p{color:rgba(255,255,255,.90)}
   .btn{background:linear-gradient(180deg,#FFC65C,#F5A623);color:#231600;border-bottom:4px solid #B97A0E;text-shadow:none;box-shadow:0 10px 22px rgba(245,166,35,.35),inset 0 2px 0 rgba(255,255,255,.55)}
   .btn.ghost{background:rgba(13,20,32,.88);color:#F5C15C;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.35);box-shadow:0 8px 18px rgba(10,20,40,.30);text-shadow:none}
+  .ms-levelbar{text-align:center;font-weight:800;color:#1e3a5f;margin:0 auto 10px;font-size:1.05rem}
+  .ms-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .ms-lvl{border:2px solid rgba(87,168,255,.4);background:rgba(255,255,255,.85);color:#1e3a5f;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .ms-lvl.ms-done{background:#dcfce7;border-color:#22c55e}
+  .ms-lvl.ms-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .ms-lvl.ms-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -54,16 +61,16 @@
 <main>
   <div class="game-head">
     <h1>Minesweeper</h1>
-    <p>The timeless logic classic, rebuilt with glossy HD 3D tiles. Reveal every safe tile, flag every mine — and think before you click.</p>
+    <p>The timeless logic classic, rebuilt with glossy HD 3D tiles. Reveal every safe tile, flag every mine — and think before you click. <strong>100 levels</strong>: the board grows from 9×9 with 10 mines to a 20×20 field with 80.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
       <div class="btn-row" style="justify-content:center;margin-bottom:12px;gap:8px;flex-wrap:wrap">
-        <button class="btn" id="m-diff-easy">Easy 9×9</button>
-        <button class="btn ghost" id="m-diff-medium">Medium 16×16</button>
         <button class="btn ghost" id="m-flagmode" aria-pressed="false">Flag mode: OFF</button>
       </div>
+      <div class="ms-levelbar">💣 You are on <strong>Level <span id="m-level-now">1</span></strong> · <span id="m-progress-note"></span></div>
+      <div class="ms-map" id="ms-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Mines</span><div id="m-mines">10</div></div>
         <div class="stat"><span>Time</span><div id="m-time">0s</div></div>
@@ -89,7 +96,7 @@
         <li><strong>Tap or click a tile</strong> to reveal it. A number tells you exactly how many mines are touching that tile — use the numbers to deduce where the mines must be.</li>
         <li>Reveal an <strong>empty tile</strong> and the whole safe area opens up in a flood. That's your reward for a brave first click — which is <strong>always safe</strong>.</li>
         <li>Sure a tile hides a mine? <strong>Long-press it</strong> (or right-click on desktop) to plant a flag. You can also switch on <strong>Flag mode</strong> and flag with simple taps — perfect for phones.</li>
-        <li>Reveal every safe tile to win. Touch one mine and it's <strong>boom</strong> — game over. Two difficulties: <strong>Easy 9×9</strong> with 10 mines, <strong>Medium 16×16</strong> with 40 mines. Beat your best time!</li>
+        <li>Reveal every safe tile to clear the level. Touch one mine and it's <strong>boom</strong> — game over. There are <strong>100 levels</strong>: the board and the mine count grow as you climb, from 9×9 with 10 mines to 20×20 with 80. Clear fast for 3 stars — and beat your best time on every level!</li>
       </ol>
     </div>
 
@@ -128,7 +135,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/minesweeper.js?v=5"></script>
+<script src="../js/minesweeper.js?v=6"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
