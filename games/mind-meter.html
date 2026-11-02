@@ -141,6 +141,13 @@
     border:1px solid rgba(255,181,46,.45);border-bottom:3px solid rgba(255,181,46,.35);
     box-shadow:0 6px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.10)}
   .game-area{max-width:880px}
+  .md-levelbar{text-align:center;font-weight:800;color:#312e81;margin:0 auto 10px;font-size:1.05rem}
+  .md-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .md-lvl{border:2px solid rgba(99,102,241,.4);background:rgba(255,255,255,.85);color:#312e81;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .md-lvl.md-done{background:#dcfce7;border-color:#22c55e}
+  .md-lvl.md-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .md-lvl.md-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -161,11 +168,13 @@
 <main>
   <div class="game-head">
     <h1>Mind Meter</h1>
-    <p>An IQ challenge in glowing 3D — 12 timed brain-teasers across number logic, patterns, words, and math. How high can your meter go?</p>
+    <p>An IQ challenge in glowing 3D — 12 timed brain-teasers across number logic, patterns, words, and math. <strong>100 levels</strong>: each level asks its own 12 questions, and the clock shrinks from 30 seconds per question down to 11. How high can your meter go?</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
+      <div class="md-levelbar">🧠 You are on <strong>Level <span id="mm-level-now">1</span></strong> · <span id="mm-progress-note"></span></div>
+      <div class="md-map" id="mm-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Score</span><div id="mm-score">0</div></div>
         <div class="stat"><span>Streak</span><div id="mm-streak"></div></div>
@@ -178,7 +187,7 @@
         <div class="mm-screen" id="mm-start">
           <div class="mm-badge">🧠</div>
           <div class="mm-title">Measure your mind</div>
-          <p class="mm-sub">12 questions. 30 seconds each. Answer fast and keep a streak going for bonus points — then get your estimated IQ.</p>
+          <p class="mm-sub">12 questions per level. The clock shrinks as you climb — and each level has its own set. Get 8+ correct to clear the level. Answer fast and keep a streak going for bonus points — then get your estimated IQ.</p>
           <button class="btn" id="mm-play">Start the challenge</button>
         </div>
 
@@ -231,7 +240,7 @@
         <li>Read the question, pick one of the four answers — <strong>faster answers earn bigger time bonuses</strong>.</li>
         <li>Chain correct answers into a <strong>streak</strong> — every streak step adds bonus points, up to +100 per question.</li>
         <li>Run out of time and the question is gone — no points, streak resets. Keep moving!</li>
-        <li>At the end you get an <strong>estimated IQ score</strong> (85–145 scale) and a rank, from Curious Mind up to Certified Genius. Beat your best next time.</li>
+        <li>At the end you get an <strong>estimated IQ score</strong> (85–145 scale) and a rank, from Curious Mind up to Certified Genius. Clear a level with 8+ correct — 10+ earns 2 stars, a perfect 12 earns 3. Beat your best next time.</li>
       </ol>
     </div>
 
@@ -272,7 +281,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/mind-meter.js?v=3"></script>
+<script src="../js/mind-meter.js?v=4"></script>
 <script>
 /* 3D ambience: floating pastel shapes behind the quiz, drifting with the pointer. */
 (function () {
