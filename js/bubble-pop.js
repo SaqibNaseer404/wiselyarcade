@@ -44,6 +44,49 @@
   var best = 0;
   try { best = parseInt(localStorage.getItem('wisely_bubble_pop_best') || '0', 10) || 0; } catch (e) {}
 
+  // ---- 100-level campaign: clear the first board of a run to beat the level.
+  // Higher campaign levels start deeper (more rows, more colours).
+  // Stars by shots used on the clearing board: <=14 = 3, <=22 = 2, else 1.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, clearedThisRun = false, pendingNext = false, clearShots = 0;
+  try {
+    camp = parseInt(localStorage.getItem('wa_bp_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_bp_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_bp_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_bp_current', String(camp));
+      localStorage.setItem('wa_bp_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_bp_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function startLevelFor(l) { return 1 + Math.floor((l - 1) / 12); }
+  function tierName(l) { return l <= 15 ? 'Easy popping' : l <= 35 ? 'Getting colourful' : l <= 55 ? 'Deep boards' : l <= 75 ? 'Bubble expert' : l <= 90 ? 'Bubble master' : 'Pop legend'; }
+  function buildMap() {
+    var map = document.getElementById('b-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'bp-lvl bp-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'bp-lvl bp-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'bp-lvl'; b.textContent = l; }
+        else { b.className = 'bp-lvl bp-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; saveCampaign(); reset(true); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('b-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('b-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + dc + ' of 100 levels completed'; }
+  }
+
   var elScore = document.getElementById('b-score');
   var elLevel = document.getElementById('b-level');
   var elBest = document.getElementById('b-best');
@@ -316,6 +359,16 @@
   }
 
   function levelClear() {
+    if (!clearedThisRun && level === startLevelFor(camp)) {
+      clearedThisRun = true;
+      clearShots = shots;
+      var stars = shots <= 14 ? 3 : shots <= 22 ? 2 : 1;
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      pendingNext = camp < MAX_LEVEL;
+      saveCampaign();
+      popups.push({ x: W / 2, y: H / 2 - 90, text: '🏆 Campaign Level ' + camp + ' cleared — ' + stars + ' stars!', life: 0, max: 2 });
+    }
     var bonus = 200 * level;
     score += bonus;
     popups.push({ x: W / 2, y: H / 2 - 40, text: 'Level clear! +' + bonus, life: 0, max: 1.5 });
@@ -338,7 +391,8 @@
     grid = []; pShift = 0;
     parts = []; popups = []; fallers = []; rings = [];
     shot = null;
-    level = 1; score = 0; shots = 0; newBest = false;
+    level = startLevelFor(camp); score = 0; shots = 0; newBest = false;
+    clearedThisRun = false; pendingNext = false;
     aim = -Math.PI / 2;
     levelBanner = 0;
     newBoard();
@@ -347,7 +401,8 @@
     overlay.classList.add('hidden');
     updateStats();
     state = toReady ? 'ready' : 'playing';
-    if (!toReady) { bannerText = 'Level 1'; levelBanner = 1.6; }
+    if (!toReady) { bannerText = 'Level ' + camp; levelBanner = 1.6; }
+    buildMap();
   }
 
   function gameOver() {
@@ -359,10 +414,13 @@
       try { localStorage.setItem('wisely_bubble_pop_best', String(best)); } catch (e) {}
     }
     updateStats();
-    overTitle.textContent = 'Game over!';
+    overTitle.textContent = clearedThisRun ? '🏆 Level ' + camp + ' Complete!' : 'Game over!';
     overStats.textContent = 'Score ' + score + ' · Reached level ' + level +
-      (newBest ? ' — new best!' : ' · Best ' + best);
-    btnAgain.textContent = 'Pop again';
+      (newBest ? ' — new best!' : ' · Best ' + best) +
+      (clearedThisRun
+        ? ' · Campaign Level ' + camp + ' cleared in ' + clearShots + ' shots (' + campStars[camp] + ' stars)!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' unlocked.' : ' You popped all 100 levels!')
+        : ' · Clear the first board to beat Campaign Level ' + camp + '.');
+    btnAgain.textContent = clearedThisRun && camp < MAX_LEVEL ? 'Next Level →' : 'Pop again';
     overlay.classList.remove('hidden');
   }
 
@@ -941,6 +999,7 @@
       btnAgain.textContent = 'Pop again';
       overlay.classList.add('hidden');
     } else {
+      if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
       reset(false);
     }
   });
