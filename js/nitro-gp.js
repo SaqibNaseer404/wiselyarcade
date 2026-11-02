@@ -9,7 +9,7 @@
   if (!window.THREE) return;
 
   /* ================= Config & persistence ================= */
-  var LEVELS = 15, LAPS = 3, RIDERS = 6;
+  var LEVELS = 100, LAPS = 3, RIDERS = 6;
   var POINTS = [100, 75, 60, 45, 30, 20]; // by finishing position
   var UPS = {
     engine: { name: 'Engine', desc: '+7% top speed per stage. Pure straight-line fury.', costs: [60, 120, 200, 300, 450] },
@@ -23,6 +23,7 @@
     points: loadNum('nitrogp_points', 0),
     up: { engine: loadNum('nitrogp_up_e', 0), tires: loadNum('nitrogp_up_t', 0), nitro: loadNum('nitrogp_up_n', 0) }
   };
+  var selLevel = store.level; // level chosen in the menu picker (1..store.level)
   function saveStore() {
     saveNum('nitrogp_level', store.level); saveNum('nitrogp_points', store.points);
     saveNum('nitrogp_up_e', store.up.engine); saveNum('nitrogp_up_t', store.up.tires); saveNum('nitrogp_up_n', store.up.nitro);
@@ -139,7 +140,38 @@
   ];
   var curSpec = { sprint: false };
   var gapSeg = null; // per-sample "road missing" flags for sprint river gaps
+  // Levels 16-100: every 3rd level is a generated sprint; the rest are new
+  // circuit layouts (layoutFor already generates any level). Themes cycle
+  // with a round number (Desert Sprint II, III...) so names stay fresh.
+  function themeFor(lv) {
+    if (lv <= 15) return THEMES[lv - 1];
+    var sprint = lv % 3 === 0;
+    var base = sprint ? THEMES[10 + (Math.floor(lv / 3 - 1) % 5)] : THEMES[(lv - 1) % 10];
+    var cyc = Math.floor((lv - 1) / 15);
+    var ROMAN = ['II', 'III', 'IV', 'V', 'VI', 'VII'];
+    var copy = {}; for (var k in base) copy[k] = base[k];
+    copy.name = base.name + ' ' + (ROMAN[cyc - 1] || ('+' + cyc));
+    return copy;
+  }
+  function genSprint(lv) {
+    var rand = rng(lv * 7919 + 101);
+    var t = lv - 15;
+    var len = Math.min(7600, 3200 + t * 50 + Math.floor(rand() * 150));
+    var nRivers = Math.min(7, 4 + Math.floor(t / 14)), rivers = [], ramps = [], i;
+    for (i = 0; i < nRivers; i++) rivers.push({ at: Math.round(500 + (len - 900) * (i + 0.5) / nRivers + (rand() * 120 - 60)), w: Math.min(42, 34 + Math.floor(t / 10)) });
+    var nRamps = Math.min(5, 3 + Math.floor(t / 18));
+    for (i = 0; i < nRamps; i++) {
+      var at = Math.round(700 + (len - 1200) * (i + 0.7) / (nRamps + 0.4));
+      for (var j = 0; j < rivers.length; j++) if (Math.abs(at - rivers[j].at) < 110) at += 160;
+      ramps.push({ at: at });
+    }
+    return { len: len, roadHalf: Math.max(4.6, 5.1 - t * 0.006), traffic: Math.min(20, 14 + Math.floor(t / 5)), aiPace: Math.min(1.22, 1.07 + t * 0.002), rivers: rivers, ramps: ramps };
+  }
   function specFor(lv) {
+    if (lv > 15 && lv <= LEVELS) {
+      if (lv % 3 === 0) { var gsp = { sprint: true, lv: lv }, gb = genSprint(lv); for (var gk in gb) gsp[gk] = gb[gk]; return gsp; }
+      return { sprint: false };
+    }
     if (lv > 10 && lv <= LEVELS) {
       var base = SPRINTS[lv - 11], sp = { sprint: true, lv: lv };
       for (var k in base) sp[k] = base[k];
@@ -962,7 +994,7 @@
     // grid: player at the back, AI ahead in rows of two
     for (var i = 0; i < RIDERS; i++) {
       var isPlayer = (i === 0);
-      var accCol = new THREE.Color(THEMES[lv - 1].accent);
+      var accCol = new THREE.Color(themeFor(lv).accent);
       var mesh = makeCar(isPlayer ? 0xe63946 : RIDER_COLORS[(i - 1) % RIDER_COLORS.length],
         isPlayer ? accCol : RIDER_COLORS[(i - 1) % RIDER_COLORS.length], isPlayer ? 0.55 : 0.4);
       scene.add(mesh);
@@ -988,7 +1020,7 @@
     resetTraffic();
   }
 
-  function aiLevel() { return 0.8 + (level - 1) * 0.022; } // rivals get faster
+  function aiLevel() { return level <= 15 ? 0.8 + (level - 1) * 0.022 : 1.108 + (level - 15) * 0.004; } // rivals get faster (gentler slope past 15 so 100 stays beatable)
 
   var _p = new THREE.Vector3(), _t = new THREE.Vector3(), _p2 = new THREE.Vector3();
   function placeRider(r, dt) {
@@ -1382,7 +1414,7 @@
   }
   function buildWorld(lv) {
     if (worldGroup) { scene.remove(worldGroup); disposeWorld(worldGroup); }
-    var th = THEMES[lv - 1];
+    var th = themeFor(lv);
     curSpec = specFor(lv);
     gapSeg = null;
     if (curSpec.sprint) computeSprintTrack(curSpec); else computeTrack(layoutFor(lv));
@@ -1538,15 +1570,27 @@
   var raceTime = 0, countT = 0, player = null, playerPos = 6;
 
   function show(elm) { [menuEl, garageEl, resEl].forEach(function (m) { m.classList.add('hidden'); }); if (elm) elm.classList.remove('hidden'); }
+  function refreshPicker() {
+    selLevel = Math.min(Math.max(selLevel, 1), store.level);
+    var sp = specFor(selLevel);
+    var lab = el('ag-pick-label');
+    if (lab) lab.textContent = 'Level ' + selLevel + ' — ' + themeFor(selLevel).name + (sp.sprint ? ' (Sprint)' : '');
+    var pv = el('ag-pick-prev'), nx = el('ag-pick-next');
+    if (pv) pv.disabled = selLevel <= 1;
+    if (nx) nx.disabled = selLevel >= store.level;
+    var gl = el('ag-garage-level'); if (gl) gl.textContent = selLevel;
+  }
   function refreshMenu() {
+    selLevel = Math.min(Math.max(selLevel, 1), store.level);
     // guard: the sub-line innerHTML set below replaces #ag-menu-level on the
     // first call, so it is null on every later call (pre-existing live bug:
     // the throw also broke the garage Back button — menu never reappeared)
-    var ml = el('ag-menu-level'); if (ml) ml.textContent = store.level;
-    el('ag-menu-sub').innerHTML = (specFor(store.level).sprint
-      ? 'Daylight sprint · point-to-point · jump ramps & rivers · Level <b>' + store.level + '</b> of ' + LEVELS + ' — <b>' + THEMES[store.level - 1].name + '</b>'
-      : '3 laps · 5 rivals · Level <b>' + store.level + '</b> of ' + LEVELS + ' — <b>' + THEMES[store.level - 1].name + '</b>') +
+    var ml = el('ag-menu-level'); if (ml) ml.textContent = selLevel;
+    el('ag-menu-sub').innerHTML = (specFor(selLevel).sprint
+      ? 'Daylight sprint · point-to-point · jump ramps & rivers · Level <b>' + selLevel + '</b> of ' + LEVELS + ' — <b>' + themeFor(selLevel).name + '</b>'
+      : '3 laps · 5 rivals · Level <b>' + selLevel + '</b> of ' + LEVELS + ' — <b>' + themeFor(selLevel).name + '</b>') +
       '<br>Finish well to earn points, then spend them in the garage.<br>💰 You have <b>' + store.points + '</b> points.';
+    refreshPicker();
   }
   function startRace(lv) {
     initAudio();
@@ -1560,8 +1604,8 @@
     show(null); hud.style.display = 'flex';
     countEl.classList.remove('hidden');
     toast(curSpec.sprint
-      ? 'Level ' + lv + ' — ' + THEMES[lv - 1].name + ' · Sprint! Hit the ramps FAST to clear the rivers! 🏁'
-      : 'Level ' + lv + ' — ' + THEMES[lv - 1].name + ' · 3 laps. Good luck!');
+      ? 'Level ' + lv + ' — ' + themeFor(lv).name + ' · Sprint! Hit the ramps FAST to clear the rivers! 🏁'
+      : 'Level ' + lv + ' — ' + themeFor(lv).name + ' · 3 laps. Good luck!');
   }
   function doCountdown(dt) {
     countT += dt;
@@ -1626,9 +1670,10 @@
       prog.forEach(function (e, i) { if (e.r === p) pos = i + 1; });
     }
     var earned = POINTS[pos - 1] || 20;
+    if (level < store.level) earned = Math.floor(earned / 2); // replaying an old level pays half
     store.points += earned;
     var unlocked = false;
-    if (pos <= 3 && store.level < LEVELS) { store.level++; unlocked = true; }
+    if (pos <= 3 && level >= store.level && store.level < LEVELS) { store.level++; unlocked = true; }
     saveStore();
     var titles = ['🏆 Victory! Champion of the track!', '🥈 So close — P2!', '🥉 Podium! P3!', '🏁 P4 — points in the bag!', '🏁 P5 — keep pushing!', '🏁 P6 — the bike forgives, the track remembers.'];
     el('ag-res-title').textContent = titles[pos - 1];
@@ -1643,7 +1688,7 @@
   /* ================= Garage ================= */
   function renderGarage() {
     el('ag-points').textContent = store.points;
-    el('ag-garage-level').textContent = store.level;
+    el('ag-garage-level').textContent = selLevel;
     var wrap = el('ag-upgrades'); wrap.innerHTML = '';
     Object.keys(UPS).forEach(function (key) {
       var u = UPS[key], lv = store.up[key], maxed = lv >= 5;
@@ -1667,10 +1712,12 @@
     });
   }
 
-  el('ag-start').addEventListener('click', function () { startRace(store.level); });
+  el('ag-start').addEventListener('click', function () { startRace(selLevel); });
+  el('ag-pick-prev').addEventListener('click', function () { if (selLevel > 1) { selLevel--; refreshMenu(); } });
+  el('ag-pick-next').addEventListener('click', function () { if (selLevel < store.level) { selLevel++; refreshMenu(); } });
   el('ag-garage-btn').addEventListener('click', function () { state = 'garage'; renderGarage(); show(garageEl); });
   el('ag-garage-back').addEventListener('click', function () { state = 'menu'; refreshMenu(); show(menuEl); });
-  el('ag-garage-race').addEventListener('click', function () { startRace(store.level); });
+  el('ag-garage-race').addEventListener('click', function () { startRace(selLevel); });
   el('ag-next').addEventListener('click', function () { startRace(store.level); });
   el('ag-retry').addEventListener('click', function () { startRace(level); });
   el('ag-res-garage').addEventListener('click', function () { state = 'garage'; renderGarage(); show(garageEl); });
