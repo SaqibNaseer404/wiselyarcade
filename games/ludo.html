@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css?v=9">
+<link rel="stylesheet" href="../css/style.css?v=10">
 <style>
   .lu-wrap{max-width:760px;margin:0 auto}
   .lu-top{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
@@ -164,6 +164,13 @@
     border-color:#d97706;box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 1px 0 rgba(255,255,255,.6)}
   .lu-wrap .btn.ghost, .lu-card .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.95),rgba(11,17,29,.95));
     color:#ffc46b;border-color:rgba(245,166,35,.45);box-shadow:0 10px 22px rgba(10,16,30,.35)}
+  .lu-levelbar{text-align:center;font-weight:800;color:#7c2d12;margin:0 auto 10px;font-size:1.05rem}
+  .lu-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .lu-lvl{border:2px solid rgba(217,119,6,.4);background:rgba(255,255,255,.85);color:#7c2d12;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .lu-lvl.lu-done{background:#dcfce7;border-color:#22c55e}
+  .lu-lvl.lu-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .lu-lvl.lu-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -184,6 +191,8 @@
       <p class="tagline">The classic family race — solo vs the computer, or pass-and-play with friends.</p>
     </div>
 
+    <div class="lu-levelbar">🎲 Campaign — <strong>Level <span id="l-level-now">1</span></strong> · <span id="l-progress-note"></span></div>
+    <div class="lu-map" id="lu-map" role="group" aria-label="Choose your level"></div>
     <div class="lu-top" id="players-bar"></div>
 
     <div class="lu-top">
@@ -205,6 +214,7 @@
         <li><strong>☆ star squares</strong> are safe — nobody can capture you there.</li>
         <li>You need the <strong>exact roll</strong> to enter home.</li>
         <li>Tap a <strong>glowing token</strong> to move it.</li>
+        <li><strong>Campaign — 100 levels.</strong> Beat the computer to clear each level. One opponent at the friendly early levels, two from Level 31, three from Level 66 — and the computer's play sharpens every level. Win without being captured for 3 stars.</li>
       </ul>
     </div>
 
@@ -232,6 +242,11 @@
     <div style="font-size:3rem">🎲</div>
     <h2>Ludo</h2>
     <p>Pick your color and your game mode.</p>
+    <div class="btn-row" style="justify-content:center;margin-bottom:10px;gap:8px">
+      <button class="btn" id="l-mode-free" type="button">🎲 Free play</button>
+      <button class="btn ghost" id="l-mode-campaign" type="button">🏆 Campaign 1–100</button>
+    </div>
+    <p style="font-size:.85rem">Campaign: beat the computer to clear Level <strong id="l-setup-level">1</strong> — more opponents join the table as you climb, and the computer plays smarter every level. (Campaign ignores the mode choice below — it's always you vs the computer.)</p>
     <div style="font-weight:800;color:#5b4f70">Game mode</div>
     <div class="opt-row">
       <input type="radio" name="pmode" id="pm-ai" value="ai" checked><label for="pm-ai">🤖 Vs Computer</label>
@@ -258,6 +273,7 @@
     <p id="end-msg"></p>
     <p style="font-size:.9rem"><em>You can't control the dice — only how you play the roll.</em></p>
     <button class="btn" id="new-btn">Play again</button>
+    <button class="btn hidden" id="end-next">Next Level →</button>
   </div>
 </div>
 
@@ -276,6 +292,6 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/ludo.js?v=6"></script>
+<script src="../js/ludo.js?v=7"></script>
 </body>
 </html>
