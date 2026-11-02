@@ -36,6 +36,50 @@
 
   var best = 0;
   try { best = parseInt(localStorage.getItem(BEST_KEY), 10) || 0; } catch (e) {}
+
+  // ---- 100-level campaign: each run starts at your campaign level.
+  // Reach the mountain once to clear it. Stars by fireflies caught on the
+  // clearing leg: 10+ = 3 stars, 5+ = 2 stars, clear = 1 star.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, clearedThisRun = false, pendingNext = false, levelFliesStart = 0;
+  try {
+    camp = parseInt(localStorage.getItem('wa_fd_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_fd_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_fd_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_fd_current', String(camp));
+      localStorage.setItem('wa_fd_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_fd_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function tierName(l) { return l <= 15 ? 'Sunny trails' : l <= 35 ? 'Deeper woods' : l <= 55 ? 'Misty heights' : l <= 75 ? 'Thunder country' : l <= 90 ? 'Storm peaks' : 'Legend of the forest'; }
+  function buildMap() {
+    var map = document.getElementById('f-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'fd-lvl fd-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'fd-lvl fd-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'fd-lvl'; b.textContent = l; }
+        else { b.className = 'fd-lvl fd-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () {
+          if (l <= campUnlocked && state !== 'playing') { camp = l; saveCampaign(); level = camp; cfg = levelConfig(camp); applyTheme(cfg); elLevel.textContent = camp; buildMap(); }
+        });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('f-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('f-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + dc + ' of 100 levels completed'; }
+  }
   showBest(best);
 
   /* ---------------- v5: auto quality scaling — weak phones stay smooth ----------------
@@ -73,7 +117,7 @@
     if (n <= LEVELS.length) return c;
     var extra = n - LEVELS.length;
     return {
-      name: c.name + ' +' + extra, leg: c.leg,
+      name: c.name + ' +' + extra, leg: Math.min(2200, c.leg + extra * 60),
       speed: Math.min(30, c.speed + extra * 2), max: Math.min(34, c.max + extra * 2),
       near: c.near, far: c.far, bushes: c.bushes, tufts: c.tufts,
       fog: c.fog, fogNear: c.fogNear, fogFar: c.fogFar, grass: c.grass,
@@ -1297,8 +1341,8 @@
       }
     }
     mountain.position.z = MTN_FAR;
-    level = 1;
-    cfg = levelConfig(1);
+    level = camp;
+    cfg = levelConfig(camp);
     applyTheme(cfg);
   }
 
@@ -1308,8 +1352,9 @@
     player.position.set(0, 0, 0);
     py = 0; vy = 0; grounded = true; sliding = 0;
     dist = 0; flyCount = 0; score = 0; bonus = 0; runT = 0; levelStart = 0;
-    level = 1;
-    cfg = levelConfig(1);
+    clearedThisRun = false; pendingNext = false; levelFliesStart = 0;
+    level = camp;
+    cfg = levelConfig(camp);
     speed = cfg.speed;
     nextRowAt = 34; nextFliesAt = 16;
     resetWorld();
@@ -1318,10 +1363,22 @@
     elScore.textContent = '0';
     elFlies.textContent = '0';
     elMtn.textContent = '0%';
-    elLevel.textContent = '1';
+    elLevel.textContent = String(camp);
+    buildMap();
   }
 
   function levelUp() {
+    if (!clearedThisRun && level === camp) {
+      clearedThisRun = true;
+      var fliesLeg = flyCount - levelFliesStart;
+      var stars = fliesLeg >= 10 ? 3 : fliesLeg >= 5 ? 2 : 1;
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      pendingNext = camp < MAX_LEVEL;
+      saveCampaign();
+      toast('🏆 Campaign Level ' + camp + ' cleared — ' + stars + ' stars!');
+    }
+    levelFliesStart = flyCount;
     level++;
     levelStart = dist;
     cfg = levelConfig(level);
@@ -1339,7 +1396,13 @@
       try { localStorage.setItem(BEST_KEY, String(best)); } catch (e) {}
       showBest(best);
     }
-    overStats.innerHTML = 'You reached <strong>Level ' + level + '</strong>, dashed <strong>' + Math.floor(dist) + ' m</strong> and caught <strong>' + flyCount + '</strong> fireflies.<br>Score: <strong>' + score + '</strong> · Best: <strong>' + best + '</strong>';
+    overStats.innerHTML = 'You reached <strong>Level ' + level + '</strong>, dashed <strong>' + Math.floor(dist) + ' m</strong> and caught <strong>' + flyCount + '</strong> fireflies.<br>Score: <strong>' + score + '</strong> · Best: <strong>' + best + '</strong>' +
+      (clearedThisRun
+        ? '<br>🏆 <strong>Campaign Level ' + camp + ' cleared — ' + campStars[camp] + ' stars!</strong>' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' is unlocked.' : ' You dashed through all 100 levels!')
+        : '<br>Reach the mountain to clear Campaign Level ' + camp + '.');
+    var againBtn = document.getElementById('f-again');
+    if (againBtn) againBtn.textContent = clearedThisRun && camp < MAX_LEVEL ? 'Next Level →' : 'Run again';
+    buildMap();
     overBox.classList.remove('hidden');
   }
 
@@ -1378,7 +1441,11 @@
   }, { passive: false });
 
   document.getElementById('f-play').addEventListener('click', startGame);
-  document.getElementById('f-again').addEventListener('click', startGame);
+  buildMap();
+  document.getElementById('f-again').addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    startGame();
+  });
   document.getElementById('f-restart').addEventListener('click', startGame);
 
   /* ---------------- Animation ---------------- */
