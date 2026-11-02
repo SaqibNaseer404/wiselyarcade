@@ -38,6 +38,60 @@
 
   var PER_RUN = 12, TIME_PER_Q = 30;
 
+  // ---- 100-level campaign: each level draws its own 12 questions (seeded,
+  // so a level always asks the same set) and the clock shrinks as you climb:
+  // 30s per question at L1 down to 11s at L100. Score 8+ correct to clear;
+  // 10+ earns 2 stars, a perfect 12 earns 3.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, pendingNext = false, curTime = TIME_PER_Q, clearedRun = false;
+  try {
+    camp = parseInt(localStorage.getItem('wa_md_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_md_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_md_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_md_current', String(camp));
+      localStorage.setItem('wa_md_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_md_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function timeFor(l) { return Math.max(11, 30 - Math.floor((l - 1) / 5)); }
+  function tierName(l) { return l <= 15 ? 'Warming up' : l <= 35 ? 'Sharp thinker' : l <= 55 ? 'Quick mind' : l <= 75 ? 'Lightning mind' : l <= 90 ? 'Mind athlete' : 'Certified genius'; }
+  function seededShuffle(a, seed) {
+    a = a.slice();
+    var s2 = seed >>> 0;
+    function rnd() { s2 = (s2 * 1664525 + 1013904223) >>> 0; return s2 / 4294967296; }
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(rnd() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function buildMap() {
+    var map = document.getElementById('mm-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'md-lvl md-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'md-lvl md-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'md-lvl'; b.textContent = l; }
+        else { b.className = 'md-lvl md-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; pendingNext = false; saveCampaign(); buildMap(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('mm-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('mm-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + timeFor(camp) + 's per question · ' + dc + ' of 100 levels completed'; }
+  }
+
   var $ = function (id) { return document.getElementById(id); };
   var elQ = $('mm-q'), elOpts = $('mm-opts'), elCat = $('mm-cat'),
       elNum = $('mm-num'), elScore = $('mm-score'), elStreak = $('mm-streak'),
@@ -61,8 +115,10 @@
   }
 
   function startGame() {
-    questions = shuffle(BANK).slice(0, PER_RUN).map(function (q) {
-      var order = shuffle([0, 1, 2, 3]);
+    curTime = timeFor(camp);
+    clearedRun = false;
+    questions = seededShuffle(BANK, camp * 7919 + 17).slice(0, PER_RUN).map(function (q, n) {
+      var order = seededShuffle([0, 1, 2, 3], camp * 104729 + n * 31 + 7);
       return {
         cat: q.cat, q: q.q,
         opts: order.map(function (i) { return q.opts[i]; }),
@@ -71,6 +127,7 @@
     });
     qi = 0; score = 0; streak = 0; correctCount = 0;
     maxScore = PER_RUN * 300;
+    buildMap();
     scrStart.classList.add('hidden');
     scrDone.classList.add('hidden');
     scrQuiz.classList.remove('hidden');
@@ -98,7 +155,7 @@
       elOpts.appendChild(b);
     });
     // timer
-    timeLeft = TIME_PER_Q;
+    timeLeft = curTime;
     elTime.textContent = timeLeft;
     ringSet(1);
     elRing.classList.remove('low'); // Round 1: reset low-time ring style
@@ -106,7 +163,7 @@
     timerId = setInterval(function () {
       timeLeft--;
       elTime.textContent = Math.max(0, timeLeft);
-      ringSet(timeLeft / TIME_PER_Q);
+      ringSet(timeLeft / curTime);
       elRing.classList.toggle('low', timeLeft <= 10); // Round 1: warm amber ring under 10s
       if (timeLeft <= 0) {
         clearInterval(timerId);
@@ -130,7 +187,7 @@
     if (pick === q.a) {
       correctCount++;
       streak++;
-      var timeBonus = Math.round(100 * (timeLeft / TIME_PER_Q));
+      var timeBonus = Math.round(100 * (timeLeft / curTime));
       var streakBonus = Math.min(100, 25 * (streak - 1));
       var pts = 100 + timeBonus + streakBonus;
       score += pts;
@@ -190,9 +247,23 @@
     $('mm-iq').textContent = iq;
     $('mm-rank').textContent = rank[1] + ' ' + rank[0];
     $('mm-acc').textContent = correctCount + ' / ' + PER_RUN + ' correct';
-    $('mm-best-line').textContent = isBest
-      ? '🎉 New personal best!'
-      : 'Personal best: ' + best;
+    clearedRun = correctCount >= 8;
+    var stars = !clearedRun ? 0 : correctCount >= 12 ? 3 : correctCount >= 10 ? 2 : 1;
+    if (clearedRun) {
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      pendingNext = camp < MAX_LEVEL;
+      saveCampaign();
+    } else { pendingNext = false; }
+    $('mm-best-line').textContent = (isBest
+      ? '🎉 New personal best! '
+      : 'Personal best: ' + best + '. ') +
+      (clearedRun
+        ? '🏆 Level ' + camp + ' cleared — ' + stars + ' stars!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' unlocked.' : ' All 100 levels cleared!')
+        : 'Level ' + camp + ' needs 8 correct — you got ' + correctCount + '. Try again!');
+    var againBtn = $('mm-again');
+    if (againBtn) againBtn.textContent = clearedRun && camp < MAX_LEVEL ? 'Next Level →' : 'Play again';
+    buildMap();
     showBest();
     scrQuiz.classList.add('hidden');
     scrDone.classList.remove('hidden');
@@ -206,6 +277,11 @@
   }
 
   $('mm-play').addEventListener('click', startGame);
-  $('mm-again').addEventListener('click', startGame);
+  $('mm-again').addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    $('mm-again').textContent = 'Play again';
+    startGame();
+  });
   $('mm-restart').addEventListener('click', startGame);
+  buildMap();
 })();
