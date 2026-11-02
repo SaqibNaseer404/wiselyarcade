@@ -17,7 +17,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>Forest Dash — Free Online Endless Runner Game | Wisely Arcade</title>
 <link rel="canonical" href="https://wiselyarcade.com/games/forest-dash">
-<meta name="description" content="Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.">
+<meta name="description" content="Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, climb 100 levels from Sunny Grove to the storm peaks, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
@@ -44,6 +44,13 @@
   }
   #f-toast.show{opacity:1;transform:translate(-50%,0)}
   .game-area{max-width:880px}
+  .fd-levelbar{text-align:center;font-weight:800;color:#14532d;margin:0 auto 10px;font-size:1.05rem}
+  .fd-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .fd-lvl{border:2px solid rgba(22,163,74,.35);background:rgba(255,255,255,.85);color:#14532d;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .fd-lvl.fd-done{background:#dcfce7;border-color:#22c55e}
+  .fd-lvl.fd-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .fd-lvl.fd-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -69,6 +76,8 @@
 
   <div class="wrap">
     <div class="game-area">
+      <div class="fd-levelbar">🌲 You are on <strong>Level <span id="f-level-now">1</span></strong> · <span id="f-progress-note"></span></div>
+      <div class="fd-map" id="f-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Score</span><div id="f-score">0</div></div>
         <div class="stat"><span>Fireflies</span><div id="f-flies">0</div></div>
@@ -101,7 +110,7 @@
       <ol>
         <li>You run forward automatically and the trail keeps getting <strong>faster</strong>. Switch lanes with <span class="kbd">←</span> <span class="kbd">→</span>, jump with <span class="kbd">↑</span>, slide with <span class="kbd">↓</span>.</li>
         <li><strong>Fallen logs</strong> — jump clean over them. <strong>Low branches</strong> — slide right under. <strong>Rock walls</strong> — you can't jump or slide through these, so switch lanes!</li>
-        <li>Grab <strong>glowing fireflies</strong> for bonus points. Reach the <strong>mountain</strong> to complete the level — each new level is a deeper, darker, faster forest, from Sunny Grove to Thunder Forest and beyond. How many peaks can you conquer?</li>
+        <li>Grab <strong>glowing fireflies</strong> for bonus points. Reach the <strong>mountain</strong> to clear your level — there are <strong>100 levels</strong>: the four forests (Sunny Grove, Deep Woods, Misty Pines, Thunder Forest) return in faster, longer rounds, the legs grow longer and the gaps tighter. Catch 10 fireflies on the clearing leg for 3 stars. How many peaks can you conquer?</li>
         <li>One hit ends the run. Watch ahead, plan your moves, and chase your best score. How far can you go?</li>
       </ol>
     </div>
@@ -142,7 +151,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="../js/three.min.js"></script>
-<script src="../js/forest-dash-3d.js?v=7"></script>
+<script src="../js/forest-dash-3d.js?v=8"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
