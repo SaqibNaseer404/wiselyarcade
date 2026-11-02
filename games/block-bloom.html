@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Block Bloom — Free Online Block Puzzle Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/block-bloom">
+<meta name="description" content="Play Block Bloom free online — a Block Blast-style block puzzle — drag, place, clear. 100 levels, no download, no sign-up. Glossy 3D blocks, rising targets and a best-score endless mode, family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  #bbloom{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+  .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
+  #bb-status{
+    text-align:center;font-weight:800;color:#0b5563;background:rgba(14,165,164,.12);
+    border:1px solid rgba(14,165,164,.35);border-radius:999px;
+    padding:7px 14px;margin:10px auto 14px;max-width:640px;font-size:.95rem;
+  }
+  .overlay .btn{margin:4px}
+  #bb-picker-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+    max-height:300px;overflow-y:auto;margin:12px 0;padding:2px;
+  }
+  .lvl-btn{
+    background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;padding:7px 2px;font-family:Nunito,sans-serif;font-weight:900;font-size:.92rem;cursor:pointer;
+  }
+  .lvl-btn span{display:block;color:#ffc85e;font-size:.68rem;letter-spacing:.12em}
+  .lvl-btn.locked{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Block Bloom</h1>
+    <p>The block puzzle everyone is playing, rebuilt glossy and gorgeous — drag pieces onto the board, fill rows and columns, and watch them bloom away in a sweep of light. Plan ahead, or run out of room.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="bb-score">0</div></div>
+        <div class="stat"><span>Level</span><div id="bb-level">—</div></div>
+        <div class="stat"><span>Best</span><div id="bb-best">—</div></div>
+      </div>
+      <div id="bb-status">Pick a mode to start blooming.</div>
+      <div class="stage">
+        <canvas id="bbloom" width="440" height="600" aria-label="Block Bloom game: drag pieces onto the 8 by 8 board to fill rows and columns"></canvas>
+        <div class="overlay hidden" id="bb-over">
+          <h2 id="bb-over-title">Ready to bloom?</h2>
+          <p id="bb-over-stats"></p>
+          <button class="btn" id="bb-ov-main">▶ Level 1</button>
+          <button class="btn ghost" id="bb-ov-alt">∞ Endless mode</button>
+        </div>
+        <div class="overlay hidden" id="bb-picker">
+          <h2>Pick a level</h2>
+          <div id="bb-picker-grid"></div>
+          <button class="btn ghost" id="bb-picker-close">Close</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="bb-restart">Restart</button>
+        <button class="btn ghost" id="bb-levels">All levels</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>If you love satisfying block puzzles, you'll feel right at home — three pieces at a time, one 8×8 board, and one golden rule: a full row <em>or</em> a full column bursts in a sweep of light and frees the space again.</p>
+      <ol>
+        <li><strong>Drag a piece</strong> from the tray onto the board — or tap a piece, then tap where it should go. The ghost shows you exactly how it will land: green means it fits, red means it doesn't.</li>
+        <li>Fill a complete <strong>row or column</strong> to clear it. Clear two or more lines with one piece for a big bonus — the points grow fast.</li>
+        <li>When all three pieces are placed, a <strong>fresh set of three</strong> arrives. In <strong>Endless mode</strong> you play until no piece fits anywhere — chase your best score.</li>
+        <li>In <strong>Level mode</strong> there are <strong>100 levels</strong>. Each level gives you a target score (some also ask for a number of lines) and a fixed number of piece sets. Reach the target before the sets run out to clear the level — finish fast for <strong>3 stars</strong>.</li>
+        <li>The climb gets serious: higher levels start with <strong>pre-filled cells</strong> on the board and deal <strong>bigger, trickier pieces</strong>, while the targets keep rising. Your progress and stars save on your device.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse:</strong> drag a piece onto the board, or click a piece then click a square to place it.</li>
+        <li><strong>Touch:</strong> drag with your finger, or tap a piece, then tap the board.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Plan ahead — leave room for the future.</h2>
+      <p>A grid filled in a rush has no space for the piece that matters; a life filled in a rush is the same. In Block Bloom, the players who survive aren't the fastest — they're the ones who glance at all three pieces before placing the first, and keep a corner free for the awkward shape they know is coming.</p>
+      <p>Place each piece where it helps the next one too. Leave room for the future — in the grid, and in your day.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/block-bloom.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
