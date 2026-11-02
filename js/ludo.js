@@ -50,6 +50,59 @@ function isSafe(color, steps) {
 var players, turn, dice, sixes, movable, phase, finishes;
 var humanColor = 'red', gameMode = 'ai'; // 'ai' = you vs 1 computer | 2 | 3 | 4 humans
 var humanCount = 1;
+
+// ---- 100-level campaign: you vs the computer, but the table fills up and
+// the computer stops daydreaming. L1-30: 1 opponent playing loose (75%
+// careless moves). Opponents grow to 3 by L66, carelessness fades to 0.
+// Stars: win without being captured = 3, captured 1-2 times = 2, else 1.
+var MAX_LEVEL = 100;
+var camp = 1, campUnlocked = 1, campStars = {}, mode = 'free', campaignGame = false, humanTimesCaptured = 0;
+try {
+  camp = parseInt(localStorage.getItem('wa_lu_current') || '1', 10) || 1;
+  campUnlocked = parseInt(localStorage.getItem('wa_lu_unlocked') || '1', 10) || 1;
+  campStars = JSON.parse(localStorage.getItem('wa_lu_stars') || '{}') || {};
+} catch (e) {}
+if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+function saveCampaign() {
+  try {
+    localStorage.setItem('wa_lu_current', String(camp));
+    localStorage.setItem('wa_lu_unlocked', String(campUnlocked));
+    localStorage.setItem('wa_lu_stars', JSON.stringify(campStars));
+  } catch (e) {}
+}
+function oppCountFor(l) { return l <= 30 ? 1 : l <= 65 ? 2 : 3; }
+function carelessFor(l) { return Math.max(0, 0.75 - l * 0.0083); }
+function tierName(l) { return l <= 15 ? 'Friendly table' : l <= 30 ? 'Warming up' : l <= 50 ? 'Busy table' : l <= 65 ? 'Sharp table' : l <= 85 ? 'Ruthless table' : l <= 90 ? 'Pro table' : 'Champion table'; }
+function buildMap() {
+  var map = document.getElementById('lu-map'); if (!map) return;
+  map.innerHTML = '';
+  for (var l = 1; l <= MAX_LEVEL; l++) {
+    (function (l) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      if (campStars[l] != null && l !== camp) { b.className = 'lu-lvl lu-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+      else if (l === camp) { b.className = 'lu-lvl lu-cur'; b.textContent = l; }
+      else if (l <= campUnlocked) { b.className = 'lu-lvl'; b.textContent = l; }
+      else { b.className = 'lu-lvl lu-lock'; b.textContent = '🔒'; }
+      b.disabled = l > campUnlocked;
+      b.setAttribute('aria-label', 'Level ' + l);
+      b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; saveCampaign(); setMode('campaign'); } });
+      map.appendChild(b);
+    })(l);
+  }
+  var ln = document.getElementById('l-level-now'); if (ln) ln.textContent = camp;
+  var sl = document.getElementById('l-setup-level'); if (sl) sl.textContent = camp;
+  var pn = document.getElementById('l-progress-note');
+  if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + oppCountFor(camp) + ' computer opponent' + (oppCountFor(camp) > 1 ? 's' : '') + ' · ' + dc + ' of 100 levels completed'; }
+}
+function setMode(m) {
+  mode = m;
+  var bf = document.getElementById('l-mode-free'), bc = document.getElementById('l-mode-campaign');
+  if (bf) bf.classList.toggle('ghost', mode !== 'free');
+  if (bc) bc.classList.toggle('ghost', mode !== 'campaign');
+  buildMap();
+}
 var OPP = { red: 'yellow', yellow: 'red', green: 'blue', blue: 'green' };
 
 function aiTotal() { return players.filter(function (p) { return p.ai; }).length; }
@@ -65,7 +118,9 @@ function humanTurnMsg() {
 
 function newGame() {
   var humans, total;
-  if (gameMode === 'ai') { humans = 1; total = 2; }
+  humanTimesCaptured = 0;
+  if (campaignGame) { humans = 1; total = 1 + oppCountFor(camp); }
+  else if (gameMode === 'ai') { humans = 1; total = 2; }
   else { humans = total = parseInt(gameMode, 10) || 2; }
   humanCount = humans;
   // seat order: your color first, then the opposite color, then the rest
@@ -163,6 +218,7 @@ function applyMove(pl, ti, d) {
         var qs = q.tokens[j];
         if (qs >= 0 && qs <= 50 && trackIdx(q.color, qs) === sq) {
           q.tokens[j] = -1; captured = true;
+          if (pl.ai && !q.ai) humanTimesCaptured++;
         }
       }
     });
@@ -207,6 +263,9 @@ function nextTurn() {
 }
 
 function aiChoose(pl, d, moves) {
+  if (campaignGame && Math.random() < carelessFor(camp)) {
+    return moves[Math.floor(Math.random() * moves.length)]; // daydreaming move
+  }
   var best = moves[0], bs = -1e9;
   for (var i = 0; i < moves.length; i++) {
     var m = moves[i], s = Math.random() * 6;
@@ -257,9 +316,25 @@ function endGame(winnerColor) {
   var humanWon = w && !w.ai;
   document.getElementById('end-title').textContent =
     humanWon ? ('🏆 ' + (humanCount === 1 ? 'You win!' : pname(w) + ' wins!')) : '🤖 Computer wins';
-  document.getElementById('end-msg').textContent = humanWon
+  var endMsg = humanWon
     ? 'All four tokens home — beautifully played!'
     : 'The computer got all four tokens home first. Rematch?';
+  var nextBtn = document.getElementById('end-next');
+  if (nextBtn) nextBtn.classList.add('hidden');
+  if (campaignGame) {
+    if (humanWon) {
+      var stars = humanTimesCaptured === 0 ? 3 : humanTimesCaptured <= 2 ? 2 : 1;
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      saveCampaign();
+      endMsg += ' 🏆 Level ' + camp + ' cleared — ' + stars + ' stars!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' unlocked.' : ' You beat all 100 levels!');
+      if (nextBtn && camp < MAX_LEVEL) nextBtn.classList.remove('hidden');
+      buildMap();
+    } else {
+      endMsg += ' Get all four tokens home first to clear Level ' + camp + '.';
+    }
+  }
+  document.getElementById('end-msg').textContent = endMsg;
   document.getElementById('gameover').classList.add('show');
 }
 
@@ -460,9 +535,22 @@ document.getElementById('roll-btn').addEventListener('click', rollDice);
 document.getElementById('start-btn').addEventListener('click', function () {
   humanColor = document.querySelector('input[name="lcolor"]:checked').value;
   gameMode = document.querySelector('input[name="pmode"]:checked').value;
+  campaignGame = mode === 'campaign';
   document.getElementById('setup').classList.remove('show');
+  document.getElementById('gameover').classList.remove('show');
   newGame();
 });
+var endNextBtn = document.getElementById('end-next');
+if (endNextBtn) endNextBtn.addEventListener('click', function () {
+  if (camp < MAX_LEVEL) { camp++; saveCampaign(); buildMap(); }
+  document.getElementById('gameover').classList.remove('show');
+  newGame();
+});
+var modeFreeBtn = document.getElementById('l-mode-free');
+var modeCampBtn = document.getElementById('l-mode-campaign');
+if (modeFreeBtn) modeFreeBtn.addEventListener('click', function () { setMode('free'); });
+if (modeCampBtn) modeCampBtn.addEventListener('click', function () { setMode('campaign'); });
+buildMap();
 document.getElementById('new-btn').addEventListener('click', function () {
   document.getElementById('gameover').classList.remove('show');
   document.getElementById('setup').classList.add('show');
