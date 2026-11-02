@@ -126,7 +126,52 @@
   /* ================= end 3D-STYLE ================= */
 
   var ANIMALS = ['🐶', '🐱', '🦊', '🐼', '🐸', '🦁', '🐵', '🐯'];
+  var POOL = ANIMALS.concat(['🐰', '🦄', '🐷', '🐥', '🦋', '🐢', '🐳', '🦉', '🐙', '🦩', '🐿️', '🦜']);
   var BEST_KEY = 'wisely_memory_best';
+
+  // ---- 100-level campaign: the board grows (6 pairs at L1 -> 17 at L100)
+  // and mismatched cards flip back faster. Stars by moves: efficient
+  // memory (<=1.6 moves per pair) earns 3 stars.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, pendingNext = false, curPairs = 8;
+  try {
+    camp = parseInt(localStorage.getItem('wa_mm_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_mm_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_mm_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_mm_current', String(camp));
+      localStorage.setItem('wa_mm_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_mm_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function pairsFor(l) { return 6 + Math.floor((l - 1) / 9); }
+  function peekMs(l) { return Math.max(380, 750 - (l - 1) * 4); }
+  function tierName(l) { return l <= 15 ? 'Sharp start' : l <= 35 ? 'Strong memory' : l <= 55 ? 'Memory athlete' : l <= 75 ? 'Mind palace' : l <= 90 ? 'Memory master' : 'Total recall'; }
+  function buildMap() {
+    var map = document.getElementById('m-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'mm-lvl mm-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'mm-lvl mm-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'mm-lvl'; b.textContent = l; }
+        else { b.className = 'mm-lvl mm-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; pendingNext = false; saveCampaign(); newGame(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('m-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('m-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + dc + ' of 100 levels completed'; }
+  }
 
   var board = document.getElementById('mboard');
   var movesEl = document.getElementById('m-moves');
@@ -152,7 +197,7 @@
 
   function getBest() {
     try {
-      var raw = localStorage.getItem(BEST_KEY);
+      var raw = localStorage.getItem(BEST_KEY + '_' + camp);
       return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
   }
@@ -207,17 +252,18 @@
       card.classList.add('matched');
       firstCard = null;
       matchedPairs++;
-      if (matchedPairs === ANIMALS.length) win();
+      if (matchedPairs === curPairs) win();
     } else {
       // Not a match — flip both back after a short look.
       lock = true;
       var a = firstCard, b = card;
       firstCard = null;
+      var wait = peekMs(camp);
       setTimeout(function () {
         a.classList.remove('flipped');
         b.classList.remove('flipped');
         lock = false;
-      }, 750);
+      }, wait);
     }
   }
 
@@ -226,13 +272,22 @@
     var b = getBest();
     var isBest = !b || moves < b.moves;
     if (isBest) {
-      try { localStorage.setItem(BEST_KEY, JSON.stringify({ moves: moves, time: seconds })); } catch (e) {}
+      try { localStorage.setItem(BEST_KEY + '_' + camp, JSON.stringify({ moves: moves, time: seconds })); } catch (e) {}
     }
     renderBest();
+    var stars = moves <= Math.ceil(curPairs * 1.6) ? 3 : moves <= Math.ceil(curPairs * 2.2) ? 2 : 1;
+    if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+    if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+    pendingNext = camp < MAX_LEVEL;
+    saveCampaign();
     winStats.innerHTML =
-      'You found all 8 pairs in <strong>' + moves + ' moves</strong> ' +
+      'You found all ' + curPairs + ' pairs in <strong>' + moves + ' moves</strong> ' +
       'and <strong>' + fmt(seconds) + '</strong>.' +
-      (isBest ? '<br><strong>That\'s a new best score!</strong>' : '');
+      (isBest ? '<br><strong>That\'s a new best score for Level ' + camp + '!</strong>' : '') +
+      '<br>🏆 <strong>Level ' + camp + ' cleared — ' + stars + ' stars!</strong>' +
+      (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' is unlocked.' : ' You remembered all 100 levels!');
+    againBtn.textContent = camp < MAX_LEVEL ? 'Next Level →' : 'Play again';
+    buildMap();
     overlay.classList.remove('hidden');
   }
 
@@ -249,8 +304,11 @@
     overlay.classList.add('hidden');
     renderBest();
 
-    // Build a shuffled deck of 8 pairs.
-    var deck = shuffled(ANIMALS.concat(ANIMALS));
+    // Build a shuffled deck for this level's pair count.
+    curPairs = pairsFor(camp);
+    var chosen = shuffled(POOL).slice(0, curPairs);
+    var deck = shuffled(chosen.concat(chosen));
+    board.style.gridTemplateColumns = 'repeat(' + (deck.length <= 12 ? 4 : deck.length <= 20 ? 5 : 6) + ', 1fr)';
     board.innerHTML = '';
     deck.forEach(function (animal) {
       var card = document.createElement('div');
@@ -272,7 +330,12 @@
     });
   }
 
-  restartBtn.addEventListener('click', newGame);
-  againBtn.addEventListener('click', newGame);
+  restartBtn.addEventListener('click', function () { pendingNext = false; againBtn.textContent = 'Play again'; newGame(); });
+  againBtn.addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    againBtn.textContent = 'Play again';
+    newGame();
+  });
+  buildMap();
   newGame();
 })();
