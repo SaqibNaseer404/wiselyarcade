@@ -66,6 +66,13 @@
   .game-area .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.96),rgba(11,17,29,.96));
     color:#ffc46b;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.5);
     box-shadow:0 10px 22px rgba(10,16,30,.35);text-shadow:none}
+  .mm-levelbar{text-align:center;font-weight:800;color:#14532d;margin:0 auto 10px;font-size:1.05rem}
+  .mm-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .mm-lvl{border:2px solid rgba(30,125,87,.4);background:rgba(255,255,255,.85);color:#14532d;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .mm-lvl.mm-done{background:#dcfce7;border-color:#22c55e}
+  .mm-lvl.mm-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .mm-lvl.mm-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -86,11 +93,13 @@
 <main>
   <div class="game-head">
     <h1>Animal Memory Match</h1>
-    <p>Find all eight animal pairs hiding in the cards. Take your time — rushing never wins this game.</p>
+    <p>Find the animal pairs hiding in the cards. Take your time — rushing never wins this game. <strong>100 levels</strong>: the board grows from 6 pairs to 17, and mismatched cards flip back faster and faster.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
+      <div class="mm-levelbar">🧠 You are on <strong>Level <span id="m-level-now">1</span></strong> · <span id="m-progress-note"></span></div>
+      <div class="mm-map" id="m-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Moves</span><div id="m-moves">0</div></div>
         <div class="stat"><span>Time</span><div id="m-time">0:00</div></div>
@@ -115,7 +124,7 @@
         <li>Tap any card to flip it over and reveal the animal hiding underneath.</li>
         <li>Tap a second card. If the two animals match, the pair stays face-up.</li>
         <li>If they don't match, both cards flip back — try to remember where each animal was!</li>
-        <li>Find all 8 pairs to win. Fewer moves means a better score.</li>
+        <li>Find all the pairs to clear the level — there are <strong>100 levels</strong>. Higher levels hide more pairs and flip mismatched cards back sooner. Clear in 1.6 moves per pair or fewer for 3 stars!</li>
       </ol>
     </div>
 
@@ -154,7 +163,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/memory-match.js?v=2"></script>
+<script src="../js/memory-match.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
