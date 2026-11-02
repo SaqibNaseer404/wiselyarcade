@@ -50,6 +50,13 @@
     border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
     box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
   }
+  .bp-levelbar{text-align:center;font-weight:800;color:#831843;margin:0 auto 10px;font-size:1.05rem}
+  .bp-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .bp-lvl{border:2px solid rgba(219,39,119,.35);background:rgba(255,255,255,.85);color:#831843;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .bp-lvl.bp-done{background:#dcfce7;border-color:#22c55e}
+  .bp-lvl.bp-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .bp-lvl.bp-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -70,11 +77,13 @@
 <main>
   <div class="game-head">
     <h1>Bubble Pop</h1>
-    <p>The timeless bubble shooter, rebuilt glossy and gorgeous — aim the cannon, match three or more bubbles, and watch whole clusters tumble. Every shot counts.</p>
+    <p>The timeless bubble shooter, rebuilt glossy and gorgeous — aim the cannon, match three or more bubbles, and watch whole clusters tumble. Every shot counts. <strong>100 levels</strong>: clear the first board to beat each level — higher levels start with deeper, more colourful boards.</p>
   </div>
 
   <div class="wrap">
     <div class="game-area">
+      <div class="bp-levelbar">🫧 You are on <strong>Level <span id="b-level-now">1</span></strong> · <span id="b-progress-note"></span></div>
+      <div class="bp-map" id="b-map" role="group" aria-label="Choose your level"></div>
       <div class="stats">
         <div class="stat"><span>Score</span><div id="b-score">0</div></div>
         <div class="stat"><span>Level</span><div id="b-level">1</div></div>
@@ -101,7 +110,7 @@
         <li><strong>Click or release to shoot.</strong> Match <strong>3 or more bubbles</strong> of the same color to pop them in a juicy burst.</li>
         <li>Bubbles left hanging with nothing connecting them to the top <strong>tumble down</strong> for bonus points — set up big drops by popping their anchors!</li>
         <li>Every <strong>6 shots</strong>, a new row slides in from the top. If any bubble crosses the red <strong>danger line</strong>, the game is over.</li>
-        <li>Clear the whole board to reach the <strong>next level</strong> — more rows, and a sneaky sixth color joins the fun. How far can you pop?</li>
+        <li>Clear the whole board to beat your <strong>campaign level</strong> — there are <strong>100 levels</strong>, and higher ones start with more rows and a sneaky sixth color. Clear in 14 shots or fewer for 3 stars! Then keep popping — the boards keep coming. How far can you pop?</li>
       </ol>
     </div>
 
@@ -140,7 +149,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/bubble-pop.js?v=5"></script>
+<script src="../js/bubble-pop.js?v=6"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
