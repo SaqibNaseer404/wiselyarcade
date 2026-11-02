@@ -12,6 +12,54 @@
     easy:   { rows: 9,  cols: 9,  mines: 10, tile: 36 },
     medium: { rows: 16, cols: 16, mines: 40, tile: 27 }
   };
+
+  // ---- 100-level campaign: the board grows from 9x9/10 mines to 20x20/80
+  // and the mine density rises with it. Stars by clear time vs par.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, pendingNext = false, curBest = 0;
+  try {
+    camp = parseInt(localStorage.getItem('wa_ms_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_ms_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_ms_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_ms_current', String(camp));
+      localStorage.setItem('wa_ms_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_ms_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function configFor(l) {
+    var t = (l - 1) / 99;
+    var size = Math.round(9 + t * 11);
+    var mines = Math.round(size * size * (0.123 + t * 0.077));
+    return { rows: size, cols: size, mines: mines, tile: size <= 9 ? 36 : size <= 13 ? 30 : size <= 16 ? 27 : 24 };
+  }
+  function parFor(l) { var c = configFor(l); return Math.round(c.rows * c.cols * 0.85); }
+  function tierName(l) { return l <= 15 ? 'Careful steps' : l <= 35 ? 'Mine hunter' : l <= 55 ? 'Logic pro' : l <= 75 ? 'Minefield master' : l <= 90 ? 'Demolition brain' : 'Minesweeper legend'; }
+  function buildMap() {
+    var map = document.getElementById('ms-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'ms-lvl ms-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'ms-lvl ms-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'ms-lvl'; b.textContent = l; }
+        else { b.className = 'ms-lvl ms-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; pendingNext = false; saveCampaign(); newBoard(); buildMap(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('m-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('m-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; var cf = configFor(camp); pn.textContent = tierName(camp) + ' · ' + cf.rows + '×' + cf.cols + ', ' + cf.mines + ' mines · ' + dc + ' of 100 levels completed'; }
+  }
   var NUM_COLS = ['', '#57a8ff', '#3ddc74', '#ff5252', '#b388ff',
                   '#ffb020', '#2dd4bf', '#ff5da2', '#c7cede'];
   var PAD = 14;
@@ -79,17 +127,18 @@
   function updateHUD() {
     elMines.textContent = mineCount - flagCount;
     elTime.textContent = fmt(elapsed);
-    elBest.textContent = best[diff] ? fmt(best[diff]) : '—';
+    elBest.textContent = curBest ? fmt(curBest) : '—';
   }
 
   function syncDiffButtons() {
-    btnEasy.classList.toggle('ghost', diff !== 'easy');
-    btnMedium.classList.toggle('ghost', diff !== 'medium');
+    if (btnEasy) btnEasy.classList.toggle('ghost', diff !== 'easy');
+    if (btnMedium) btnMedium.classList.toggle('ghost', diff !== 'medium');
   }
 
   function newBoard() {
     confetti.length = 0; // Round 1: clear win confetti on new board
-    var d = DIFFS[diff];    rows = d.rows; cols = d.cols; mineCount = d.mines; T = d.tile;
+    var d = configFor(camp); rows = d.rows; cols = d.cols; mineCount = d.mines; T = d.tile;
+    try { curBest = parseInt(localStorage.getItem('wisely_minesweeper_best_L' + camp) || '0', 10) || 0; } catch (e) { curBest = 0; }
     canvas.width = cols * T + PAD * 2;
     canvas.height = rows * T + PAD * 2;
     board = [];
@@ -200,10 +249,10 @@
       }
     }
     var isBest = false;
-    if (!best[diff] || elapsed < best[diff]) {
-      best[diff] = elapsed;
+    if (!curBest || elapsed < curBest) {
+      curBest = elapsed;
       isBest = true;
-      try { localStorage.setItem('wisely_minesweeper_best_' + diff, String(elapsed)); } catch (e) {}
+      try { localStorage.setItem('wisely_minesweeper_best_L' + camp, String(elapsed)); } catch (e) {}
     }
     // Round 1: pastel confetti burst on win
     var CONF_COLS = ['#C2A9F2', '#9ADCD6', '#F6B3C2', '#FFDF9E', '#BFE3FA'];
@@ -221,9 +270,18 @@
       });
     }
     updateHUD();
-    overTitle.textContent = 'You win!';
+    var par = parFor(camp);
+    var stars = elapsed <= par ? 3 : elapsed <= Math.round(par * 1.5) ? 2 : 1;
+    if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+    if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+    pendingNext = camp < MAX_LEVEL;
+    saveCampaign();
+    overTitle.textContent = '🏆 Level ' + camp + ' cleared!';
     overStats.textContent = 'Board cleared in ' + fmt(elapsed) +
-      (isBest ? ' — new best time!' : ' · Best ' + fmt(best[diff]));
+      (isBest ? ' — new best time!' : ' · Best ' + fmt(curBest)) +
+      ' · ' + stars + ' stars!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' unlocked.' : ' You swept all 100 levels!');
+    btnAgain.textContent = camp < MAX_LEVEL ? 'Next Level →' : 'Play again';
+    buildMap();
     overlay.classList.remove('hidden');
   }
 
@@ -242,7 +300,8 @@
     updateHUD();
     overTitle.textContent = 'Boom!';
     overStats.textContent = 'You hit a mine after ' + fmt(elapsed) +
-      '. Think it through — then try again.';
+      '. Clear the board to beat Level ' + camp + ' — think it through, then try again.';
+    btnAgain.textContent = 'Try again';
     overlay.classList.remove('hidden');
   }
 
@@ -681,8 +740,8 @@
     syncDiffButtons();
     newBoard();
   }
-  btnEasy.addEventListener('click', function () { setDiff('easy'); });
-  btnMedium.addEventListener('click', function () { setDiff('medium'); });
+  if (btnEasy) btnEasy.addEventListener('click', function () { setDiff('easy'); });
+  if (btnMedium) btnMedium.addEventListener('click', function () { setDiff('medium'); });
 
   btnFlagMode.addEventListener('click', function () {
     flagMode = !flagMode;
@@ -691,11 +750,17 @@
     btnFlagMode.textContent = 'Flag mode: ' + (flagMode ? 'ON' : 'OFF');
   });
 
-  btnAgain.addEventListener('click', function () { newBoard(); });
+  btnAgain.addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    btnAgain.textContent = 'Play again';
+    newBoard();
+    buildMap();
+  });
   btnRestart.addEventListener('click', function () { newBoard(); });
 
   // go
   syncDiffButtons();
+  buildMap();
   newBoard();
   requestAnimationFrame(frame);
 })();
