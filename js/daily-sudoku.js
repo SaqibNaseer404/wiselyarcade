@@ -120,6 +120,142 @@
   var againBtn = document.getElementById('d-again');
   var retryBtn = document.getElementById('d-retry');
 
+  // ---- 100-level campaign (the Daily puzzle stays as its own mode) ----
+  // Each level's puzzle is generated from its seed: a full solution with
+  // holes dug out while the solution stays unique. Givens fall 38 -> 24.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, pendingNext = false, mode = 'daily';
+  try {
+    camp = parseInt(localStorage.getItem('wa_su_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_su_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_su_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_su_current', String(camp));
+      localStorage.setItem('wa_su_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_su_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function givensFor(l) { return Math.round(38 - (l - 1) * 14 / 99); }
+  function tierName(l) { return l <= 15 ? 'Gentle grids' : l <= 35 ? 'Getting tricky' : l <= 55 ? 'Logic workout' : l <= 75 ? 'Expert grids' : l <= 90 ? 'Master grids' : 'Grandmaster'; }
+  function makeRng(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function shuffledIdx(rng, n) {
+    var a = []; for (var i = 0; i < n; i++) a.push(i);
+    for (var i = n - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+    return a;
+  }
+  function cellCandidates(g, idx) {
+    var r = Math.floor(idx / 9), c = idx % 9, used = {}, i;
+    for (i = 0; i < 9; i++) { used[g[r * 9 + i]] = 1; used[g[i * 9 + c]] = 1; }
+    var br = Math.floor(r / 3) * 3, bc = Math.floor(c / 3) * 3;
+    for (var dr = 0; dr < 3; dr++) for (var dc = 0; dc < 3; dc++) used[g[(br + dr) * 9 + bc + dc]] = 1;
+    var out = [];
+    for (var n = 1; n <= 9; n++) if (!used[n]) out.push(n);
+    return out;
+  }
+  function countSolutions(g, limit) {
+    var best = -1, bestCands = null, i;
+    for (i = 0; i < 81; i++) {
+      if (g[i] === 0) {
+        var cs = cellCandidates(g, i);
+        if (cs.length === 0) return 0;
+        if (bestCands === null || cs.length < bestCands.length) { best = i; bestCands = cs; if (cs.length === 1) break; }
+      }
+    }
+    if (best === -1) return 1;
+    var total = 0;
+    for (var k = 0; k < bestCands.length; k++) {
+      g[best] = bestCands[k];
+      total += countSolutions(g, limit - total);
+      g[best] = 0;
+      if (total >= limit) return total;
+    }
+    return total;
+  }
+  var _puzzleCache = {};
+  function genPuzzle(level) {
+    if (_puzzleCache[level]) return _puzzleCache[level];
+    var rng = makeRng(level * 7919 + 12345);
+    var g = [], i;
+    for (i = 0; i < 81; i++) g.push(0);
+    (function fill() {
+      var idx = g.indexOf(0);
+      if (idx === -1) return true;
+      var cs = cellCandidates(g, idx);
+      var order = shuffledIdx(rng, cs.length).map(function (j) { return cs[j]; });
+      for (var k = 0; k < order.length; k++) {
+        g[idx] = order[k];
+        if (fill()) return true;
+        g[idx] = 0;
+      }
+      return false;
+    })();
+    var solution = g.join('');
+    var target = givensFor(level), givens = 81;
+    var order = shuffledIdx(rng, 81);
+    for (var o = 0; o < 81 && givens > target; o++) {
+      var ix = order[o];
+      if (g[ix] === 0) continue;
+      var saved = g[ix];
+      g[ix] = 0;
+      if (countSolutions(g.slice(), 2) !== 1) { g[ix] = saved; } else { givens--; }
+    }
+    var out = { puzzle: g.join(''), solution: solution };
+    _puzzleCache[level] = out;
+    return out;
+  }
+  function bestKey() { return mode === 'levels' ? 'wisely_sudoku_best_L' + camp : BEST_KEY; }
+  function buildMap() {
+    var map = document.getElementById('su-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'su-lvl su-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'su-lvl su-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'su-lvl'; b.textContent = l; }
+        else { b.className = 'su-lvl su-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; pendingNext = false; saveCampaign(); setMode('levels'); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('d-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('d-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + givensFor(camp) + ' givens · ' + dc + ' of 100 levels completed'; }
+  }
+  function loadCurrentPuzzle() {
+    if (mode === 'levels') {
+      var p = genPuzzle(camp);
+      PUZZLE = p.puzzle; SOLUTION = p.solution;
+    } else {
+      PUZZLE = SUDOKU_PUZZLES[puzzleIndex].puzzle;
+      SOLUTION = SUDOKU_PUZZLES[puzzleIndex].solution;
+    }
+  }
+  function setMode(m) {
+    mode = m;
+    var bd = document.getElementById('d-mode-daily'), bl = document.getElementById('d-mode-levels');
+    if (bd) bd.classList.toggle('ghost', mode !== 'daily');
+    if (bl) bl.classList.toggle('ghost', mode !== 'levels');
+    loadCurrentPuzzle();
+    buildMap();
+    newDay();
+  }
+
   // ---- Pick today's puzzle ----
   var now = new Date();
   var startOfYear = new Date(now.getFullYear(), 0, 0);
@@ -149,7 +285,7 @@
 
   function getBest() {
     try {
-      var raw = localStorage.getItem(BEST_KEY);
+      var raw = localStorage.getItem(bestKey());
       return raw ? parseInt(raw, 10) : null;
     } catch (e) { return null; }
   }
@@ -353,13 +489,29 @@
     var b = getBest();
     var isBest = (b == null || seconds < b);
     if (isBest) {
-      try { localStorage.setItem(BEST_KEY, String(seconds)); } catch (e) {}
+      try { localStorage.setItem(bestKey(), String(seconds)); } catch (e) {}
     }
     renderBest();
-    winStats.innerHTML =
-      'Puzzle #' + (puzzleIndex + 1) + ' solved in <strong>' + fmt(seconds) + '</strong>' +
-      ' with <strong>' + mistakes + '</strong> mistake' + (mistakes === 1 ? '' : 's') + '.' +
-      (isBest ? '<br><strong>New best time!</strong>' : '<br>Come back tomorrow for a fresh puzzle.');
+    if (mode === 'levels') {
+      var stars = mistakes === 0 ? 3 : mistakes === 1 ? 2 : 1;
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      pendingNext = camp < MAX_LEVEL;
+      saveCampaign();
+      winStats.innerHTML =
+        'Level ' + camp + ' solved in <strong>' + fmt(seconds) + '</strong>' +
+        ' with <strong>' + mistakes + '</strong> mistake' + (mistakes === 1 ? '' : 's') + '.' +
+        (isBest ? '<br><strong>New best time for this level!</strong>' : '') +
+        '<br>🏆 <strong>' + stars + ' stars!</strong>' +
+        (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' is unlocked.' : ' You solved all 100 levels!');
+      againBtn.textContent = camp < MAX_LEVEL ? 'Next Level →' : 'Play again';
+      buildMap();
+    } else {
+      winStats.innerHTML =
+        'Puzzle #' + (puzzleIndex + 1) + ' solved in <strong>' + fmt(seconds) + '</strong>' +
+        ' with <strong>' + mistakes + '</strong> mistake' + (mistakes === 1 ? '' : 's') + '.' +
+        (isBest ? '<br><strong>New best time!</strong>' : '<br>Come back tomorrow for a fresh puzzle.');
+    }
     winOverlay.classList.remove('hidden');
   }
 
@@ -388,8 +540,10 @@
     timeEl.textContent = '0:00';
     renderMistakes();
     renderBest();
-    metaEl.textContent = 'Puzzle #' + (puzzleIndex + 1) + ' · ' +
-      MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+    metaEl.textContent = mode === 'levels'
+      ? 'Level ' + camp + ' · ' + givensFor(camp) + ' givens · ' + tierName(camp)
+      : 'Puzzle #' + (puzzleIndex + 1) + ' · ' +
+        MONTHS[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
     buildBoard();
     paint();
     // Pre-select the first empty cell so the number pad works immediately.
@@ -424,9 +578,18 @@
     notesBtn.textContent = '✎ Notes: ' + (pencil ? 'On' : 'Off');
   });
   restartBtn.addEventListener('click', function () {
-    if (confirm('Restart today\'s puzzle? Your current progress will be cleared.')) newDay();
+    if (confirm(mode === 'levels' ? 'Restart this level? Your current progress will be cleared.' : 'Restart today\'s puzzle? Your current progress will be cleared.')) newDay();
   });
-  againBtn.addEventListener('click', newDay);
+  againBtn.addEventListener('click', function () {
+    if (mode === 'levels' && pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); loadCurrentPuzzle(); buildMap(); }
+    againBtn.textContent = 'Play again';
+    newDay();
+  });
+  var modeDailyBtn = document.getElementById('d-mode-daily');
+  var modeLevelsBtn = document.getElementById('d-mode-levels');
+  if (modeDailyBtn) modeDailyBtn.addEventListener('click', function () { setMode('daily'); });
+  if (modeLevelsBtn) modeLevelsBtn.addEventListener('click', function () { setMode('levels'); });
+  buildMap();
   retryBtn.addEventListener('click', newDay);
 
   // Keyboard: 1-9 to enter, Backspace/Delete to erase, N for notes.
