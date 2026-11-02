@@ -9,7 +9,7 @@
   if (!window.THREE) return;
 
   /* ================= Config & persistence ================= */
-  var LEVELS = 10, LAPS = 3, RIDERS = 6;
+  var LEVELS = 100, LAPS = 3, RIDERS = 6;
   var POINTS = [100, 75, 60, 45, 30, 20]; // by finishing position
   var UPS = {
     engine: { name: 'Engine', desc: '+7% top speed per stage. Pure sky-straight fury.', costs: [60, 120, 200, 300, 450] },
@@ -112,6 +112,16 @@
     { name: 'Tropical Noon',     sky: 0x5fc9d9, hemi: 0xc0f2e8, accent: '#059669', accentN: 0x34d399 },
     { name: "Champion's Sunrise", sky: 0xffd9a0, hemi: 0xffe7bd, accent: '#b45309', accentN: 0xf59e0b }
   ];
+  // Levels 11-100 cycle the 10 skies in harder rounds (Azure Bay II, III...)
+  function themeFor(lv) {
+    if (lv <= 10) return THEMES[lv - 1];
+    var base = THEMES[(lv - 1) % 10];
+    var cyc = Math.floor((lv - 1) / 10);
+    var ROMAN = ['II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X'];
+    var copy = {}; for (var k in base) copy[k] = base[k];
+    copy.name = base.name + ' ' + (ROMAN[cyc - 1] || ('+' + cyc));
+    return copy;
+  }
   function layoutFor(lv) {
     if (lv === 1) return BASE_CTRL.map(function (p) { return new THREE.Vector3(p[0], p[2], p[1]); });
     var rand = rng(lv * 7919 + 101);
@@ -772,7 +782,7 @@
       });
     }
   }
-  function aiLevel() { return 0.8 + (level - 1) * 0.022; }
+  function aiLevel() { return level <= 10 ? 0.8 + (level - 1) * 0.022 : 0.998 + (level - 10) * 0.004; } // gentler slope past 10 so 100 stays beatable
 
   var _p = new THREE.Vector3(), _t = new THREE.Vector3(), _p2 = new THREE.Vector3(), _look = new THREE.Vector3();
   var _white = new THREE.Color(0xffffff);
@@ -907,7 +917,7 @@
     camera.fov += (targetFov - camera.fov) * Math.min(1, dt * 3);
     camera.updateProjectionMatrix();
     // high air is thinner and brighter: lift the fog toward white with altitude
-    var th = THEMES[Math.max(0, Math.min(LEVELS - 1, level - 1))];
+    var th = themeFor(level);
     var lift = Math.max(0, Math.min(1, (r.alt + 6) / 26));
     scene.fog.color.setHex(th.sky).lerp(_white, lift * 0.18);
     updateStreaks(r, dt);
@@ -1030,7 +1040,7 @@
   }
   function buildWorld(lv) {
     if (worldGroup) { scene.remove(worldGroup); disposeWorld(worldGroup); }
-    var th = THEMES[lv - 1];
+    var th = themeFor(lv);
     computeTrack(layoutFor(lv));
     scene.background.set(th.sky);
     scene.fog.color.set(th.sky);
@@ -1119,7 +1129,7 @@
   function refreshMenu() {
     el('ag-menu-level').textContent = store.level;
     el('ag-menu-sub').innerHTML =
-      'Career Level <b>' + store.level + '</b> of ' + LEVELS + ' — <b>' + THEMES[store.level - 1].name + '</b> · 3 laps · 5 rivals · golden rings' +
+      'Career Level <b>' + store.level + '</b> of ' + LEVELS + ' — <b>' + themeFor(store.level).name + '</b> · 3 laps · 5 rivals · golden rings' +
       '<br>⏱️ Time Trial best: <b>' + store.best + ' rings</b> · 💰 You have <b>' + store.points + '</b> points.' +
       '<br>📖 The lesson: <b>Aim high, but fly calm — panic crashes, patience lands.</b>';
   }
@@ -1140,7 +1150,7 @@
     countEl.classList.remove('hidden');
     toast(mode === 'tt'
       ? 'Time Trial — every ring = +2s. Go!'
-      : 'Level ' + lv + ' — ' + THEMES[lv - 1].name + ' · 3 laps. Fly calm!');
+      : 'Level ' + lv + ' — ' + themeFor(lv).name + ' · 3 laps. Fly calm!');
   }
   function doCountdown(dt) {
     countT += dt;
@@ -1193,16 +1203,17 @@
     var pos = 1;
     prog.forEach(function (e, i) { if (e.r === p) pos = i + 1; });
     var earned = POINTS[pos - 1] || 20;
+    if (level < store.level) earned = Math.floor(earned / 2); // replaying an old level pays half
     store.points += earned;
     var unlocked = false;
     if (pos <= 3 && level === store.level && store.level < LEVELS) { store.level++; unlocked = true; }
     saveStore();
     var titles = ['🏆 Victory! King of the sky!', '🥈 So close — P2!', '🥉 Podium! P3!', '🏁 P4 — points in the bag!', '🏁 P5 — keep pushing!', '🏁 P6 — the sky forgives, the clock remembers.'];
     el('ag-res-title').textContent = titles[pos - 1];
-    el('ag-res-sub').innerHTML = 'Level ' + level + ' (' + THEMES[level - 1].name + ') · Time ' + fmtTime(raceTime) +
+    el('ag-res-sub').innerHTML = 'Level ' + level + ' (' + themeFor(level).name + ') · Time ' + fmtTime(raceTime) +
       ' · 💍 ' + ringsHit + ' rings' +
       '<br>💰 <b>+' + earned + ' points</b> (total ' + store.points + ')' +
-      (unlocked ? '<br>🔓 <b>Level ' + store.level + ' unlocked!</b>' : (store.level >= LEVELS && pos <= 3 ? '<br>👑 You conquered all 10 skies — legend!' : '')) +
+      (unlocked ? '<br>🔓 <b>Level ' + store.level + ' unlocked!</b>' : (store.level >= LEVELS && pos <= 3 ? '<br>👑 You conquered all ' + LEVELS + ' skies — legend!' : '')) +
       '<br>📖 Aim high, but fly calm — panic crashes, patience lands.';
     el('ag-next').style.display = unlocked ? '' : 'none';
     show(resEl);
@@ -1280,7 +1291,7 @@
         var b = document.createElement('button');
         b.className = 'btn lvl-btn' + (lv <= store.level ? '' : ' ghost');
         b.disabled = lv > store.level;
-        b.innerHTML = (lv <= store.level ? '☁️' : '🔒') + ' Level ' + lv + '<small>' + THEMES[lv - 1].name + '</small>';
+        b.innerHTML = (lv <= store.level ? '☁️' : '🔒') + ' Level ' + lv + '<small>' + themeFor(lv).name + '</small>';
         b.addEventListener('click', function () { startRace(lv, 'career'); });
         wrap.appendChild(b);
       })(lv);
