@@ -255,7 +255,7 @@ function negamax(st, depth, alpha, beta, colorSign) {
   }
   return best;
 }
-function aiPick(st, depth, blunder) {
+function aiPick(st, depth, blunderP) {
   nodes = 0;
   var ms = legalMoves(st, st.turn);
   if (!ms.length) return null;
@@ -272,8 +272,8 @@ function aiPick(st, depth, blunder) {
     scored.push({ m: ms[i], s: sc });
   }
   scored.sort(function (a, b) { return b.s - a.s; });
-  if (blunder) { // easy: sometimes pick a weaker move
-    if (Math.random() < 0.35) return scored[Math.floor(Math.random() * Math.min(scored.length, 6))].m;
+  if (blunderP > 0) { // weaker play: sometimes pick a random top-6 move
+    if (Math.random() < blunderP) return scored[Math.floor(Math.random() * Math.min(scored.length, 6))].m;
   }
   return scored[0].m;
 }
@@ -281,7 +281,60 @@ function aiPick(st, depth, blunder) {
 /* ---------- UI ---------- */
 var GLYPH = { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' };
 var st = G();
-var human = 'w', depth = 2, blunder = false, over = false;
+var human = 'w', depth = 2, blunderP = 0, over = false;
+
+// ---- 100-level campaign: the opponent climbs from blunder-prone beginner
+// (depth 1, ~54% loose moves) to a clean depth-3 player by L75+.
+// Win the game to clear the level. Stars by game length: <=25 moves = 3.
+var MAX_LEVEL = 100;
+var camp = 1, campUnlocked = 1, campStars = {}, mode = 'free', campaignGame = false;
+try {
+  camp = parseInt(localStorage.getItem('wa_ch_current') || '1', 10) || 1;
+  campUnlocked = parseInt(localStorage.getItem('wa_ch_unlocked') || '1', 10) || 1;
+  campStars = JSON.parse(localStorage.getItem('wa_ch_stars') || '{}') || {};
+} catch (e) {}
+if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+function saveCampaign() {
+  try {
+    localStorage.setItem('wa_ch_current', String(camp));
+    localStorage.setItem('wa_ch_unlocked', String(campUnlocked));
+    localStorage.setItem('wa_ch_stars', JSON.stringify(campStars));
+  } catch (e) {}
+}
+function depthFor(l) { return l < 35 ? 1 : l < 75 ? 2 : 3; }
+function blunderFor(l) { return Math.max(0, 0.55 - l * 0.006); }
+function eloFor(l) { return 400 + l * 14; }
+function tierName(l) { return l <= 15 ? 'Club beginner' : l <= 35 ? 'Casual player' : l <= 55 ? 'Club regular' : l <= 75 ? 'Strong amateur' : l <= 90 ? 'Expert' : 'Master'; }
+function buildMap() {
+  var map = document.getElementById('ch-map'); if (!map) return;
+  map.innerHTML = '';
+  for (var l = 1; l <= MAX_LEVEL; l++) {
+    (function (l) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      if (campStars[l] != null && l !== camp) { b.className = 'ch-lvl ch-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+      else if (l === camp) { b.className = 'ch-lvl ch-cur'; b.textContent = l; }
+      else if (l <= campUnlocked) { b.className = 'ch-lvl'; b.textContent = l; }
+      else { b.className = 'ch-lvl ch-lock'; b.textContent = '🔒'; }
+      b.disabled = l > campUnlocked;
+      b.setAttribute('aria-label', 'Level ' + l);
+      b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; saveCampaign(); setMode('campaign'); } });
+      map.appendChild(b);
+    })(l);
+  }
+  var ln = document.getElementById('c-level-now'); if (ln) ln.textContent = camp;
+  var sl = document.getElementById('c-setup-level'); if (sl) sl.textContent = camp;
+  var pn = document.getElementById('c-progress-note');
+  if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · opponent ≈ ' + eloFor(camp) + ' Elo · ' + dc + ' of 100 levels completed'; }
+}
+function setMode(m) {
+  mode = m;
+  var bf = document.getElementById('c-mode-free'), bc = document.getElementById('c-mode-campaign');
+  if (bf) bf.classList.toggle('ghost', mode !== 'free');
+  if (bc) bc.classList.toggle('ghost', mode !== 'campaign');
+  buildMap();
+}
 var sel = -1, selMoves = [];
 var lastFrom = -1, lastTo = -1; // render-only: last-move wash + slide fx
 var moveLog = [];
@@ -445,8 +498,26 @@ function checkEnd() {
   else if ((st.reps[key] || 0) >= 3) msg = 'Draw — the same position three times.';
   if (msg) {
     over = true;
-    document.getElementById('end-title').textContent = msg.indexOf('you win') !== -1 ? '🏆 You win!' : 'Game over';
-    document.getElementById('end-msg').textContent = msg;
+    var won = msg.indexOf('you win') !== -1;
+    document.getElementById('end-title').textContent = won ? '🏆 You win!' : 'Game over';
+    var endMsg = msg;
+    var nextBtn = document.getElementById('end-next');
+    if (nextBtn) nextBtn.classList.add('hidden');
+    if (campaignGame) {
+      if (won) {
+        var fm = Math.ceil(moveLog.length / 2);
+        var stars = fm <= 25 ? 3 : fm <= 40 ? 2 : 1;
+        if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+        if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+        saveCampaign();
+        endMsg += ' 🏆 Level ' + camp + ' cleared — ' + stars + ' stars!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' unlocked.' : ' You beat all 100 levels!');
+        if (nextBtn && camp < MAX_LEVEL) nextBtn.classList.remove('hidden');
+        buildMap();
+      } else {
+        endMsg += ' Win the game to clear Level ' + camp + ' — try again!';
+      }
+    }
+    document.getElementById('end-msg').textContent = endMsg;
     endOverlay.classList.add('show');
   }
 }
@@ -483,22 +554,40 @@ function askPromo(mv) {
 
 function aiMove() {
   if (over) return;
-  var m = aiPick(st, depth, blunder);
+  var m = aiPick(st, depth, blunderP);
   if (m) doMove(m);
 }
 
-document.getElementById('start-btn').addEventListener('click', function () {
+function startGame() {
   var hc = document.querySelector('input[name="color"]:checked').value;
   human = hc === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : hc;
-  var df = document.querySelector('input[name="diff"]:checked').value;
-  depth = df === 'easy' ? 1 : df === 'hard' ? 3 : 2;
-  blunder = df === 'easy';
+  campaignGame = mode === 'campaign';
+  if (campaignGame) {
+    depth = depthFor(camp);
+    blunderP = blunderFor(camp);
+  } else {
+    var df = document.querySelector('input[name="diff"]:checked').value;
+    depth = df === 'easy' ? 1 : df === 'hard' ? 3 : 2;
+    blunderP = df === 'easy' ? 0.35 : 0;
+  }
   st = G(); st.reps[posKey(st)] = 1;
   over = false; sel = -1; selMoves = []; moveLog = [];
   overlay.classList.remove('show');
+  endOverlay.classList.remove('show');
   render();
   if (st.turn !== human) setTimeout(aiMove, 600);
+}
+document.getElementById('start-btn').addEventListener('click', startGame);
+var endNextBtn = document.getElementById('end-next');
+if (endNextBtn) endNextBtn.addEventListener('click', function () {
+  if (camp < MAX_LEVEL) { camp++; saveCampaign(); buildMap(); }
+  startGame();
 });
+var modeFreeBtn = document.getElementById('c-mode-free');
+var modeCampBtn = document.getElementById('c-mode-campaign');
+if (modeFreeBtn) modeFreeBtn.addEventListener('click', function () { setMode('free'); });
+if (modeCampBtn) modeCampBtn.addEventListener('click', function () { setMode('campaign'); });
+buildMap();
 document.getElementById('new-btn').addEventListener('click', function () {
   endOverlay.classList.remove('show');
   overlay.classList.add('show');
