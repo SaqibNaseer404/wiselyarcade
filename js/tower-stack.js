@@ -41,6 +41,50 @@
   var best = 0;
   try { best = parseInt(localStorage.getItem('towerStackBest') || '0', 10) || 0; } catch (e) {}
 
+  // ---- 100-level campaign: reach the height target to clear the level.
+  // Higher campaign levels start faster and windier. Clear = 1 star,
+  // +5 blocks past target = 2 stars, +10 past target = 3 stars.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, clearedThisRun = false, pendingNext = false;
+  try {
+    camp = parseInt(localStorage.getItem('wa_ts_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_ts_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_ts_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_ts_current', String(camp));
+      localStorage.setItem('wa_ts_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_ts_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function targetFor(l) { return 8 + Math.floor((l - 1) / 4); }
+  function tierName(l) { return l <= 15 ? 'Gentle heights' : l <= 35 ? 'Rising fast' : l <= 55 ? 'Into the wind' : l <= 75 ? 'Sky builder' : l <= 90 ? 'Cloud heights' : 'Star tower master'; }
+  function buildMap() {
+    var map = document.getElementById('t-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'ts-lvl ts-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'ts-lvl ts-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'ts-lvl'; b.textContent = l; }
+        else { b.className = 'ts-lvl ts-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; saveCampaign(); reset(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('t-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('t-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · ' + dc + ' of 100 levels completed'; }
+    var tg = document.getElementById('t-target'); if (tg) tg.textContent = targetFor(camp);
+  }
+
   var camY = 0;        // camera offset (world -> screen)
   var time = 0;
   var lastT = 0;
@@ -56,17 +100,19 @@
     ['#bfe3ff', '#5ea9ee'], ['#c9f2d8', '#58bd82'], ['#fff3b0', '#e8b93e']
   ];
 
-  function speed() { return 200 + (level - 1) * 48; }
-  function windAmp() { return level >= 3 ? Math.min(46, (level - 2) * 9) : 0; }
+  function speed() { return 200 + (level - 1) * 48 + (camp - 1) * 2; }
+  function windAmp() { var eff = level + Math.floor((camp - 1) / 15); return eff >= 3 ? Math.min(52, (eff - 2) * 9) : 0; }
 
   function reset() {
     blocks = [{ x: W / 2, w: BASE_W }];
     debris = []; missed = null; popups = [];
     placed = 0; level = 1; combo = 0; camY = 0;
+    clearedThisRun = false; pendingNext = false;
     state = 'ready';
     overlay.classList.add('hidden');
     spawnMover();
     updateStats();
+    buildMap();
     draw(0);
   }
 
@@ -131,6 +177,10 @@
       best = placed;
       try { localStorage.setItem('towerStackBest', String(best)); } catch (e) {}
     }
+    if (!clearedThisRun && placed >= targetFor(camp)) {
+      clearedThisRun = true;
+      popups.push({ text: '🎉 Level ' + camp + ' cleared! Keep stacking for stars!', y: H * 0.3, life: 2, color: '#0EA5A4' });
+    }
     updateStats();
     spawnMover();
   }
@@ -153,7 +203,25 @@
   function finishGame() {
     var msg = 'You stacked ' + placed + (placed === 1 ? ' block' : ' blocks') + ' and reached level ' + level + '.';
     if (placed >= best && placed > 0) msg += ' That\'s your best tower yet!';
+    var h2 = overlay.querySelector('h2');
+    var againBtn = document.getElementById('t-again');
+    if (clearedThisRun) {
+      var stars = 1 + (placed >= targetFor(camp) + 5 ? 1 : 0) + (placed >= targetFor(camp) + 10 ? 1 : 0);
+      if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+      if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+      pendingNext = camp < MAX_LEVEL;
+      saveCampaign();
+      if (h2) h2.textContent = '🏆 Level ' + camp + ' Complete!';
+      msg += ' Level ' + camp + ' cleared with ' + stars + ' of 3 stars!' + (camp < MAX_LEVEL ? ' Level ' + (camp + 1) + ' is unlocked.' : ' You built through all 100 levels!');
+      if (againBtn) againBtn.textContent = camp < MAX_LEVEL ? 'Next Level →' : 'Build again';
+    } else {
+      pendingNext = false;
+      if (h2) h2.textContent = 'Tower toppled!';
+      msg += ' Level ' + camp + ' needs ' + targetFor(camp) + ' blocks — you reached ' + placed + '. Try again!';
+      if (againBtn) againBtn.textContent = 'Retry Level ' + camp;
+    }
     overStats.textContent = msg;
+    buildMap();
     setTimeout(function () { overlay.classList.remove('hidden'); }, 700);
     updateStats();
   }
@@ -788,7 +856,10 @@
   });
 
   document.getElementById('t-restart').addEventListener('click', reset);
-  document.getElementById('t-again').addEventListener('click', reset);
+  document.getElementById('t-again').addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    reset();
+  });
 
   updateStats();
   reset();
