@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Gem Grove Quest — Free Online Match-3 Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/gem-grove-quest">
+<meta name="description" content="Play Gem Grove Quest free online — a Candy Crush-style match-3 puzzle adventure — swap glossy gems, chain cascades and grow line and star gems. 100 levels, no download, no sign-up. Family-friendly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  #ggrove{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+  .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
+  #gg-status{
+    text-align:center;font-weight:800;color:#0b5563;background:rgba(14,165,164,.12);
+    border:1px solid rgba(14,165,164,.35);border-radius:999px;
+    padding:7px 14px;margin:10px auto 14px;max-width:640px;font-size:.95rem;
+  }
+  .overlay .btn{margin:4px}
+  #gg-picker-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+    max-height:300px;overflow-y:auto;margin:12px 0;padding:2px;
+  }
+  .lvl-btn{
+    background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;padding:7px 2px;font-family:Nunito,sans-serif;font-weight:900;font-size:.92rem;cursor:pointer;
+  }
+  .lvl-btn span{display:block;color:#ffc85e;font-size:.68rem;letter-spacing:.12em}
+  .lvl-btn.locked{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Gem Grove Quest</h1>
+    <p>A sparkling match-3 adventure in a magical grove — swap glossy gems, set off chain cascades, and grow line gems and star gems. One good match lights the whole grove.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Score</span><div id="gg-score">0</div></div>
+        <div class="stat"><span>Level</span><div id="gg-level">—</div></div>
+        <div class="stat"><span>Best</span><div id="gg-best">—</div></div>
+      </div>
+      <div id="gg-status">Welcome to the grove — pick a level to start matching.</div>
+      <div class="stage">
+        <canvas id="ggrove" width="440" height="440" aria-label="Gem Grove Quest game: swap neighbouring gems on the 8 by 8 board to match three or more"></canvas>
+        <div class="overlay hidden" id="gg-over">
+          <h2 id="gg-over-title">Welcome to the grove!</h2>
+          <p id="gg-over-stats"></p>
+          <button class="btn" id="gg-ov-main">▶ Level 1</button>
+          <button class="btn ghost" id="gg-ov-alt">All levels</button>
+        </div>
+        <div class="overlay hidden" id="gg-picker">
+          <h2>Pick a level</h2>
+          <div id="gg-picker-grid"></div>
+          <button class="btn ghost" id="gg-picker-close">Close</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="gg-restart">Restart</button>
+        <button class="btn ghost" id="gg-levels">All levels</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>The grove is full of glossy gems — ruby circles, sapphire diamonds, aqua teardrops and more. Your job: swap, match, and chain your way to each level's target before your moves run out.</p>
+      <ol>
+        <li><strong>Swap two neighbouring gems</strong> — tap one, then tap the gem next to it, or drag one into the other. The swap only counts if it makes a <strong>match of 3 or more</strong>; otherwise the gems swap back. Every good swap costs 1 move.</li>
+        <li>Matched gems pop, gems above <strong>fall into the gaps</strong>, and fresh gems rain in from the top. If the fall makes another match, the <strong>cascade multiplies your points</strong> — ×2, ×3 and beyond.</li>
+        <li>Match <strong>4 in a row</strong> to grow a <strong>line gem</strong>: match it later and it blasts its whole row or column. Match <strong>5 in a row</strong> to grow a <strong>star gem</strong>: swap it with any gem and every gem of that colour vanishes.</li>
+        <li>There are <strong>100 levels</strong>. Each level sets a <strong>score target</strong> and a <strong>move limit</strong>, and both get tougher as you climb — new gem types join the grove at levels 26 and 61. The grove itself changes season every 10 levels.</li>
+        <li><strong>Stars:</strong> reaching the target earns 1 star, scoring <strong>120% of the target</strong> earns 2 stars, and <strong>150%</strong> earns 3 stars. Run out of moves below the target and you simply try the level again — no dead ends, ever.</li>
+        <li>If the board ever runs out of possible matches, the grove <strong>reshuffles the gems for you</strong>, so a level can always be finished. Your progress and stars save on your device.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse:</strong> click a gem, then click a neighbour to swap — or drag one gem into its neighbour.</li>
+        <li><strong>Touch:</strong> tap two neighbouring gems, or drag with your finger.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Small moves add up — one good match sets off a chain.</h2>
+      <p>Nobody clears a level in one giant swap. In Gem Grove Quest you win the way the grove grows: one small, well-chosen move at a time — and every so often, one good move sets off a whole cascade you never saw coming.</p>
+      <p>Life works the same way. One good habit triggers the next: the short walk leads to the better sleep, the better sleep leads to the clearer morning. Don't wait for a huge change. Make the small move in front of you — and let the chain begin.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/gem-grove-quest.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
