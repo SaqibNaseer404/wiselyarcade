@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Peak Dash — Free Online Platform Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/peak-dash">
+<meta name="description" content="Play Peak Dash free online — a precision platform game. Run and jump across mountain peaks, dodge spikes, ride moving platforms, bounce on springs, collect coins and plant the summit flag. 100 levels in 10 worlds, no download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  #peakdash{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;background:#8ec9e8}
+  .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
+  #pd-status{
+    text-align:center;font-weight:800;color:#0b5563;background:rgba(14,165,164,.12);
+    border:1px solid rgba(14,165,164,.35);border-radius:999px;
+    padding:7px 14px;margin:10px auto 14px;max-width:640px;font-size:.95rem;
+  }
+  .overlay .btn{margin:4px}
+  #pd-picker-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+    max-height:300px;overflow-y:auto;margin:12px 0;padding:2px;
+  }
+  .lvl-btn{
+    background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;padding:7px 2px;font-family:Nunito,sans-serif;font-weight:900;font-size:.92rem;cursor:pointer;
+  }
+  .lvl-btn span{display:block;color:#ffc85e;font-size:.68rem;letter-spacing:.12em}
+  .lvl-btn.locked{opacity:.35;cursor:not-allowed}
+  /* on-screen touch controls: shown on touch devices, harmless with a mouse */
+  #pd-touch{
+    display:none;justify-content:space-between;align-items:center;
+    margin-top:12px;gap:10px;user-select:none;-webkit-user-select:none;
+  }
+  #pd-touch .cluster{display:flex;gap:10px}
+  .tbtn{
+    width:64px;height:64px;border-radius:50%;border:2px solid rgba(245,166,35,.55);
+    background:rgba(13,20,32,.82);color:#ffc85e;font-size:1.5rem;font-weight:900;
+    touch-action:none;cursor:pointer;font-family:Nunito,sans-serif;
+  }
+  .tbtn.on{background:#f5a623;color:#231600}
+  .tbtn.jump{width:76px;height:76px;background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;border-color:#9a6204}
+  @media (pointer:coarse){ #pd-touch{display:flex} }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Peak Dash</h1>
+    <p>A tiny climber, a huge mountain, and one pink flag waiting at the top. Run, jump, ride and bounce your way up — every fall teaches you the timing for the next try.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Coins</span><div id="pd-coins">—</div></div>
+        <div class="stat"><span>Level</span><div id="pd-level">—</div></div>
+        <div class="stat"><span>Hearts</span><div id="pd-hearts">♥♥♥</div></div>
+      </div>
+      <div id="pd-status">Pick a level to start climbing.</div>
+      <div class="stage">
+        <canvas id="peakdash" width="880" height="480" aria-label="Peak Dash game: run with the arrow keys or A and D, jump with Space, W or the up arrow, and reach the summit flag"></canvas>
+        <div class="overlay hidden" id="pd-over">
+          <h2 id="pd-over-title">Ready to climb?</h2>
+          <p id="pd-over-stats"></p>
+          <button class="btn" id="pd-ov-main">▶ Level 1</button>
+          <button class="btn ghost" id="pd-ov-alt">All levels</button>
+        </div>
+        <div class="overlay hidden" id="pd-picker">
+          <h2>Pick a level</h2>
+          <div id="pd-picker-grid"></div>
+          <button class="btn ghost" id="pd-picker-close">Close</button>
+        </div>
+      </div>
+      <div id="pd-touch" aria-hidden="true">
+        <div class="cluster">
+          <button class="tbtn" id="pd-t-left">◀</button>
+          <button class="tbtn" id="pd-t-right">▶</button>
+        </div>
+        <button class="tbtn jump" id="pd-t-jump">⬆</button>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="pd-restart">Restart</button>
+        <button class="btn ghost" id="pd-levels">All levels</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li><strong>Run and jump</strong> across the mountain platforms and <strong>reach the pink summit flag</strong> to finish the level.</li>
+        <li><strong>Coins</strong> sparkle along the way — grab as many as you can. They are a bonus, never a requirement.</li>
+        <li><strong>Spikes and long falls</strong> cost you <strong>1 heart</strong>. You pop back to the last safe ground you stood on. Lose all <strong>3 hearts</strong> and the level ends — just try again.</li>
+        <li><strong>New tricks arrive one at a time:</strong> spike patches first, then <strong>moving platforms</strong> that ferry you over wide pits, then <strong>springs</strong> that bounce you to high ledges.</li>
+        <li><strong>Stars:</strong> finish with no falls for <strong>3 stars</strong>, one fall for <strong>2 stars</strong>, two falls for <strong>1 star</strong>. (A third fall ends the level, so a finished level always earns at least one star.)</li>
+        <li>There are <strong>100 levels</strong> in <strong>10 worlds</strong>, from Sunny Slopes to The Grand Peak. Jumps get longer, climbs get higher and pits get wider as you rise — and every level is test-played by a robot climber before it ships, so every summit can always be reached. Your progress and stars save on your device.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Keyboard:</strong> run with <strong>← / →</strong> or <strong>A / D</strong>. Jump with <strong>Space</strong>, <strong>W</strong> or <strong>↑</strong>.</li>
+        <li><strong>Touch:</strong> on phones and tablets, use the on-screen <strong>◀ ▶</strong> buttons to run and the big <strong>⬆</strong> button to jump.</li>
+        <li><strong>Friendly jumping:</strong> the jump is forgiving — press a moment too early or a moment too late at a ledge edge and the climber still jumps. Run at a gap at full speed and leap from the very edge for your longest jumps.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Falling is information.</h2>
+      <p>Every failed jump teaches you the timing: where the edge really is, how long to run before you leap, when to wait for the platform. A fall is not the opposite of progress — it is how the mountain explains itself. Mastery is just failing smarter, faster, until the failures run out.</p>
+      <p>It works the same way off the mountain. A missed answer in class, a cake that flops, a song that falls apart — each one is data with a bruise on it. The climbers who reach summits are not the ones who never fall. They are the ones who read every fall and adjust the next jump.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for teens</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/peak-dash.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
