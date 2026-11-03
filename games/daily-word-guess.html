@@ -180,6 +180,20 @@
       <p>Life works exactly the same way. The attempt that "fails" is quietly teaching you where the answer isn't — and narrowing down where it is. The only true loss is the guess you never make. So keep guessing, keep learning, and never give up: the word is always findable, one honest try at a time.</p>
     </div>
 
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Daily Word Guess?</h3>
+      <p>One hidden 5-letter word is set each day, the same word for everyone, and you have 6 tries to guess it. After each guess the tiles flip: green means the right letter in the right place, gold means the right letter in the wrong place, and grey means the letter is not in the word.</p>
+      <h3>What is the streak?</h3>
+      <p>Win days in a row and you build a winning streak. Come back tomorrow for a new word and keep the streak alive.</p>
+      <h3>What is Level Climb mode?</h3>
+      <p>Level Climb has 100 levels that grow with you — 4-letter words at first, then 5, 6 and finally 7-letter words. Finish a word quickly to earn up to 3 stars per level.</p>
+      <h3>Can a letter appear twice in the word?</h3>
+      <p>Yes, a letter can appear twice, so watch the colours carefully. Any real word of the right length counts as a guess.</p>
+      <h3>What does Daily Word Guess teach?</h3>
+      <p>It teaches you to never give up, because every wrong guess teaches you something. A grey letter crosses out a dead end, and a gold letter narrows the search.</p>
+    </div>
+
     <div class="center" style="margin-bottom:10px">
       <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
     </div>
@@ -205,6 +219,54 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Daily Word Guess?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "One hidden 5-letter word is set each day, the same word for everyone, and you have 6 tries to guess it. After each guess the tiles flip: green means the right letter in the right place, gold means the right letter in the wrong place, and grey means the letter is not in the word."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the streak?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Win days in a row and you build a winning streak. Come back tomorrow for a new word and keep the streak alive."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is Level Climb mode?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Level Climb has 100 levels that grow with you — 4-letter words at first, then 5, 6 and finally 7-letter words. Finish a word quickly to earn up to 3 stars per level."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can a letter appear twice in the word?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, a letter can appear twice, so watch the colours carefully. Any real word of the right length counts as a guess."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Daily Word Guess teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches you to never give up, because every wrong guess teaches you something. A grey letter crosses out a dead end, and a gold letter narrows the search."
+      }
+    }
+  ]
 }
 </script>
 </body>
