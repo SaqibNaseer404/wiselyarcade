@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Arrowway Escape — Free Online Arrow Puzzle Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/arrowway-escape">
+<meta name="description" content="Play Arrowway Escape free online — an arrow escape puzzle: tap an arrow to slide it off the board, but only when its path to the edge is clear. Blocked taps cost a heart. 100 levels, no download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  #arrowway{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+  .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
+  #aw-status{
+    text-align:center;font-weight:800;color:#0b5563;background:rgba(14,165,164,.12);
+    border:1px solid rgba(14,165,164,.35);border-radius:999px;
+    padding:7px 14px;margin:10px auto 14px;max-width:640px;font-size:.95rem;
+  }
+  .overlay .btn{margin:4px}
+  #aw-picker-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+    max-height:300px;overflow-y:auto;margin:12px 0;padding:2px;
+  }
+  .lvl-btn{
+    background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;padding:7px 2px;font-family:Nunito,sans-serif;font-weight:900;font-size:.92rem;cursor:pointer;
+  }
+  .lvl-btn span{display:block;color:#ffc85e;font-size:.68rem;letter-spacing:.12em}
+  .lvl-btn.locked{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Arrowway Escape</h1>
+    <p>A tray full of arrows, every one pointing at its own way out — but most of them are blocked by the others. Tap the right ones in the right order and the whole tray empties, one smooth slide at a time.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Arrows left</span><div id="aw-left">—</div></div>
+        <div class="stat"><span>Level</span><div id="aw-level">—</div></div>
+        <div class="stat"><span>Hearts</span><div id="aw-hearts">♥♥♥</div></div>
+      </div>
+      <div id="aw-status">Pick a level to start escaping.</div>
+      <div class="stage">
+        <canvas id="arrowway" width="440" height="440" aria-label="Arrowway Escape game: tap an arrow whose path to the edge is clear to slide it off the board"></canvas>
+        <div class="overlay hidden" id="aw-over">
+          <h2 id="aw-over-title">Ready to escape?</h2>
+          <p id="aw-over-stats"></p>
+          <button class="btn" id="aw-ov-main">▶ Level 1</button>
+          <button class="btn ghost" id="aw-ov-alt">All levels</button>
+        </div>
+        <div class="overlay hidden" id="aw-picker">
+          <h2>Pick a level</h2>
+          <div id="aw-picker-grid"></div>
+          <button class="btn ghost" id="aw-picker-close">Close</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="aw-restart">Restart</button>
+        <button class="btn ghost" id="aw-levels">All levels</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>Every tile on the tray is an arrow pointing up, down, left or right. An arrow can only leave the tray by sliding straight in the direction it points — and only when nothing stands between it and the edge.</p>
+      <ol>
+        <li><strong>Tap an arrow.</strong> If every square between it and the edge is empty, it slides off the tray and is gone. If another arrow — or a steel block — is in the way, it bumps, stays put… and costs you a heart.</li>
+        <li>You get <strong>3 hearts</strong> per level. Three blocked taps and the level is over — so look before you tap.</li>
+        <li><strong>Clear every arrow</strong> off the tray to finish the level. Each escape frees the arrows that were trapped behind it, so the right order unlocks the whole board.</li>
+        <li><strong>Stars:</strong> clear a level with no mistakes for <strong>3 stars</strong>, one mistake for <strong>2 stars</strong>, two mistakes for <strong>1 star</strong>.</li>
+        <li>There are <strong>100 levels</strong>. The tray grows from a friendly 4×4 to a packed 10×10, the arrows pack in tighter, and from level 51 on, riveted steel blocks join the tray as fixed obstacles. Your progress and stars save on your device.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse:</strong> click an arrow to try to free it.</li>
+        <li><strong>Touch:</strong> tap an arrow. The tile colours match their direction — amber up, blue right, green down, pink left — so you can read the tray at a glance.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Order matters.</h2>
+      <p>Free the blocked pieces — and problems — in the right sequence instead of forcing the first one you see. In Arrowway Escape, the arrow you want most is usually trapped behind two others; the win comes from finding the one that can move <em>now</em> and letting each escape unlock the next.</p>
+      <p>Life works the same way. When everything feels stuck, don't push harder on the blocked piece — look for the one small thing that can move first, and let the path open up.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/arrowway-escape.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
