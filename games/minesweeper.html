@@ -114,6 +114,20 @@
       <p>Life hands you the same board every day. Rushed choices — the angry reply, the skipped homework, the impulse buy — are clicks on unflagged tiles. Pause, count your numbers, and make the move you can defend. Careful beats fast, every single time.</p>
     </div>
 
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Minesweeper?</h3>
+      <p>Click or tap a tile to reveal it. The number on a tile tells you how many mines are touching it — use the numbers to work out where the mines hide, and reveal every safe tile to clear the level.</p>
+      <h3>Can my first click ever hit a mine?</h3>
+      <p>No. The first click is always safe, so you can start every level with a brave click.</p>
+      <h3>How do I mark a tile where I think a mine is hiding?</h3>
+      <p>Long-press the tile on a touch screen, or right-click with a mouse, to plant a flag. You can also switch on Flag mode and flag tiles with simple taps.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels. The board and the mine count grow as you climb, from 9×9 with 10 mines on level 1 to 20×20 with 80 mines on level 100.</p>
+      <h3>What does Minesweeper teach?</h3>
+      <p>It teaches you to think before you act. The numbers give you all the information you need, but only if you slow down and read them — careful beats fast, every time.</p>
+    </div>
+
     <div class="center" style="margin-bottom:10px">
       <a class="btn ghost" href="../adults">← More games for adults</a>
     </div>
@@ -139,6 +153,54 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Minesweeper?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Click or tap a tile to reveal it. The number on a tile tells you how many mines are touching it — use the numbers to work out where the mines hide, and reveal every safe tile to clear the level."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can my first click ever hit a mine?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The first click is always safe, so you can start every level with a brave click."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I mark a tile where I think a mine is hiding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Long-press the tile on a touch screen, or right-click with a mouse, to plant a flag. You can also switch on Flag mode and flag tiles with simple taps."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels. The board and the mine count grow as you climb, from 9×9 with 10 mines on level 1 to 20×20 with 80 mines on level 100."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Minesweeper teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches you to think before you act. The numbers give you all the information you need, but only if you slow down and read them — careful beats fast, every time."
+      }
+    }
+  ]
 }
 </script>
 </body>
