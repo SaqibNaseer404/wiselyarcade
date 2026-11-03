@@ -18,6 +18,8 @@
       lesson: 'Real strength is self-control — stay calm and strike with focus.' },
     { slug: 'block-bloom', name: 'Block Bloom', ages: ['teens'], seed: 48,
       lesson: 'Plan ahead — leave room for the future.' },
+    { slug: 'gem-grove-quest', name: 'Gem Grove Quest', ages: ['teens'], seed: 49,
+      lesson: 'Small moves add up — one good match sets off a chain.' },
     { slug: 'missing-letters', name: 'Missing Letters', ages: ['kids'], seed: 28,
       lesson: 'Reading grows one letter at a time.' },
     { slug: 'math-quest', name: 'Math Quest', ages: ['kids', 'teens'], seed: 29,
