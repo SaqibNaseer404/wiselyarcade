@@ -127,6 +127,20 @@
       <p>Big problems in life work the same way. Panic sees the whole mountain; logic climbs one step at a time. Stay calm, break it down, and trust the process — logic beats panic.</p>
     </div>
 
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Daily Sudoku?</h3>
+      <p>Fill the 9×9 grid so every row, every column and every 3×3 box contains the numbers 1 to 9 exactly once. Tap a cell, then tap a number to place it.</p>
+      <h3>Is there really a new puzzle every day?</h3>
+      <p>Yes, a brand-new Sudoku puzzle appears every day. There is also a Levels mode with a 100-level climb, where each level's puzzle is generated fresh and always has exactly one solution.</p>
+      <h3>What happens if I enter a wrong number?</h3>
+      <p>Wrong entries count as mistakes, and three wrong entries end the puzzle. In Levels mode, finishing with no mistakes earns 3 stars.</p>
+      <h3>What are Notes for?</h3>
+      <p>Notes let you pencil in the numbers a tricky cell might be, so you can work through the logic without guessing. Tap the Notes button, or press N, to switch them on.</p>
+      <h3>What does Daily Sudoku teach?</h3>
+      <p>It teaches that big problems break into small steps. You never solve the whole grid at once — you find one certain number, then the next.</p>
+    </div>
+
     <div class="center" style="margin-bottom:10px">
       <a class="btn ghost" href="../adults">← More games for ages 18+</a>
     </div>
@@ -169,6 +183,54 @@
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Daily Sudoku?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fill the 9×9 grid so every row, every column and every 3×3 box contains the numbers 1 to 9 exactly once. Tap a cell, then tap a number to place it."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is there really a new puzzle every day?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, a brand-new Sudoku puzzle appears every day. There is also a Levels mode with a 100-level climb, where each level's puzzle is generated fresh and always has exactly one solution."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I enter a wrong number?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Wrong entries count as mistakes, and three wrong entries end the puzzle. In Levels mode, finishing with no mistakes earns 3 stars."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are Notes for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Notes let you pencil in the numbers a tricky cell might be, so you can work through the logic without guessing. Tap the Notes button, or press N, to switch them on."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Daily Sudoku teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that big problems break into small steps. You never solve the whole grid at once — you find one certain number, then the next."
+      }
+    }
+  ]
 }
 </script>
 </body>
