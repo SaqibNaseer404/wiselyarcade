@@ -22,6 +22,8 @@
       lesson: 'Small moves add up — one good match sets off a chain.' },
     { slug: 'arrowway-escape', name: 'Arrowway Escape', ages: ['teens'], seed: 50,
       lesson: 'Order matters — free the blocked pieces in the right sequence.' },
+    { slug: 'crown-logic', name: 'Crown Logic', ages: ['adults'], seed: 51,
+      lesson: 'Every constraint is a clue — limits don\'t block you, they quietly tell you where the answer must be.' },
     { slug: 'missing-letters', name: 'Missing Letters', ages: ['kids'], seed: 28,
       lesson: 'Reading grows one letter at a time.' },
     { slug: 'math-quest', name: 'Math Quest', ages: ['kids', 'teens'], seed: 29,
