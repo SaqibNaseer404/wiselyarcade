@@ -20,6 +20,8 @@
       lesson: 'Plan ahead — leave room for the future.' },
     { slug: 'gem-grove-quest', name: 'Gem Grove Quest', ages: ['teens'], seed: 49,
       lesson: 'Small moves add up — one good match sets off a chain.' },
+    { slug: 'arrowway-escape', name: 'Arrowway Escape', ages: ['teens'], seed: 50,
+      lesson: 'Order matters — free the blocked pieces in the right sequence.' },
     { slug: 'missing-letters', name: 'Missing Letters', ages: ['kids'], seed: 28,
       lesson: 'Reading grows one letter at a time.' },
     { slug: 'math-quest', name: 'Math Quest', ages: ['kids', 'teens'], seed: 29,
