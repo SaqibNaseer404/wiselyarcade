@@ -258,6 +258,20 @@
       <p>So a low score today means nothing except "you haven't practiced yet." Play again tomorrow, and the meter moves. Brains grow the same way everything else grows: one small effort, repeated.</p>
     </div>
 
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Mind Meter?</h3>
+      <p>Each level asks 12 puzzles drawn from number logic, visual patterns, word reasoning and classic maths riddles, and every question gives you 30 seconds. Pick one of the four answers — faster answers earn bigger time bonuses.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels, and each level asks its own 12 questions. Clear a level with 8 or more correct answers — 10 or more earns 2 stars, and a perfect 12 earns 3 stars.</p>
+      <h3>What happens when time runs out on a question?</h3>
+      <p>The question is gone — no points, and your streak resets. Chain correct answers into a streak to add bonus points, up to 100 extra points per question.</p>
+      <h3>What do I get at the end of a level?</h3>
+      <p>You get an estimated IQ score on an 85 to 145 scale and a rank, from Curious Mind up to Certified Genius. It is an estimate from a puzzle game — beat your best next time.</p>
+      <h3>What does Mind Meter teach?</h3>
+      <p>It teaches that a sharp mind is built, not born. Every question you solve is a rep for your brain, the same way every push-up is a rep for your muscles.</p>
+    </div>
+
     <div class="center" style="margin-bottom:10px">
       <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
       <a class="btn ghost" href="../adults">← More games for ages 18+</a>
@@ -403,6 +417,54 @@ document.addEventListener('keydown', function (e) {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Mind Meter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each level asks 12 puzzles drawn from number logic, visual patterns, word reasoning and classic maths riddles, and every question gives you 30 seconds. Pick one of the four answers — faster answers earn bigger time bonuses."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels, and each level asks its own 12 questions. Clear a level with 8 or more correct answers — 10 or more earns 2 stars, and a perfect 12 earns 3 stars."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens when time runs out on a question?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The question is gone — no points, and your streak resets. Chain correct answers into a streak to add bonus points, up to 100 extra points per question."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What do I get at the end of a level?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You get an estimated IQ score on an 85 to 145 scale and a rank, from Curious Mind up to Certified Genius. It is an estimate from a puzzle game — beat your best next time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Mind Meter teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that a sharp mind is built, not born. Every question you solve is a rep for your brain, the same way every push-up is a rep for your muscles."
+      }
+    }
+  ]
 }
 </script>
 </body>
