@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Crown Logic — Free Online Crown Puzzle Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/crown-logic">
+<meta name="description" content="Play Crown Logic free online — a Queens-style crown placement logic puzzle. Place exactly one crown in every row, column and colour region, and never let two crowns touch, not even diagonally. 100 levels, each with exactly one solution, no download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  #crownlogic{display:block;width:100%;height:auto;border-radius:12px;touch-action:none;cursor:pointer}
+  .game-area{max-width:880px}
+  /* v5 visual polish: dark-glass pro HUD (matches Apex / Forest Dash / Nitro / Sky / Trail Stunts / Tower Stack / Neon Snake) */
+  .stat{
+    background:linear-gradient(180deg,rgba(13,20,32,.90),rgba(13,20,32,.80));
+    border:1px solid rgba(255,255,255,.16);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:14px;box-shadow:0 8px 20px rgba(10,20,40,.28);color:#fff;
+  }
+  .stat span{color:#F5A623;letter-spacing:.14em}
+  .stat div{color:#fff;font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.55rem;line-height:1.05}
+  .overlay{
+    background:rgba(9,14,24,.78);
+    -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+    border:1px solid rgba(255,255,255,.14);color:#fff;
+  }
+  .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;letter-spacing:.03em;text-shadow:0 3px 10px rgba(0,0,0,.5)}
+  .overlay p{color:rgba(255,255,255,.88)}
+  .btn{
+    background:linear-gradient(180deg,#ffc85e,#f5a623 55%,#d98a06);color:#231600;
+    border-bottom:4px solid #9a6204;text-shadow:none;
+    box-shadow:0 10px 24px rgba(245,166,35,.35), inset 0 2px 0 rgba(255,255,255,.55);
+  }
+  .btn.ghost{
+    background:rgba(13,20,32,.85);color:#F5A623;
+    border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.45);
+    box-shadow:0 6px 16px rgba(10,20,40,.30);text-shadow:none;
+  }
+  #cl-status{
+    text-align:center;font-weight:800;color:#0b5563;background:rgba(14,165,164,.12);
+    border:1px solid rgba(14,165,164,.35);border-radius:999px;
+    padding:7px 14px;margin:10px auto 14px;max-width:640px;font-size:.95rem;
+  }
+  .overlay .btn{margin:4px}
+  #cl-picker-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:7px;
+    max-height:300px;overflow-y:auto;margin:12px 0;padding:2px;
+  }
+  .lvl-btn{
+    background:rgba(255,255,255,.10);color:#fff;border:1px solid rgba(255,255,255,.25);
+    border-radius:9px;padding:7px 2px;font-family:Nunito,sans-serif;font-weight:900;font-size:.92rem;cursor:pointer;
+  }
+  .lvl-btn span{display:block;color:#ffc85e;font-size:.68rem;letter-spacing:.12em}
+  .lvl-btn.locked{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Crown Logic</h1>
+    <p>A velvet board of stained-glass colours, and one quiet challenge: seat a crown in every row, every column and every colour — without any two crowns ever touching. Pure logic, no guessing: every board has exactly one solution.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="stats">
+        <div class="stat"><span>Crowns</span><div id="cl-crowns">—</div></div>
+        <div class="stat"><span>Level</span><div id="cl-level">—</div></div>
+        <div class="stat"><span>Hearts</span><div id="cl-hearts">♥♥♥</div></div>
+      </div>
+      <div id="cl-status">Pick a level to start reasoning.</div>
+      <div class="stage">
+        <canvas id="crownlogic" width="440" height="440" aria-label="Crown Logic game: tap a square to place a crown, tap a crown to turn it into an X note, tap an X to clear it"></canvas>
+        <div class="overlay hidden" id="cl-over">
+          <h2 id="cl-over-title">Ready to rule?</h2>
+          <p id="cl-over-stats"></p>
+          <button class="btn" id="cl-ov-main">▶ Level 1</button>
+          <button class="btn ghost" id="cl-ov-alt">All levels</button>
+        </div>
+        <div class="overlay hidden" id="cl-picker">
+          <h2>Pick a level</h2>
+          <div id="cl-picker-grid"></div>
+          <button class="btn ghost" id="cl-picker-close">Close</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="cl-restart">Restart</button>
+        <button class="btn ghost" id="cl-levels">All levels</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <p>The board is split into coloured regions — one region for every row. Your job is to place crowns so that four rules all hold at once.</p>
+      <ol>
+        <li><strong>One crown in every row</strong> and <strong>one in every column</strong>.</li>
+        <li><strong>One crown in every colour region</strong>, however tangled its shape.</li>
+        <li><strong>No two crowns may touch</strong> — not side by side, and not even diagonally at the corners.</li>
+        <li><strong>Tap a square</strong> to place a crown. If it breaks a rule, both crowns flash and it costs you a heart — you get <strong>3 hearts</strong> per level, and three mistakes end the level. Tap a crown again to turn it into an <strong>X</strong> — a free note meaning "no crown here". Tap the X once more to clear it. X notes are unlimited thinking aids; they never cost hearts.</li>
+        <li><strong>Stars:</strong> finish with no mistakes for <strong>3 stars</strong>, one mistake for <strong>2 stars</strong>, two mistakes for <strong>1 star</strong>.</li>
+        <li>There are <strong>100 levels</strong>. The board grows from 6×6 to 10×10 and the regions twist into trickier shapes as you climb. Every single board is solver-verified to have <strong>exactly one solution</strong> — if you are stuck, the answer is always hiding in the rules, never in a guess. Your progress and stars save on your device.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse:</strong> click a square to cycle it — empty → crown → X note → empty.</li>
+        <li><strong>Touch:</strong> tap a square the same way. Use X notes to cross out squares the rules rule out, and the crowns will find themselves.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Every constraint is a clue.</h2>
+      <p>Limits don't block you — they quietly tell you where the answer must be. In Crown Logic, every "no" is information: a full row crosses out a column, a crowded colour corners its crown, and the last empty square in a region is a crown whether you feel ready or not.</p>
+      <p>Life's hard problems work the same way. The budget, the deadline, the rule you wish wasn't there — each one deletes a hundred wrong answers and points at the few that remain. Read the limits like clues, and the path appears.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../adults">← More games for adults</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/crown-logic.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
