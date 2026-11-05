@@ -267,7 +267,7 @@
     total = grid.c * grid.r;
     var pic = picFor(cur);
 
-    boardBox.style.width = Math.min(620, grid.c * 150) + 'px';
+    boardBox.style.width = Math.min(620, grid.c * 150, playEl.clientWidth || 620) + 'px';
     ghostEl.style.backgroundImage = 'url("' + pic.src + '")';
     ghostEl.style.backgroundSize = '100% 100%';
     peekImg.style.backgroundImage = 'url("' + pic.src + '")';
