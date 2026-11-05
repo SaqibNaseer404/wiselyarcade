@@ -1021,6 +1021,45 @@
   bindTouch('t-gas', 'gas'); bindTouch('t-brake', 'brake');
   bindTouch('t-left', 'left'); bindTouch('t-right', 'right'); bindTouch('t-nitro', 'nitro');
 
+  /* ---- Tilt steering: tip the phone/tablet to steer (motion sensor) ---- */
+  var tiltOn = false;
+  function tiltRoll(e) {
+    var ang = 0;
+    if (screen.orientation && typeof screen.orientation.angle === 'number') ang = screen.orientation.angle;
+    else if (typeof window.orientation === 'number') ang = window.orientation;
+    var g = e.gamma || 0, b = e.beta || 0;
+    if (ang === 90) return b;
+    if (ang === -90 || ang === 270) return -b;
+    return g;
+  }
+  window.addEventListener('deviceorientation', function (e) {
+    if (!tiltOn || e.gamma === null || e.beta === null) return;
+    var v = tiltRoll(e);
+    input.left = v < -8;
+    input.right = v > 8;
+  });
+  (function () {
+    var btn = el('t-tilt');
+    if (!btn) return;
+    function setTilt(on) {
+      tiltOn = on;
+      btn.classList.toggle('on', on);
+      if (!on) { input.left = false; input.right = false; }
+    }
+    btn.addEventListener('click', function () {
+      if (tiltOn) { setTilt(false); return; }
+      var isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent || '') ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      if (isIOS && typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().then(function (res) {
+          if (res === 'granted') setTilt(true);
+        }).catch(function () {});
+      } else { setTilt(true); }
+    });
+  })();
+
+
   /* ================= Audio (tiny engine hum) ================= */
   var AC = null, engOsc = null, engGain = null, muted = false;
   function initAudio() {
