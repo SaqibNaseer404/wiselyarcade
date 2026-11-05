@@ -127,6 +127,14 @@
     .cfa-announce{font-size:2.6rem}
     .cfa-bar{height:12px}
   }
+
+  /* phones: shrink the touch buttons so the whole control bar fits the screen */
+  @media (max-width:560px){
+    .cfa-tbtn{width:44px;height:44px;font-size:1.05rem}
+    .cfa-tbtn small{font-size:.42rem;letter-spacing:.05em}
+    .cfa-touch{gap:6px;flex-wrap:wrap}
+    .cfa-touch .grp{gap:6px}
+  }
 </style>
 </head>
 <body>
