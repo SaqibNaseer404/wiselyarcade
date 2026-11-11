@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Word Pet — Free Word Game for Kids | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/word-pet">
+<meta name="description" content="Play Word Pet free online — tap the letters in order to finish each word, feed Biscuit the puppy, and watch him grow from a tiny egg to a crowned champion across 100 levels. A friendly word game for kids ages 5–9. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .wp-stage{
+    background:linear-gradient(180deg,#f2fbff,#e2f5e9 55%,#d8f0dc);
+    border-radius:26px;padding:22px 18px 28px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(30,110,60,.18), inset 0 2px 0 #fff}
+  .wp-stars{font-size:1.35rem;letter-spacing:.28em;min-height:1.6em;margin-bottom:4px}
+  .wp-scene{position:relative;width:100%;height:360px;border-radius:20px;overflow:hidden;
+    background:linear-gradient(180deg,#bfe8ff 0%,#dff6ff 55%,#cdeecb 100%);
+    box-shadow:inset 0 2px 0 #fff, inset 0 -18px 30px rgba(70,140,80,.18)}
+  .wp-scene canvas{display:block;width:100%;height:100%}
+  @media (max-width:640px){.wp-scene{height:280px}}
+  .wp-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .wp-fallback.hidden{display:none}
+  .wp-fallback span{display:inline-block;line-height:1;transition:font-size .5s ease;
+    filter:drop-shadow(0 12px 14px rgba(90,60,0,.25))}
+  .wp-fallback span.wp-hop{animation:wphop .55s ease}
+  @keyframes wphop{0%{transform:translateY(0)}35%{transform:translateY(-34px) rotate(-4deg)}70%{transform:translateY(0) rotate(3deg)}100%{transform:translateY(0)}}
+  .wp-burst{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .wp-bit{position:absolute;bottom:38%;font-size:1.7rem;animation:wpfloat 1.5s ease-out forwards}
+  @keyframes wpfloat{0%{transform:translateY(0) scale(.7);opacity:0}18%{opacity:1}100%{transform:translateY(-130px) scale(1.25);opacity:0}}
+  .wp-petbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin:14px auto 2px;
+    font-weight:800;color:#20513a;font-size:1.02rem}
+  .wp-petbar .wp-stagepill{background:linear-gradient(180deg,#ffd98a,#ffc44d);color:#5c3a00;border-radius:999px;
+    padding:3px 14px;box-shadow:0 4px 10px rgba(160,110,0,.25)}
+  .wp-pets{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px auto 2px;max-width:720px}
+  .wp-pet{background:rgba(255,255,255,.85);border:2px solid rgba(60,140,90,.35);border-radius:14px;
+    padding:6px 10px 4px;min-width:64px}
+  .wp-pet span{font-size:1.7rem;line-height:1.1;display:block}
+  .wp-pet small{display:block;font-size:.66rem;font-weight:800;color:#2c6e49;letter-spacing:.03em}
+  .wp-pet.wp-pet-lock{opacity:.55;filter:grayscale(.7)}
+  .wp-pet.wp-pet-lock small{color:#7a8a80}
+  .wp-petslabel{font-weight:800;color:#20513a;font-size:.92rem;letter-spacing:.05em;margin-top:12px}
+  .wp-hintrow{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px}
+  .wp-hint{font-size:4.6rem;line-height:1.1;filter:drop-shadow(0 8px 12px rgba(60,90,0,.2))}
+  .wp-hintlabel{font-weight:800;color:#20513a;max-width:300px;text-align:left}
+  .wp-word{display:flex;gap:8px;justify-content:center;margin:16px 0 4px;flex-wrap:wrap}
+  .wp-tile{width:50px;height:58px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2rem;color:#20513a;
+    background:linear-gradient(180deg,#ffffff,#e6f7ec);border:2px solid rgba(60,140,90,.35);
+    box-shadow:0 8px 16px rgba(40,110,70,.15), inset 0 2px 0 #fff}
+  .wp-tile.wp-slot{color:#9fc7ad}
+  .wp-tile.wp-filled{background:linear-gradient(180deg,#b6f2c0,#6ede8a);border-color:#1d9e4b;color:#0d5c2a;
+    animation:wppop .25s ease}
+  @keyframes wppop{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+  .wp-tiles{display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .wp-choice{width:58px;height:58px;border-radius:16px;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2rem;color:#fff;
+    background:linear-gradient(180deg,#ffb03a,#f28c13);box-shadow:0 10px 20px rgba(200,120,0,.32), inset 0 2px 0 rgba(255,255,255,.5)}
+  .wp-choice:hover{transform:translateY(-3px)}
+  .wp-choice.wp-used{opacity:.22;cursor:default;transform:none;box-shadow:none}
+  .wp-choice.wp-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:wpshake .3s ease}
+  .wp-choice:disabled{cursor:default}
+  @keyframes wpshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .wp-msg{font-weight:800;font-size:1.12rem;min-height:1.6em;margin:16px 0 0;color:#20513a}
+  .wp-levelbar{text-align:center;font-weight:800;color:#20513a;margin:0 auto 10px;font-size:1.05rem}
+  .wp-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .wp-lvl{border:2px solid rgba(60,140,90,.4);background:rgba(255,255,255,.85);color:#20513a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .wp-lvl.wp-done{background:#dcfce7;border-color:#22c55e}
+  .wp-lvl.wp-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .wp-lvl.wp-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Word Pet</h1>
+    <p>Meet <strong>Biscuit</strong> — the puppy who grows when you spell! Tap the letter tiles <strong>in order</strong> to finish each word, and every word feeds him, plays with him, and helps him grow — from a tiny egg all the way to a crowned champion. <strong>100 levels</strong> of words that grow longer as Biscuit grows bigger.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="wp-levelbar">🐶 You are on <strong>Level <span id="wp-level-now">1</span></strong> · <span id="wp-progress-note"></span></div>
+      <div class="wp-map" id="wp-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Word</span><div id="wp-round">1 / 6</div></div>
+        <div class="stat"><span>Stars</span><div id="wp-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="wp-best">—</div></div>
+      </div>
+      <div class="wp-stage">
+        <div class="wp-stars" id="wp-stars" aria-hidden="true"></div>
+        <div class="wp-scene" id="wp-scene">
+          <div class="wp-fallback hidden" id="wp-fallback"><span id="wp-fallback-pet">🐶</span></div>
+          <div class="wp-burst" id="wp-burst" aria-hidden="true"></div>
+        </div>
+        <div class="wp-petbar">
+          <span>🐶 <strong>Biscuit</strong></span>
+          <span class="wp-stagepill">Stage: <span id="wp-stage-name">Egg</span></span>
+          <span id="wp-pets-count">1 / 10 pets</span>
+        </div>
+        <div class="wp-petslabel">🧺 My Pets — a new friend every 10 levels</div>
+        <div class="wp-pets" id="wp-pets"></div>
+        <div class="wp-hintrow">
+          <div class="wp-hint" id="wp-hint">🐱</div>
+          <div class="wp-hintlabel" id="wp-hintlabel">Biscuit is thinking of this — spell it!</div>
+        </div>
+        <div class="wp-word" id="wp-word"></div>
+        <div class="wp-tiles" id="wp-tiles"></div>
+        <p class="wp-msg" id="wp-msg">Tap the letters in order to spell the word.</p>
+        <div class="overlay hidden" id="wp-done">
+          <h2 id="wp-done-title">🎉 Level Complete!</h2>
+          <p id="wp-done-stats"></p>
+          <button class="btn" id="wp-again">Next level →</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="wp-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Look at the picture — that is the word Biscuit is thinking of.</li>
+        <li>Tap the letter tiles in order to spell the whole word. Each letter you place fills a tile above.</li>
+        <li>Every finished word feeds Biscuit and plays with him — watch him hop, spin, and <strong>grow a little with every word</strong>.</li>
+        <li>There are <strong>100 levels</strong>, with 6 words in each. Words start tiny (CAT, DOG) and grow longer as you climb. From Level 21, <strong>trap letters</strong> sneak into the tiles; from Level 51 the picture hides until you place a letter; and from Level 81 the word is a complete mystery until you finish it.</li>
+        <li>Biscuit grows through the stages — Egg, Baby, Pup, Young, Big — and at Level 100 he becomes a <strong>Champion</strong> with a golden crown. Every 10 levels, a new pet friend joins your My Pets collection.</li>
+        <li>A star is earned for each word you spell with no mistakes — how many can you collect?</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click the letter tiles, in the order they appear in the word.</li>
+        <li><strong>Wrong letter?</strong> No problem — the tile shakes, and you can try again. Trying is how we learn.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Love and care help everything grow</h2>
+      <p>Biscuit does not grow in one giant jump. He grows word by word — a little food, a little play, a little love, every single day. That is how puppies grow, how gardens grow, how friendships grow… and how readers grow, too.</p>
+      <p>Nothing you care for grows all at once, and nothing grows if it is ignored. Small care, given often, is what makes big, strong, happy things. So whatever you are growing — a pet, a plant, a skill, a friendship — feed it a little today. Then again tomorrow. One day you will look back and see how far it has come.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Word Pet?</h3>
+      <p>Look at the picture — that is the word Biscuit is thinking of. Tap the shuffled letter tiles in order to spell the whole word, and every finished word feeds Biscuit and helps him grow.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels, with 6 words in each level. Words start tiny, like CAT and DOG, and grow longer as you climb — all the way to champion words like STRAWBERRY and HELICOPTER.</p>
+      <h3>What happens if I tap the wrong letter?</h3>
+      <p>No problem — the tile shakes and you can try again. A star is earned for each word you spell with no mistakes.</p>
+      <h3>How does Biscuit grow?</h3>
+      <p>Biscuit grows a little with every finished word, and his stage grows as you climb the levels — Egg, Baby, Pup, Young, Big, and Champion with a golden crown at level 100. Every 10 levels, a new pet friend joins your collection.</p>
+      <h3>What does Word Pet teach?</h3>
+      <p>It teaches that love and care help everything grow. Nothing grows all at once — small care, given often, is what makes big, strong, happy things.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="../js/word-pet.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Word Pet?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Look at the picture — that is the word Biscuit is thinking of. Tap the shuffled letter tiles in order to spell the whole word, and every finished word feeds Biscuit and helps him grow."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels, with 6 words in each level. Words start tiny, like CAT and DOG, and grow longer as you climb — all the way to champion words like STRAWBERRY and HELICOPTER."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I tap the wrong letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No problem — the tile shakes and you can try again. A star is earned for each word you spell with no mistakes."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does Biscuit grow?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Biscuit grows a little with every finished word, and his stage grows as you climb the levels — Egg, Baby, Pup, Young, Big, and Champion with a golden crown at level 100. Every 10 levels, a new pet friend joins your collection."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Word Pet teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that love and care help everything grow. Nothing grows all at once — small care, given often, is what makes big, strong, happy things."
+      }
+    }
+  ]
+}
+</script>
+</body>
+</html>
