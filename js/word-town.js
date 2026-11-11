@@ -58,6 +58,8 @@
   var sceneEl = document.getElementById('wt-scene');
   var stripEl = document.getElementById('wt-strip');
   var sparkEl = document.getElementById('wt-spark');
+  var hintBtn = document.getElementById('wt-hint-btn');
+  var demoBanner = document.getElementById('wt-demo-banner');
 
   var level = 1, unlocked = 1, starsMap = {};
   try {
@@ -74,6 +76,7 @@
   var queue = [], round = 0, score = 0, locked = false;
   var placed = 0, wordMistake = false, currentItem = null, tiles = [], slotEls = [];
   var builtThisLevel = 0, basePieces = 0, renderedCount = 0;
+  var demoActive = false, demoTimers = [];
 
   function save() {
     try {
@@ -326,6 +329,113 @@
     }
   }
 
+  /* ================= HINT ================= */
+  function syncHintBtn() {
+    if (hintBtn) hintBtn.disabled = locked || demoActive || !currentItem;
+  }
+  function useHint() {
+    if (locked || demoActive || !currentItem) return null;
+    var expected = currentItem.word.charAt(placed);
+    for (var i = 0; i < tiles.length; i++) {
+      var tile = tiles[i];
+      if (!tile.used && tile.letter === expected && tile.btn) {
+        wordMistake = true; // a hint costs the word's star, same as a wrong tap
+        if (window.__wt) window.__wt.lastHint = expected;
+        tile.btn.classList.remove('wt-hint-flash');
+        void tile.btn.offsetWidth; // restart the pulse if hinted twice in a row
+        tile.btn.classList.add('wt-hint-flash');
+        (function (btn) {
+          setTimeout(function () { btn.classList.remove('wt-hint-flash'); }, 1250);
+        })(tile.btn);
+        msgEl.textContent = 'The next letter is ' + expected + ' — find its glowing tile! (The star is gone, but the town still grows.)';
+        return expected;
+      }
+    }
+    return null;
+  }
+
+  /* ================= FIRST-VISIT DEMO (level 1, word 1) ================= */
+  function demoSeen() {
+    try { return localStorage.getItem('wa_wt_demo_seen') === '1'; } catch (e) { return true; }
+  }
+  function setDemoSeen() {
+    try { localStorage.setItem('wa_wt_demo_seen', '1'); } catch (e) {}
+  }
+  function clearDemoTimers() {
+    for (var i = 0; i < demoTimers.length; i++) clearTimeout(demoTimers[i]);
+    demoTimers = [];
+  }
+  function resetWordVisuals() {
+    tiles.forEach(function (t) {
+      t.used = false;
+      if (t.btn) { t.btn.disabled = false; t.btn.classList.remove('wt-right'); }
+    });
+    slotEls.forEach(function (s) { s.textContent = '·'; s.classList.remove('wt-filled'); });
+    placed = 0;
+  }
+  function demoPlaceNext() {
+    if (!demoActive || !currentItem) return;
+    var expected = currentItem.word.charAt(placed);
+    for (var i = 0; i < tiles.length; i++) {
+      var tile = tiles[i];
+      if (!tile.used && tile.letter === expected) {
+        tile.used = true;
+        tile.btn.disabled = true;
+        tile.btn.classList.add('wt-right');
+        slotEls[placed].textContent = tile.letter;
+        slotEls[placed].classList.add('wt-filled');
+        placed++;
+        return;
+      }
+    }
+  }
+  function endDemo() {
+    clearDemoTimers();
+    demoActive = false;
+    setDemoSeen();
+    resetWordVisuals();
+    msgEl.textContent = 'Tap the letter tiles in order to build the word.';
+    if (demoBanner) {
+      demoBanner.textContent = '▶️ Now you try!';
+      demoTimers.push(setTimeout(function () { if (demoBanner) demoBanner.classList.add('wt-fade'); }, 2500));
+      demoTimers.push(setTimeout(function () {
+        if (demoBanner) { demoBanner.classList.add('wt-off'); demoBanner.classList.remove('wt-fade'); }
+      }, 3200));
+    }
+    syncHintBtn();
+  }
+  function cancelDemo() { // player tapped a tile mid-demo: hand over at once
+    if (!demoActive) return;
+    endDemo();
+  }
+  function stopDemo() { // game is restarting/navigating: tidy up, no banner show
+    if (!demoActive) return;
+    clearDemoTimers();
+    demoActive = false;
+    setDemoSeen();
+    if (demoBanner) { demoBanner.classList.add('wt-off'); demoBanner.classList.remove('wt-fade'); }
+  }
+  function startDemo() {
+    demoActive = true;
+    syncHintBtn();
+    if (demoBanner) {
+      demoBanner.textContent = '👀 Watch — tap the letters in order to build the word!';
+      demoBanner.classList.remove('wt-off');
+      demoBanner.classList.remove('wt-fade');
+    }
+    msgEl.textContent = 'Watch how it is done…';
+    var n = currentItem.word.length;
+    for (var i = 0; i < n; i++) {
+      demoTimers.push(setTimeout(demoPlaceNext, 700 * (i + 1)));
+    }
+    demoTimers.push(setTimeout(function () { if (demoActive) endDemo(); }, 700 * n + 1000));
+  }
+  function maybeStartDemo() {
+    if (level !== 1 || round !== 0 || unlocked > 1) return;
+    if (!currentItem || demoSeen()) return;
+    startDemo();
+  }
+
   /* ================= GAME FLOW ================= */
   function buildMap() {
     mapEl.innerHTML = '';
@@ -400,9 +510,11 @@
       tilesEl.appendChild(b);
     });
     msgEl.textContent = 'Tap the letter tiles in order to build the word.';
+    syncHintBtn();
   }
 
   function choose(tile) {
+    if (demoActive) cancelDemo(); // a real tap ends the demo and takes over
     if (locked || tile.used) return;
     var item = currentItem;
     var expected = item.word.charAt(placed);
@@ -419,6 +531,7 @@
       }
       if (placed >= item.word.length) {
         locked = true;
+        syncHintBtn();
         tiles.forEach(function (t) { t.btn.disabled = true; });
         if (hintMode(level) === 'atEnd') {
           emojiEl.textContent = item.emoji;
@@ -461,6 +574,7 @@
   }
 
   function start() {
+    stopDemo();
     queue = shuffle(bankFor(level)).slice(0, WORDS_PER_LEVEL);
     round = 0; score = 0; builtThisLevel = 0;
     scoreEl.textContent = '0';
@@ -470,8 +584,10 @@
     drawStars();
     showBest();
     nextRound();
+    maybeStartDemo();
   }
 
+  if (hintBtn) hintBtn.addEventListener('click', function () { useHint(); });
   document.getElementById('wt-restart').addEventListener('click', start);
   againBtn.addEventListener('click', function () {
     if (level < MAX_LEVEL) { level = level + 1; save(); }
@@ -492,9 +608,12 @@
         word: currentItem ? currentItem.word : null,
         score: score, builtThisLevel: builtThisLevel,
         buildings: renderedCount, fallback: !use3D,
-        stars: starsMap[level] || 0
+        stars: starsMap[level] || 0,
+        mistake: wordMistake, demo: demoActive
       };
     },
+    hint: function () { return useHint(); },
+    lastHint: null,
     setLevel: function (n) {
       n = parseInt(n, 10) || 1;
       if (n < 1) n = 1; if (n > MAX_LEVEL) n = MAX_LEVEL;
@@ -505,6 +624,7 @@
     },
     start: function () { start(); },
     placeNext: function () {
+      if (demoActive) cancelDemo(); // pick the tile against the post-demo state
       if (!currentItem || locked) return false;
       var expected = currentItem.word.charAt(placed);
       for (var i = 0; i < tiles.length; i++) {
