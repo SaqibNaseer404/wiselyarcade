@@ -1,12 +1,13 @@
-/* Wisely Arcade service worker v5
+/* Wisely Arcade service worker v6
    Network-first for HTML navigations (never show a stale page),
    stale-while-revalidate for same-origin CSS/JS/images.
+   v6: adds Letter Garden, Word Pet and Word Town.
    v5: precaches every page in the sitemap plus the CSS/JS files each
    page names (engines carry ?v= versions), so the whole arcade can be
    played offline after a single online visit. When the connection
    returns, pages load fresh from the network and cached assets refresh
    in the background, so players drift back up to date on their own. */
-const CACHE = 'wiselyarcade-v5';
+const CACHE = 'wiselyarcade-v6';
 const CORE = ['/css/style.css?v=10', '/js/main.js', '/js/recommend.js',
   '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 const PAGES = ['/', '/kids', '/teens', '/adults',
@@ -16,7 +17,8 @@ const PAGES = ['/', '/kids', '/teens', '/adults',
   '/games/2048-merge', '/games/trail-stunts', '/games/bubble-pop',
   '/games/paint-the-rocket', '/games/spot-the-difference',
   '/games/jigsaw-puzzle', '/games/calm-fist-arena',
-  '/games/missing-letters', '/games/math-quest', '/games/iq-quest',
+  '/games/missing-letters', '/games/letter-garden', '/games/word-pet',
+  '/games/word-town', '/games/math-quest', '/games/iq-quest',
   '/games/gk-quest', '/games/minesweeper', '/games/mind-meter',
   '/games/ludo', '/games/chess', '/games/block-bloom',
   '/games/gem-grove-quest', '/games/arrowway-escape',
