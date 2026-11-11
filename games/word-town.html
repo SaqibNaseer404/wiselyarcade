@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Word Town — Free Spelling Game for Kids | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/word-town">
+<meta name="description" content="Play Word Town free online — tap letter tiles in order to complete each word and watch your 3D town grow, one building at a time. A friendly spelling game for kids ages 5–9. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .wt-stage{
+    background:linear-gradient(180deg,#eef9ff,#fdf6e0 55%,#ffecc9);
+    border-radius:26px;padding:22px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(60,90,140,.18), inset 0 2px 0 #fff}
+  .wt-view{position:relative;margin-bottom:8px}
+  .wt-scene{height:360px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(180deg,#aee3f7,#dff6ff);
+    box-shadow:inset 0 2px 0 #fff, 0 12px 24px rgba(60,90,140,.20)}
+  .wt-scene canvas{display:block}
+  @media (max-width:560px){ .wt-scene{height:260px} }
+  .wt-strip{display:none;min-height:120px;align-items:center;justify-content:center;flex-wrap:wrap;
+    gap:2px;font-size:2.1rem;line-height:1.4;padding:16px 10px;border-radius:18px;
+    background:linear-gradient(180deg,#cdeffd,#eafbe7);
+    box-shadow:inset 0 2px 0 #fff, 0 12px 24px rgba(60,90,140,.15)}
+  .wt-strip.wt-on{display:flex}
+  .wt-spark{position:absolute;top:12px;right:16px;font-size:2.2rem;opacity:0;pointer-events:none;z-index:3}
+  .wt-spark.wt-pop{animation:wtpop .85s ease}
+  @keyframes wtpop{0%{opacity:0;transform:scale(.4) rotate(-14deg)}30%{opacity:1;transform:scale(1.25) rotate(6deg)}100%{opacity:0;transform:scale(1) translateY(-14px)}}
+  .wt-emoji{font-size:4.6rem;line-height:1.1;filter:drop-shadow(0 8px 12px rgba(120,70,0,.22))}
+  .wt-clue{font-weight:800;color:#33608a;margin:2px 0 0;min-height:1.4em}
+  .wt-stars{font-size:1.35rem;letter-spacing:.28em;min-height:1.6em;margin-bottom:6px}
+  .wt-slots{display:flex;gap:8px;justify-content:center;margin:16px 0 4px;flex-wrap:wrap}
+  .wt-slot{width:50px;height:58px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2.1rem;color:#b08968;
+    background:linear-gradient(180deg,#ffffff,#fdf1de);border:2px dashed rgba(160,110,50,.45);
+    box-shadow:0 6px 14px rgba(140,90,20,.14), inset 0 2px 0 #fff}
+  .wt-slot.wt-filled{background:linear-gradient(180deg,#b6f2c0,#6ede8a);border:2px solid #1d9e4b;color:#0d5c2a;
+    animation:wtbuild .35s ease}
+  @keyframes wtbuild{0%{transform:translateY(8px) scale(.85)}60%{transform:translateY(-3px) scale(1.06)}100%{transform:none}}
+  .wt-tiles{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+  .wt-tile{width:64px;height:64px;border-radius:18px;border:0;cursor:pointer;
+    font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2.3rem;color:#fff;
+    background:linear-gradient(180deg,#f5a623,#e8890c);box-shadow:0 10px 20px rgba(180,110,10,.35), inset 0 2px 0 rgba(255,255,255,.5)}
+  .wt-tile:hover{transform:translateY(-3px)}
+  .wt-tile.wt-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:wtshake .3s ease}
+  .wt-tile.wt-right{background:linear-gradient(180deg,#4ade80,#16a34a)}
+  .wt-tile:disabled{opacity:.45;cursor:default;transform:none}
+  .wt-tile.wt-right:disabled{opacity:.95}
+  @keyframes wtshake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+  .wt-msg{font-weight:800;font-size:1.15rem;min-height:1.6em;margin:16px 0 0;color:#33608a}
+  .wt-levelbar{text-align:center;font-weight:800;color:#33608a;margin:0 auto 10px;font-size:1.05rem}
+  .wt-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .wt-lvl{border:2px solid rgba(51,96,138,.4);background:rgba(255,255,255,.85);color:#33608a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .wt-lvl.wt-done{background:#dcfce7;border-color:#22c55e}
+  .wt-lvl.wt-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .wt-lvl.wt-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Word Town</h1>
+    <p>Welcome to the town that words built! Look at the picture, tap the letter tiles in the right order to finish the word — and every word you complete <strong>builds a new piece of your town in real 3D</strong>: a house, a shop, a park, a school. <strong>100 levels</strong> — how big will your town grow?</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="wt-levelbar">🏙️ You are on <strong>Level <span id="wt-level-now">1</span></strong> · <span id="wt-progress-note"></span></div>
+      <div class="wt-map" id="wt-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Word</span><div id="wt-round">1 / 6</div></div>
+        <div class="stat"><span>Stars</span><div id="wt-score">0</div></div>
+        <div class="stat"><span>Best</span><div id="wt-best">—</div></div>
+      </div>
+      <div class="wt-stage">
+        <div class="wt-view">
+          <div class="wt-scene" id="wt-scene" aria-label="Your 3D town"></div>
+          <div class="wt-strip" id="wt-strip" aria-label="Your town"></div>
+          <div class="wt-spark" id="wt-spark" aria-hidden="true">🔨✨</div>
+        </div>
+        <div class="wt-stars" id="wt-stars" aria-hidden="true"></div>
+        <div class="wt-emoji" id="wt-emoji">🏠</div>
+        <p class="wt-clue" id="wt-clue">What is this? Build the word!</p>
+        <div class="wt-slots" id="wt-slots"></div>
+        <div class="wt-tiles" id="wt-tiles"></div>
+        <p class="wt-msg" id="wt-msg">Tap the letter tiles in order to build the word.</p>
+        <div class="overlay hidden" id="wt-done">
+          <h2 id="wt-done-title">🎉 Level Complete!</h2>
+          <p id="wt-done-stats"></p>
+          <button class="btn" id="wt-again">Next level →</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="wt-restart">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Look at the big picture above the empty boxes. What is it?</li>
+        <li>Tap the letter tiles in the right order to build the word — the letters are all there, just shuffled.</li>
+        <li>Every word you finish <strong>builds a new piece of your 3D town</strong> — a house, a shop, a little park, a school, a tower. Watch it rise!</li>
+        <li>There are <strong>100 levels</strong>, with 6 words in each. Words start tiny (CAT, HOME) and grow longer as you climb. From Level 21, two cheeky trap letters sneak into the tiles; from Level 51, the picture hides until you place the first letter; and from Level 81, there is no picture at all — the finished word reveals it!</li>
+        <li>Your town keeps every level you finish, so it grows and grows. Finish Level 100 and a <strong>golden tower</strong> shines over your complete town. Finish a level to unlock the next.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click the letter tiles in order.</li>
+        <li><strong>Wrong tile?</strong> No problem — it shakes, and you can try another. Trying is how we learn. A star is earned for each word built with no wrong taps.</li>
+        <li><strong>Town view:</strong> your town slowly turns on its own, so you can admire it from every side while you play.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Great towns are built one brick — and one word — at a time</h2>
+      <p>No town appears in a single day. First one house, then a street, then a school — brick by brick, each small piece placed on top of the last. Learning works exactly the same way: one letter, then one word, then one whole town of words you can read and build with.</p>
+      <p>So when something big feels too big, remember your town. You never have to build it all at once. Place one brick — learn one word — today, and the next one tomorrow. Step by small step, the empty field becomes a town, and the beginner becomes a builder.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Word Town?</h3>
+      <p>Look at the picture, then tap the shuffled letter tiles in the right order to complete the word. Every finished word builds a new piece of your 3D town — a house, a shop, a park, a school or a tower.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels, with 6 words in each level. Words start tiny, like CAT and HOME, and grow longer as you climb — all the way to long words like SUPERMARKET and SKYSCRAPER. Your town keeps growing with every level you finish.</p>
+      <h3>What happens if I tap the wrong tile?</h3>
+      <p>No problem — the tile shakes and you can try another one. Nothing is taken away. A star is earned for each word you build with no wrong taps.</p>
+      <h3>Who is Word Town for?</h3>
+      <p>It is made for young readers and builders who are learning to spell everyday words about homes, schools and towns. The picture gives a clue for almost every word, so early readers can play on their own.</p>
+      <h3>What does Word Town teach?</h3>
+      <p>It teaches that great towns are built one brick — and one word — at a time. One small step, placed on top of the last, is how every big thing gets built.</p>
+    </div>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="../js/word-town.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Word Town?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Look at the picture, then tap the shuffled letter tiles in the right order to complete the word. Every finished word builds a new piece of your 3D town — a house, a shop, a park, a school or a tower."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels, with 6 words in each level. Words start tiny, like CAT and HOME, and grow longer as you climb — all the way to long words like SUPERMARKET and SKYSCRAPER. Your town keeps growing with every level you finish."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I tap the wrong tile?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No problem — the tile shakes and you can try another one. Nothing is taken away. A star is earned for each word you build with no wrong taps."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Word Town for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is made for young readers and builders who are learning to spell everyday words about homes, schools and towns. The picture gives a clue for almost every word, so early readers can play on their own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Word Town teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that great towns are built one brick — and one word — at a time. One small step, placed on top of the last, is how every big thing gets built."
+      }
+    }
+  ]
+}
+</script>
+</body>
+</html>
