@@ -110,6 +110,8 @@
   var noteEl = document.getElementById('lg-progress-note');
   var gardenEl = document.getElementById('lg-garden');
   var gardenCountEl = document.getElementById('lg-garden-count');
+  var hintBtn = document.getElementById('lg-hint-btn');
+  var demoBannerEl = document.getElementById('lg-demo-banner');
 
   var level = 1, unlocked = 1, starsMap = {};
   try {
@@ -125,6 +127,19 @@
 
   var queue = [], round = 0, score = 0, locked = false;
   var currentItem = null, placed = 0, wordMistake = false, stage = 0, hintShown = true;
+  var lastHint = null;
+  var demoActive = false, demoTimer = null;
+
+  function demoSeen() {
+    try { return localStorage.getItem('wa_lg_demo_seen') === '1'; } catch (e) { return true; }
+  }
+  function markDemoSeen() {
+    try { localStorage.setItem('wa_lg_demo_seen', '1'); } catch (e) {}
+  }
+  function updateHintBtn() {
+    if (!hintBtn) return;
+    hintBtn.disabled = !!(locked || demoActive || !currentItem || placed >= currentItem.word.length);
+  }
 
   function save() {
     try {
@@ -216,8 +231,89 @@
     hintEl.textContent = hintShown ? currentItem.emoji : '❓';
   }
 
+  // ---------- 💡 Hint ----------
+  function doHint() {
+    if (locked || demoActive || !currentItem) return false;
+    if (placed >= currentItem.word.length) return false;
+    var want = currentItem.word.charAt(placed);
+    var btns = tilesEl.querySelectorAll('.lg-choice');
+    for (var i = 0; i < btns.length; i++) {
+      if (!btns[i].disabled && btns[i].getAttribute('data-letter') === want) {
+        wordMistake = true; // a hint costs the word's star, same as a wrong tap
+        lastHint = want;
+        var b = btns[i];
+        b.classList.add('lg-hintflash');
+        setTimeout(function () { b.classList.remove('lg-hintflash'); }, 1200);
+        msgEl.textContent = '💡 Look — the glowing tile is the next letter!';
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ---------- 👀 Level-1 first-visit auto-demo ----------
+  function hideBannerNow() {
+    if (!demoBannerEl) return;
+    demoBannerEl.classList.add('hidden');
+    demoBannerEl.classList.remove('lg-fade');
+  }
+  function maybeStartDemo() {
+    if (demoActive || level !== 1 || round !== 0 || unlocked > 1 || demoSeen()) return;
+    demoActive = true;
+    updateHintBtn();
+    if (demoBannerEl) {
+      demoBannerEl.textContent = '👀 Watch — tap the letters in order to build the word!';
+      demoBannerEl.classList.remove('hidden');
+      demoBannerEl.classList.remove('lg-fade');
+    }
+    demoTimer = setTimeout(demoStep, 900);
+  }
+  function demoPlaceNext() {
+    var want = currentItem.word.charAt(placed);
+    var btns = tilesEl.querySelectorAll('.lg-choice');
+    for (var i = 0; i < btns.length; i++) {
+      if (!btns[i].disabled && btns[i].getAttribute('data-letter') === want) {
+        var btn = btns[i];
+        btn.disabled = true;
+        btn.classList.add('lg-used');
+        var slot = slotsEl.children[placed];
+        slot.textContent = want;
+        slot.classList.remove('lg-blank');
+        slot.classList.add('lg-filled');
+        placed++;
+        spawnFx(placed % 2 ? '💧' : '☀️');
+        return;
+      }
+    }
+  }
+  function demoStep() {
+    if (!demoActive) return;
+    if (!currentItem || placed >= currentItem.word.length) {
+      // word fully placed on screen — but NOT completed/scored; hand over to the player
+      demoTimer = setTimeout(endDemo, 700);
+      return;
+    }
+    demoPlaceNext();
+    demoTimer = setTimeout(demoStep, 700);
+  }
+  function endDemo() {
+    if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+    demoActive = false;
+    markDemoSeen();
+    nextRound(); // resets the same word: tiles back, placed = 0, no stars/stage touched
+    if (demoBannerEl) {
+      demoBannerEl.textContent = '▶️ Now you try!';
+      demoBannerEl.classList.remove('hidden');
+      setTimeout(function () {
+        demoBannerEl.classList.add('lg-fade');
+        setTimeout(function () { demoBannerEl.classList.add('hidden'); demoBannerEl.classList.remove('lg-fade'); }, 650);
+      }, 2500);
+    }
+    updateHintBtn();
+  }
+
   function nextRound() {
-    locked = false; wordMistake = false; placed = 0;
+    locked = false; wordMistake = false; placed = 0; lastHint = null;
     currentItem = queue[round];
     roundEl.textContent = (round + 1) + ' / ' + WORDS_PER_LEVEL;
     drawHint();
@@ -252,9 +348,11 @@
     msgEl.textContent = hintMode(level) === 2
       ? 'Mystery word! Tap the letters in order — the picture is your reward.'
       : 'Tap the letters in order to build the word.';
+    updateHintBtn();
   }
 
   function tapTile(btn, letter) {
+    if (demoActive) { endDemo(); return; } // player touched a tile mid-demo: cancel, reset, hand over
     if (locked || btn.disabled) return;
     var want = currentItem.word.charAt(placed);
     if (letter === want) {
@@ -279,6 +377,7 @@
 
   function completeWord() {
     locked = true;
+    updateHintBtn();
     tilesEl.querySelectorAll('.lg-choice').forEach(function (x) { x.disabled = true; });
     if (!wordMistake) { score++; scoreEl.textContent = score; drawStars(); }
     if (hintMode(level) === 2) { hintEl.textContent = currentItem.emoji; hintShown = true; }
@@ -316,6 +415,10 @@
   }
 
   function start() {
+    // a (re)start while the demo is running cancels it for good
+    if (demoTimer) { clearTimeout(demoTimer); demoTimer = null; }
+    if (demoActive) { demoActive = false; markDemoSeen(); }
+    hideBannerNow();
     queue = shuffle(bankFor(level)).slice(0, WORDS_PER_LEVEL);
     round = 0; score = 0; stage = 0;
     scoreEl.textContent = '0';
@@ -326,9 +429,11 @@
     showBest();
     drawPlant(false);
     nextRound();
+    maybeStartDemo();
   }
 
   document.getElementById('lg-restart').addEventListener('click', start);
+  if (hintBtn) hintBtn.addEventListener('click', doHint);
   againBtn.addEventListener('click', function () {
     if (level < MAX_LEVEL) { level = level + 1; save(); }
     start();
@@ -336,7 +441,11 @@
 
   window.__lg = {
     state: function () {
-      return { level: level, unlocked: unlocked, round: round + 1, score: score, placed: placed, stage: stage, stars: JSON.parse(JSON.stringify(starsMap)) };
+      return { level: level, unlocked: unlocked, round: round + 1, score: score, placed: placed, stage: stage, stars: JSON.parse(JSON.stringify(starsMap)), wordMistake: wordMistake, lastHint: lastHint };
+    },
+    hint: function () { return doHint(); },
+    demoState: function () {
+      return { active: demoActive, seen: demoSeen(), lastHint: lastHint };
     },
     setLevel: function (n) {
       n = Math.max(1, Math.min(MAX_LEVEL, parseInt(n, 10) || 1));
