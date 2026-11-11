@@ -1,13 +1,14 @@
-/* Wisely Arcade service worker v6
+/* Wisely Arcade service worker v7
    Network-first for HTML navigations (never show a stale page),
    stale-while-revalidate for same-origin CSS/JS/images.
+   v7: adds the Word Games That Teach Kids to Spell guide.
    v6: adds Letter Garden, Word Pet and Word Town.
    v5: precaches every page in the sitemap plus the CSS/JS files each
    page names (engines carry ?v= versions), so the whole arcade can be
    played offline after a single online visit. When the connection
    returns, pages load fresh from the network and cached assets refresh
    in the background, so players drift back up to date on their own. */
-const CACHE = 'wiselyarcade-v6';
+const CACHE = 'wiselyarcade-v7';
 const CORE = ['/css/style.css?v=10', '/js/main.js', '/js/recommend.js',
   '/manifest.webmanifest', '/icon-192.png', '/icon-512.png'];
 const PAGES = ['/', '/kids', '/teens', '/adults',
@@ -27,7 +28,8 @@ const PAGES = ['/', '/kids', '/teens', '/adults',
   '/guides/why-puzzle-games-help-kids-brains',
   '/guides/free-online-games-with-100-levels',
   '/guides/free-online-games-that-teach-life-lessons',
-  '/guides/minesweeper-online-free'];
+  '/guides/minesweeper-online-free',
+  '/guides/word-games-that-teach-kids-to-spell'];
 
 async function precache() {
   const cache = await caches.open(CACHE);
