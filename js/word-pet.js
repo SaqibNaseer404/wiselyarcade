@@ -73,6 +73,7 @@
   var againBtn = $('wp-again'), mapEl = $('wp-map'), levelNowEl = $('wp-level-now'), noteEl = $('wp-progress-note');
   var stageEl = $('wp-stage-name'), petsEl = $('wp-pets'), petsCountEl = $('wp-pets-count');
   var sceneEl = $('wp-scene'), fallbackEl = $('wp-fallback'), fallbackPetEl = $('wp-fallback-pet'), burstEl = $('wp-burst');
+  var hintBtn = $('wp-hint-btn'), demoBannerEl = $('wp-demobanner');
 
   var level = 1, unlocked = 1, starsMap = {};
   try {
@@ -88,6 +89,7 @@
 
   var queue = [], round = 0, score = 0, wordsDone = 0, locked = false;
   var placed = 0, wordMistake = false, currentItem = null, tiles = [];
+  var demoActive = false, demoTimers = [];
 
   function save() {
     try {
@@ -244,9 +246,11 @@
       return { el: b, letter: letter, used: false };
     });
     msgEl.textContent = 'Tap the letters in order to spell the word.';
+    updateHintBtn();
   }
 
   function choose(btn) {
+    if (demoActive) { cancelDemo(); return; } // a real tap stops the demo at once
     if (locked) return;
     var tile = null;
     for (var i = 0; i < tiles.length; i++) if (tiles[i].el === btn) { tile = tiles[i]; break; }
@@ -275,6 +279,7 @@
 
   function completeWord() {
     locked = true;
+    updateHintBtn();
     if (!wordMistake) { score++; scoreEl.textContent = score; drawStars(); }
     wordsDone++;
     if (hintMode(level) === 'at-end') setHint(true);
@@ -322,6 +327,7 @@
   }
 
   function start() {
+    if (demoActive) { stopDemoSilent(); markDemoSeen(); }
     queue = shuffle(bankFor(level)).slice(0, WORDS_PER_LEVEL);
     round = 0; score = 0; wordsDone = 0;
     scoreEl.textContent = '0';
@@ -333,6 +339,95 @@
     renderPets();
     updateGrowth();
     nextRound();
+    maybeDemo();
+  }
+
+  /* ---------------- hint button + first-visit Level-1 demo ---------------- */
+  function updateHintBtn() {
+    if (!hintBtn) return;
+    hintBtn.disabled = locked || demoActive || !currentItem;
+  }
+  function useHint() {
+    if (locked || demoActive || !currentItem) return null;
+    if (placed >= currentItem.word.length) return null;
+    var expected = currentItem.word.charAt(placed);
+    for (var i = 0; i < tiles.length; i++) {
+      if (!tiles[i].used && tiles[i].letter === expected) {
+        wordMistake = true; // a hint costs this word's star, same as a wrong tap
+        if (window.__wp) window.__wp.lastHint = expected;
+        var el = tiles[i].el;
+        el.classList.remove('wp-hintflash');
+        void el.offsetWidth; // restart the pulse if hint is tapped twice
+        el.classList.add('wp-hintflash');
+        setTimeout(function () { el.classList.remove('wp-hintflash'); }, 1250);
+        msgEl.textContent = '💡 That glowing letter comes next — tap it!';
+        return expected;
+      }
+    }
+    return null;
+  }
+
+  function demoSeen() {
+    try { return localStorage.getItem('wa_wp_demo_seen') === '1'; } catch (e) { return true; }
+  }
+  function markDemoSeen() {
+    try { localStorage.setItem('wa_wp_demo_seen', '1'); } catch (e) {}
+  }
+  function maybeDemo() {
+    if (demoActive || level !== 1 || round !== 0 || unlocked > 1 || demoSeen()) return;
+    if (!currentItem) return;
+    runDemo();
+  }
+  function runDemo() {
+    demoActive = true;
+    locked = true; // choose() is handed to the demo-cancel path while this runs
+    updateHintBtn();
+    if (demoBannerEl) {
+      demoBannerEl.textContent = '👀 Watch — tap the letters in order to build the word!';
+      demoBannerEl.classList.remove('hidden');
+    }
+    var len = currentItem.word.length;
+    for (var i = 0; i < len; i++) {
+      demoTimers.push(setTimeout(function () { if (demoActive) demoPlaceNext(); }, 700 * (i + 1)));
+    }
+    demoTimers.push(setTimeout(function () { if (demoActive) endDemo(true); }, 700 * (len + 1)));
+  }
+  function demoPlaceNext() {
+    // Same visuals as a correct tap in choose(), but never completes or scores the word.
+    if (!currentItem || placed >= currentItem.word.length) return;
+    var expected = currentItem.word.charAt(placed);
+    for (var i = 0; i < tiles.length; i++) {
+      if (!tiles[i].used && tiles[i].letter === expected) {
+        var tile = tiles[i];
+        tile.used = true;
+        tile.el.classList.add('wp-used');
+        tile.el.disabled = true;
+        var slot = wordEl.children[placed];
+        slot.textContent = tile.letter;
+        slot.classList.add('wp-filled');
+        placed++;
+        petReact('letter'); // Biscuit hops along with the demo
+        return;
+      }
+    }
+  }
+  function endDemo(playedOut) {
+    stopDemoSilent();
+    markDemoSeen();
+    tilesEl.innerHTML = ''; tiles = []; // clear the demo's used tiles before rebuilding
+    nextRound(); // rebuild the same word fresh: no score, no growth from the demo
+    if (demoBannerEl && playedOut) {
+      demoBannerEl.textContent = '▶️ Now you try!';
+      demoBannerEl.classList.remove('hidden');
+      setTimeout(function () { demoBannerEl.classList.add('hidden'); }, 2500);
+    }
+  }
+  function cancelDemo() { if (demoActive) endDemo(false); }
+  function stopDemoSilent() {
+    demoTimers.forEach(function (t) { clearTimeout(t); });
+    demoTimers = [];
+    demoActive = false;
+    if (demoBannerEl) demoBannerEl.classList.add('hidden');
   }
 
   /* ---------------- 3D pet (Three.js) with emoji fallback ---------------- */
@@ -539,6 +634,7 @@
   updateGrowth();
 
   /* ---------------- controls + test hook ---------------- */
+  if (hintBtn) hintBtn.addEventListener('click', function () { useHint(); });
   $('wp-restart').addEventListener('click', start);
   againBtn.addEventListener('click', function () {
     if (level < MAX_LEVEL) { level = level + 1; save(); }
@@ -549,7 +645,7 @@
     state: function () {
       return {
         level: level, round: round, score: score, wordsDone: wordsDone,
-        placed: placed, word: currentItem ? currentItem.word : null,
+        placed: placed, mistake: wordMistake, word: currentItem ? currentItem.word : null,
         stage: stageName(), scale: petScaleValue(), fallback: fallbackMode,
         threeOK: threeOK, unlocked: unlocked
       };
@@ -570,7 +666,10 @@
       return false;
     },
     word: function () { return currentItem ? currentItem.word : null; },
-    petScale: function () { return petScaleValue(); }
+    petScale: function () { return petScaleValue(); },
+    hint: useHint,
+    lastHint: null,
+    isDemo: function () { return demoActive; }
   };
 
   start();
