@@ -67,6 +67,14 @@
     font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2.3rem;color:#fff;
     background:linear-gradient(180deg,#4cc263,#2e9e4f);box-shadow:0 10px 20px rgba(30,120,50,.35), inset 0 2px 0 rgba(255,255,255,.5)}
   .lg-choice:hover{transform:translateY(-3px)}
+  .lg-choice.lg-hintflash{background:linear-gradient(180deg,#ffd94d,#f5a623);color:#5c3a00;
+    animation:lghintpulse .4s ease-in-out infinite;box-shadow:0 0 0 4px rgba(245,166,35,.55),0 10px 20px rgba(180,120,10,.4)}
+  @keyframes lghintpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+  .lg-demo-banner{max-width:540px;margin:0 auto 12px;background:linear-gradient(180deg,#fff7d6,#ffe9a8);
+    border:2px solid #d9a514;border-radius:14px;padding:10px 16px;font-weight:800;color:#6b4e00;
+    font-size:1.05rem;box-shadow:0 10px 20px rgba(150,110,10,.25);transition:opacity .6s ease}
+  .lg-demo-banner.hidden{display:none}
+  .lg-demo-banner.lg-fade{opacity:0}
   .lg-choice.lg-wrong{background:linear-gradient(180deg,#f08a8a,#d9534f);animation:lgshake .3s ease}
   .lg-choice.lg-used{opacity:.22;cursor:default;transform:none;box-shadow:none}
   .lg-choice:disabled{cursor:default}
@@ -123,6 +131,7 @@
         <div class="lg-garden" id="lg-garden"></div>
       </div>
       <div class="lg-stage">
+        <div class="lg-demo-banner hidden" id="lg-demo-banner" role="status"></div>
         <div class="lg-stars" id="lg-stars" aria-hidden="true"></div>
         <div class="lg-plantwrap">
           <div id="lg-fx"></div>
@@ -141,6 +150,7 @@
         </div>
       </div>
       <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="lg-hint-btn" type="button">💡 Hint</button>
         <button class="btn ghost" id="lg-restart">Start again</button>
       </div>
     </div>
@@ -206,7 +216,7 @@
 
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
-<script src="../js/letter-garden.js?v=1"></script>
+<script src="../js/letter-garden.js?v=2"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
