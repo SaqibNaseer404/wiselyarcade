@@ -80,6 +80,12 @@
       '  filter:drop-shadow(0 4px 3px rgba(120,70,0,.25));',
       '}',
 
+      /* PAINT pilot: portrait fills the spotlight disc; emoji text hidden but kept in DOM */
+      '.mface.front .critter.paint{',
+      '  background-size:cover;background-position:center;',
+      '  color:transparent;font-size:0;line-height:0;text-shadow:none;',
+      '}',
+
       /* ---- MATCHED pair: warm gold glow + celebratory pop ---- */
       '.mcard.matched{cursor:default}',
       '.mcard.matched .mface.front{',
@@ -128,6 +134,33 @@
   var ANIMALS = ['🐶', '🐱', '🦊', '🐼', '🐸', '🦁', '🐵', '🐯'];
   var POOL = ANIMALS.concat(['🐰', '🦄', '🐷', '🐥', '🦋', '🐢', '🐳', '🦉', '🐙', '🦩', '🐿️', '🦜']);
   var BEST_KEY = 'wisely_memory_best';
+
+  /* ================= PAINT pilot: painted portraits for the 8 core animals =================
+     The other 12 POOL animals stay emoji (intended mix for the pilot).
+     Portraits are preloaded up front; if one fails to load, its cards fall
+     back to the emoji (the emoji text is always in the DOM). */
+  var PORTRAITS = { '🐶': 'dog', '🐱': 'cat', '🦊': 'fox', '🐼': 'panda', '🐸': 'frog', '🦁': 'lion', '🐵': 'monkey', '🐯': 'tiger', '🐰': 'rabbit', '🦄': 'unicorn', '🐷': 'pig', '🐥': 'chick', '🦋': 'butterfly', '🐢': 'turtle', '🐳': 'whale', '🦉': 'owl', '🐙': 'octopus', '🦩': 'flamingo', '🐿️': 'squirrel', '🦜': 'parrot' };
+  var PORTRAIT_BASE = '../images/critters/';
+  var PORTRAIT_BAD = {};   // name -> true once its portrait failed to load
+  function unpaintPortrait(name) {
+    var spans = document.querySelectorAll('.critter.paint[data-portrait="' + name + '"]');
+    for (var i = 0; i < spans.length; i++) {
+      spans[i].classList.remove('paint');
+      spans[i].style.backgroundImage = '';
+    }
+  }
+  (function preloadPortraits() {
+    Object.keys(PORTRAITS).forEach(function (emoji) {
+      var name = PORTRAITS[emoji];
+      var img = new Image();
+      img.onerror = function () {
+        PORTRAIT_BAD[name] = true;
+        unpaintPortrait(name);
+      };
+      img.src = PORTRAIT_BASE + name + '.jpg';
+    });
+  })();
+  /* ================= end PAINT pilot setup ================= */
 
   // ---- 100-level campaign: the board grows (6 pairs at L1 -> 17 at L100)
   // and mismatched cards flip back faster. Stars by moves: efficient
@@ -317,10 +350,17 @@
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', 'Memory card');
+      var pname = PORTRAITS[animal];
+      var critterHtml;
+      if (pname && !PORTRAIT_BAD[pname]) {
+        critterHtml = '<span class="critter paint" data-portrait="' + pname + '" style="background-image:url(' + PORTRAIT_BASE + pname + '.jpg)">' + animal + '</span>';
+      } else {
+        critterHtml = '<span class="critter">' + animal + '</span>';
+      }
       card.innerHTML =
         '<div class="inner">' +
           '<div class="mface back"><span class="paw">🐾</span></div>' +
-          '<div class="mface front"><span class="critter">' + animal + '</span></div>' +
+          '<div class="mface front">' + critterHtml + '</div>' +
         '</div>';
       card.addEventListener('click', function () { onCardClick(card); });
       card.addEventListener('keydown', function (e) {
@@ -338,4 +378,10 @@
   });
   buildMap();
   newGame();
+
+  // Test hook (PAINT pilot verification).
+  window.__mm = {
+    state: function () { return { level: camp, pairs: curPairs, matched: matchedPairs }; },
+    paintedCount: function () { return document.querySelectorAll('.critter.paint').length; }
+  };
 })();
