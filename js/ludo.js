@@ -539,6 +539,10 @@ document.getElementById('start-btn').addEventListener('click', function () {
   document.getElementById('setup').classList.remove('show');
   document.getElementById('gameover').classList.remove('show');
   newGame();
+  if (window.innerWidth <= 768) {
+    var bd = document.getElementById('ludo-board');
+    if (bd && bd.scrollIntoView) setTimeout(function () { bd.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 60);
+  }
 });
 var endNextBtn = document.getElementById('end-next');
 if (endNextBtn) endNextBtn.addEventListener('click', function () {
