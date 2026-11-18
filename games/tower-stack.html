@@ -60,6 +60,20 @@
   }
   .kbd{background:linear-gradient(180deg,#2A3547,#171E2B);color:#F5C15C;border-bottom-color:#0B0F16}
 </style>
+<!-- MOBILE GAME-FIRST FIX 2026-11-19: on phones the play area comes first; level map moves below the game. Desktop layout untouched. -->
+<style>
+@media (max-width:768px){
+  .game-head{padding:14px 12px 2px}
+  .game-head h1{font-size:1.6rem;margin-bottom:4px}
+  .game-head p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-area{display:flex;flex-direction:column;padding:12px;margin-top:8px}
+  .game-area>.ts-levelbar{order:1}
+  .game-area>.stats{order:2}
+  .game-area>.stage{order:3}
+  .game-area>.btn-row{order:5}
+  .game-area>.ts-map{order:9;max-height:46vh;overflow-y:auto}
+}
+</style>
 </head>
 <body>
 
