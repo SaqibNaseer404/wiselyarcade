@@ -182,8 +182,8 @@
   function bandFor(level) {
     if (level <= 25) return { len: 4, tries: 5 };
     if (level <= 50) return { len: 5, tries: 6 };
-    if (level <= 75) return { len: 6, tries: 6 };
-    return { len: 7, tries: 6 };
+    if (level <= 75) return { len: 6, tries: 5 };  // was 6 tries
+    return { len: 7, tries: 5 };                   // was 6 tries
   }
   function levelWord(level) {
     var b = bandFor(level), list = LISTS[b.len];
