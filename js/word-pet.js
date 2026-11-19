@@ -120,13 +120,14 @@
   }
   function trapsFor(n) {
     if (n <= 20) return 0;
-    if (n <= 50) return 2;
-    if (n <= 80) return 3;
-    return 4;
+    if (n <= 50) return 3;
+    if (n <= 60) return 4;
+    if (n <= 80) return 5;
+    return 7;
   }
   function hintMode(n) { // 'show', 'after-first', 'at-end'
     if (n <= 50) return 'show';
-    if (n <= 80) return 'after-first';
+    if (n <= 60) return 'after-first';
     return 'at-end';
   }
   function maxCompleted() {
@@ -271,7 +272,6 @@
     } else {
       wordMistake = true;
       btn.classList.add('wp-wrong');
-      btn.disabled = true;
       msgEl.textContent = 'Not that letter — Biscuit believes in you. Try another!';
       setTimeout(function () { btn.classList.remove('wp-wrong'); }, 350);
     }
