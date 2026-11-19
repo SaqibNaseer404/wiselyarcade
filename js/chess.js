@@ -302,8 +302,11 @@ function saveCampaign() {
     localStorage.setItem('wa_ch_stars', JSON.stringify(campStars));
   } catch (e) {}
 }
-function depthFor(l) { return l < 35 ? 1 : l < 75 ? 2 : 3; }
-function blunderFor(l) { return Math.max(0, 0.55 - l * 0.006); }
+function depthFor(l) { return l < 25 ? 1 : l < 55 ? 2 : 3; }
+function blunderFor(l) {
+  if (l <= 20) return 0.55 - l * 0.006;              // unchanged early game
+  return Math.max(0, 0.43 - (l - 20) * 0.0108);      // hits 0 at L60
+}
 function eloFor(l) { return 400 + l * 14; }
 function tierName(l) { return l <= 15 ? 'Club beginner' : l <= 35 ? 'Casual player' : l <= 55 ? 'Club regular' : l <= 75 ? 'Strong amateur' : l <= 90 ? 'Expert' : 'Master'; }
 function buildMap() {
