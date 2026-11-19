@@ -235,8 +235,11 @@
   // ---------------------------------------------------------------- levels
   function levelParams(level) {
     var L = Math.max(1, Math.min(100, level | 0));
-    var size = L <= 20 ? 6 : L <= 40 ? 7 : L <= 60 ? 8 : L <= 80 ? 9 : 10;
-    return { level: L, size: size, hearts: 3 };
+    // Toughness pass: bands read the effective level (identity for L<=20,
+    // 1.5x slope to L60, 2.5x after). Size can never exceed 10.
+    var Le = L <= 20 ? L : L <= 60 ? 20 + (L - 20) * 1.5 : 80 + (L - 60) * 2.5;
+    var size = Le <= 20 ? 6 : Le <= 40 ? 7 : Le <= 60 ? 8 : Le <= 80 ? 9 : 10;
+    return { level: L, size: size, hearts: L >= 61 ? 2 : 3 };
   }
   function genLevel(level) {
     var p = levelParams(level);
