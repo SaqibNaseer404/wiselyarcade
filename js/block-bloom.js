@@ -177,7 +177,10 @@
   // ---------------------------------------------------------------- levels
   function levelParams(level) {
     var L = Math.max(1, Math.min(100, level | 0));
-    var prefill = L <= 10 ? 0 : Math.min(16, Math.floor((L - 10) * 16 / 90) + 2);
+    // Toughness pass: prefill only (target scores untouched — they need bot
+    // re-verification). lateFill is 0 for L<=20, so early levels are identical.
+    var lateFill = L <= 20 ? 0 : L <= 60 ? Math.floor((L - 20) / 10) : 4 + Math.floor((L - 60) / 8);
+    var prefill = L <= 10 ? 0 : Math.min(22, Math.floor((L - 10) * 16 / 90) + 2 + lateFill);
     var setsTotal = 6 + Math.ceil(L / 8) + (L >= 60 ? 1 : 0) + (L >= 85 ? 1 : 0);
     var targetScore = 30 + Math.round(1.5 * (L - 1)) + Math.floor((L - 1) * (L - 1) / 80);
     var targetLines = (L % 3 === 0) ? 1 + Math.floor(L / 9) : 0;
