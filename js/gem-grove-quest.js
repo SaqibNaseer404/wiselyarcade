@@ -311,14 +311,16 @@
     return 7;
   }
   function movesFor(level) {
-    return 26 - Math.floor((level - 1) / 14);   // 26 moves early, 19 at the top
+    var m = 26 - Math.floor((level - 1) / 14);   // 26 moves early, 19 at the top
+    if (level > 60) m -= Math.floor((level - 60) / 20); // toughness pass: -1 at L80, -2 at L100 (17 moves)
+    return m;
   }
   // Score targets, calibrated with random-move and greedy-move bots at build
   // time: a random player wins often on the early levels and fades as gem
   // types are added (levels 26 and 61), while a deliberate player can clear
   // every level. Anchors are interpolated, rounded to 5s, and forced
   // strictly upward (+5 minimum per level).
-  var TARGET_ANCHORS = [[1, 1180], [26, 1330], [61, 1540], [100, 1735]];
+  var TARGET_ANCHORS = [[1, 1180], [26, 1330], [61, 1620], [100, 1980]];
   function targetFor(level) {
     var t = 0, prev = 0, l, i;
     for (l = 1; l <= level; l++) {
