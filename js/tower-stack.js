@@ -60,7 +60,8 @@
       localStorage.setItem('wa_ts_stars', JSON.stringify(campStars));
     } catch (e) {}
   }
-  function targetFor(l) { return 8 + Math.floor((l - 1) / 4); }
+  function campEff(c) { return c <= 20 ? c : c <= 60 ? 20 + (c - 20) * 1.5 : 80 + (c - 60) * 2.5; } // toughness pass: identity <=20, 1.5x slope to 60, 2.5x to 100
+  function targetFor(l) { return Math.min(40, 8 + Math.floor((campEff(l) - 1) / 4)); }
   function tierName(l) { return l <= 15 ? 'Gentle heights' : l <= 35 ? 'Rising fast' : l <= 55 ? 'Into the wind' : l <= 75 ? 'Sky builder' : l <= 90 ? 'Cloud heights' : 'Star tower master'; }
   function buildMap() {
     var map = document.getElementById('t-map'); if (!map) return;
@@ -100,8 +101,8 @@
     ['#bfe3ff', '#5ea9ee'], ['#c9f2d8', '#58bd82'], ['#fff3b0', '#e8b93e']
   ];
 
-  function speed() { return 200 + (level - 1) * 48 + (camp - 1) * 2; }
-  function windAmp() { var eff = level + Math.floor((camp - 1) / 15); return eff >= 3 ? Math.min(52, (eff - 2) * 9) : 0; }
+  function speed() { return 200 + (level - 1) * 48 + (campEff(camp) - 1) * 2; }
+  function windAmp() { var eff = level + Math.floor((campEff(camp) - 1) / 15); return eff >= 3 ? Math.min(52, (eff - 2) * 9) : 0; }
 
   function reset() {
     blocks = [{ x: W / 2, w: BASE_W }];
