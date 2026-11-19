@@ -110,6 +110,7 @@
   var done = load('cfa_done', {});               // {level: stars}
   var unlocked = load('cfa_unlocked', 1);        // highest level you may play
   var level = Math.min(unlocked, 100);
+  var DL = level; // Toughness pass: difficulty level (== level up to L20, then steepened); set in setupLevel
 
   /* ---------- helpers ---------- */
   function rivalFor(L) {
@@ -301,13 +302,14 @@
   /* ---------- level setup ---------- */
   function setupLevel(L) {
     level = L;
+    DL = L <= 20 ? L : L <= 60 ? 20 + (L - 20) * 1.5 : 80 + (L - 60) * 2.5;
     var r = rivalFor(L);
     var champ = r.champion ? 1.25 : 1;
     P.hp = P.maxHp = 100; P.calm = 0; P.x = 28; P.y = 0; P.vy = 0;
     P.state = 'idle'; P.dead = false; P.baseFilter = ''; P.img.style.filter = '';
     P.el.classList.remove('ko'); pImg.style.transform = '';
     E.who = r.mirror ? 'hero' : r.set;
-    E.maxHp = Math.round((r.mirror ? 185 : 55 + L * 1.15) * champ);
+    E.maxHp = Math.round((r.mirror ? Math.max(185, 55 + DL * 1.15) : 55 + DL * 1.15) * champ);
     E.hp = E.maxHp; E.calm = 0; E.x = 72; E.y = 0; E.vy = 0;
     E.state = 'idle'; E.dead = false;
     E.baseFilter = r.mirror
@@ -449,15 +451,15 @@
     aiTimer -= dt;
     // AI blocking reaction: if the player just attacked and AI is free, it may guard
     if ((P.state === 'punch' || P.state === 'kick') && E.state === 'idle' && E.y < 1) {
-      var blockChance = Math.min(0.48, 0.06 + level * 0.004);
+      var blockChance = Math.min(0.60, 0.06 + DL * 0.004);
       if (Math.random() < blockChance * dt * 14) { E.blocking = true; E.state = 'block'; E.t = 0; setPose(E, 'block'); }
     }
     if (aiTimer > 0) return;
-    aiTimer = Math.max(0.24, 0.64 - level * 0.004) * (0.75 + Math.random() * 0.5);
+    aiTimer = Math.max(0.18, 0.64 - DL * 0.004) * (0.75 + Math.random() * 0.5);
     if (E.state === 'hurt' || E.state === 'ko' || E.dead) return;
     var dist = Math.abs(P.x - E.x);
     var dir = P.x > E.x ? 1 : -1;
-    var aggression = Math.min(0.82, 0.35 + level * 0.005);
+    var aggression = Math.min(0.90, 0.35 + DL * 0.005);
     E.blocking = false;
     if (E.state === 'block') { E.state = 'idle'; setPose(E, 'idle'); }
     if (E.calm >= 50 && dist < 34 && Math.random() < 0.7) { startAttack(E, 'focus'); return; }
@@ -492,7 +494,7 @@
     // attack hit windows
     var spec = attackSpec(f);
     if (spec && !f.atkHitDone && f.t >= spec.at) {
-      resolveHit(f, f === P ? E : P, spec, f === P ? 1 : Math.min(1.6, 0.5 + level * 0.011));
+      resolveHit(f, f === P ? E : P, spec, f === P ? 1 : Math.min(1.9, 0.5 + DL * 0.011));
     }
     // state timeouts
     if ((f.state === 'punch' && f.t > 0.26) || (f.state === 'kick' && f.t > 0.42) ||
@@ -502,7 +504,7 @@
     }
     if (f.state === 'walk') {
       f.walkT -= dt;
-      var sp = (f === P ? 26 : Math.min(30, 15 + level * 0.12)) * dt;
+      var sp = (f === P ? 26 : Math.min(34, 15 + DL * 0.12)) * dt;
       f.x += f.walkDir * sp;
       f.x = Math.max(5, Math.min(95, f.x));
       setPose(f, 'idle');
