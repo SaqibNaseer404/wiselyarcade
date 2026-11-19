@@ -72,7 +72,16 @@ function saveCampaign() {
   } catch (e) {}
 }
 function oppCountFor(l) { return l <= 30 ? 1 : l <= 65 ? 2 : 3; }
-function carelessFor(l) { return Math.max(0, 0.75 - l * 0.0083); }
+function carelessFor(l) {
+  if (l <= 20) return Math.max(0, 0.75 - l * 0.0083);   // unchanged: 74% -> 58%
+  if (l <= 60) return 0.584 - (l - 20) * 0.0125;        // ~1.5x slope: -> 8.4% at L60
+  return Math.max(0, 0.084 - (l - 60) * 0.0084);        // gone by ~L70
+}
+function jitterFor(l) {
+  if (l <= 20) return 6;                                 // unchanged
+  if (l <= 60) return 6 - (l - 20) * 0.075;              // -> 3 at L60
+  return Math.max(1.2, 3 - (l - 60) * 0.045);            // -> 1.2 at L100
+}
 function tierName(l) { return l <= 15 ? 'Friendly table' : l <= 30 ? 'Warming up' : l <= 50 ? 'Busy table' : l <= 65 ? 'Sharp table' : l <= 85 ? 'Ruthless table' : l <= 90 ? 'Pro table' : 'Champion table'; }
 function buildMap() {
   var map = document.getElementById('lu-map'); if (!map) return;
@@ -268,7 +277,7 @@ function aiChoose(pl, d, moves) {
   }
   var best = moves[0], bs = -1e9;
   for (var i = 0; i < moves.length; i++) {
-    var m = moves[i], s = Math.random() * 6;
+    var m = moves[i], s = Math.random() * (campaignGame ? jitterFor(camp) : 6);
     var from = pl.tokens[m.ti];
     if (from === -1) s += 60;                       // get out of base
     if (m.to === 56) s += 55;                       // bring home
