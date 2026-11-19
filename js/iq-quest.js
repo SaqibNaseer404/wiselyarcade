@@ -234,6 +234,12 @@
     return { kind: 'Puzzle Grid', visual: html, prompt: 'Which piece completes the grid?', options: shuffle([t[0], t[1], t[2], outsider].slice(0, choicesCount)), answer: ans, why: 'Every row and column holds the same three symbols, just in a different order. The last row is missing ' + ans + '.', style: 'emoji', isGrid: true };
   }
 
+  function effN(n) { // toughness pass: L1-20 exact, then generators see a higher level
+    if (n <= 20) return n;
+    if (n <= 60) return n + Math.floor((n - 20) / 2);          // slope x1.5
+    return n + 20 + Math.floor((n - 60) / 2) + (n - 60);       // slope x2.5
+  }
+
   function makePuzzle(n) {
     var pool;
     if (n <= 10) pool = ['pattern', 'odd'];
@@ -244,10 +250,10 @@
     else if (n <= 80) pool = ['riddle', 'num', 'analogy', 'grid'];
     else pool = ['grid', 'num', 'riddle', 'analogy'];
     var t = pickOne(pool);
-    if (t === 'pattern') return emojiPattern(n);
+    if (t === 'pattern') return emojiPattern(effN(n));
     if (t === 'odd') return oddOne(false);
     if (t === 'oddW') return oddOne(true);
-    if (t === 'num') return numSeq(n);
+    if (t === 'num') return numSeq(effN(n));
     if (t === 'letter') return letterSeq();
     if (t === 'analogy') return analogy();
     if (t === 'riddle') return riddle();
