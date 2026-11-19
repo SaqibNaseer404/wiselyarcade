@@ -78,17 +78,22 @@
     return {
       level: L,
       world: Math.ceil(L / 10),
-      segments: 6 + Math.floor((L - 1) / 9),              // 6 -> 17
+      segments: 6 + Math.floor((L - 1) / 9)              // 6 -> 17
+        + (L > 20 ? Math.floor((L - 20) / 18) : 0)        // toughness pass: +50% slope for 21-60
+        + (L > 60 ? Math.floor((L - 60) / 10) : 0),       // toughness pass: ~2.4x slope for 61-100 -> 25 at L100
       gapMax: L < 5 ? 2 : (L < 30 ? 3 : 4),               // tiles
       climbMax: L < 10 ? 1 : (L < 40 ? 2 : 3),            // tiles
-      spikes: L >= 3, spikeMax: L < 30 ? 2 : 3,           // tiles per patch
+      spikes: L >= 3, spikeMax: L < 30 ? 2 : (L < 61 ? 3 : 4), // tiles per patch; 4 only in the endgame
       movers: L >= 21, springs: L >= 41,
+      moverCap: L >= 61 ? 3 : 2, springCap: L >= 61 ? 3 : 2, // per-level caps, raised in the endgame
       hearts: 3
     };
   }
   // Fixed seed nudges for any endgame levels the dev-time bot found unfair;
   // same pattern as Block Bloom. (Filled only if a level needs it.)
-  var SEED_TWEAKS = {};
+  // Toughness pass: these endgame layouts failed the bot under the steeper
+  // 61-100 recipe; each nudge re-seeds that level only, params unchanged.
+  var SEED_TWEAKS = { 76: 2, 78: 1, 81: 1, 82: 1, 90: 1, 91: 1, 93: 1, 95: 1, 96: 1 };
 
   function genLevel(level) {
     var p = levelParams(level);
@@ -131,8 +136,8 @@
       // who has just landed at full speed.
       var types = calmNext ? ['step'] : ['step', 'gap', 'gap', 'drop'];
       if (p.spikes && cur.w >= 5 * TILE && !calmNext) types.push('spikes');
-      if (p.movers && moversUsed < 2 && !calmNext) types.push('mover');
-      if (p.springs && springsUsed < 2 && !calmNext) types.push('spring');
+      if (p.movers && moversUsed < p.moverCap && !calmNext) types.push('mover');
+      if (p.springs && springsUsed < p.springCap && !calmNext) types.push('spring');
       var type = types[Math.floor(rng() * types.length)];
       var wasCalm = calmNext;
       calmNext = false;
@@ -160,7 +165,7 @@
         var mv = {
           x: right + 8, y: mTop, w: mw, h: 16, kind: 'mover',
           from: right + 8, to: nx - 8 - mw,
-          period: 2.2 + rng() * 0.9, phase: rng() * 0.5
+          period: (p.level >= 61 ? 1.8 : 2.2) + rng() * (p.level >= 61 ? 0.7 : 0.9), phase: rng() * 0.5
         };
         movers.push(mv); moversUsed++;
         transitions.push({ type: 'mover-in', gap: mv.from - right, heightAbove: 0, ok: canJump(mv.from - right, 0) });
