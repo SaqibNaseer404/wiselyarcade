@@ -109,12 +109,12 @@
     if (n <= 10) return BANKS.t1;
     if (n <= 25) return BANKS.t2;
     if (n <= 45) return BANKS.t3;
-    if (n <= 65) return BANKS.t4;
+    if (n <= 60) return BANKS.t4;                    // was <= 65
     if (n <= 80) return BANKS.t4.concat(BANKS.t5);
     return BANKS.t5;
   }
-  function blanksFor(n) { return n >= 66 ? 2 : 1; }
-  function choicesFor(n) { return n >= 26 ? 4 : 3; }
+  function blanksFor(n) { return n >= 81 ? 3 : n >= 46 ? 2 : 1; }   // 2 blanks from L46 (was L66); 3 at L81
+  function choicesFor(n) { return n >= 66 ? 5 : n >= 26 ? 4 : 3; }   // 5 choices from L66
 
   function buildMap() {
     mapEl.innerHTML = '';
@@ -171,7 +171,7 @@
       wordEl.appendChild(t);
     });
     renderChoices();
-    msgEl.textContent = nb > 1 ? 'Two letters ran away! Find the first one.' : 'Which letter is missing?';
+    msgEl.textContent = nb > 1 ? nb + ' letters ran away! Find the first one.' : 'Which letter is missing?';
   }
 
   function renderChoices() {
@@ -202,7 +202,7 @@
       target.tile.classList.add('ml-filled');
       blankIdx++;
       if (blankIdx < blanks.length) {
-        msgEl.textContent = 'Yes! Now the second letter.';
+        msgEl.textContent = 'Yes! Now the next letter.';
         renderChoices();
         return;
       }
