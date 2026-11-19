@@ -107,12 +107,14 @@
   }
   function trapsFor(n) {
     if (n <= 20) return 0;
-    if (n <= 80) return 2;
-    return 3;
+    if (n <= 50) return 3;
+    if (n <= 60) return 4;
+    if (n <= 80) return 5;
+    return 6;
   }
   function hintMode(n) { // 'show' | 'afterFirst' | 'atEnd'
     if (n <= 50) return 'show';
-    if (n <= 80) return 'afterFirst';
+    if (n <= 60) return 'afterFirst';
     return 'atEnd';
   }
   function completedCount(exceptLevel) {
@@ -550,7 +552,6 @@
     } else {
       wordMistake = true;
       tile.btn.classList.add('wt-wrong');
-      tile.btn.disabled = true;
       msgEl.textContent = 'Not that letter — look at the word so far and try another tile.';
       setTimeout(function () { tile.btn.classList.remove('wt-wrong'); }, 350);
     }
