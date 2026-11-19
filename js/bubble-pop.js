@@ -17,6 +17,13 @@
   var CX = W / 2, CY = 588;
   var SHOT_SPEED = 580;
   var SHOTS_PER_ROW = 6;
+  // Toughness pass: descent rate steepens after campaign 20. Campaign 1-20
+  // always returns 6 (identical to before, even on long runs); beyond that
+  // the audit's run-level bands apply (start levels 3-5 -> 5, 6+ -> 4).
+  function shotsPerRow() {
+    if (camp <= 20) return SHOTS_PER_ROW;
+    return level <= 2 ? 6 : level <= 5 ? 5 : 4;
+  }
 
   var PALETTE = [
     { base: '#ef4444', light: '#fecaca', dark: '#7f1d1d' }, // red
@@ -351,7 +358,7 @@
     cur = nxt;
     nxt = pickColor();
     shots++;
-    if (shots % SHOTS_PER_ROW === 0) {
+    if (shots % shotsPerRow() === 0) {
       addRow();
       if (dangerHit()) { gameOver(); return; }
     }
