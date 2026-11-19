@@ -181,8 +181,16 @@
       localStorage.setItem('wa_mm_stars', JSON.stringify(campStars));
     } catch (e) {}
   }
-  function pairsFor(l) { return 6 + Math.floor((l - 1) / 9); }
-  function peekMs(l) { return Math.max(380, 750 - (l - 1) * 4); }
+  function pairsFor(l) {
+    if (l <= 20) return 6 + Math.floor((l - 1) / 9);      // unchanged: 6 -> 8
+    if (l <= 60) return 8 + Math.floor((l - 20) / 6);     // ~1.5x slope: -> 14 at L60
+    return Math.min(20, 14 + Math.floor((l - 60) / 5));   // -> 20 at L90, POOL cap
+  }
+  function peekMs(l) {
+    if (l <= 20) return Math.max(380, 750 - (l - 1) * 4); // unchanged: 750 -> 674
+    if (l <= 60) return 674 - (l - 20) * 6;               // 1.5x slope: -> 434 at L60
+    return Math.max(260, 434 - (l - 60) * 10);            // 2.5x slope: -> 260 floor ~L78
+  }
   function tierName(l) { return l <= 15 ? 'Sharp start' : l <= 35 ? 'Strong memory' : l <= 55 ? 'Memory athlete' : l <= 75 ? 'Mind palace' : l <= 90 ? 'Memory master' : 'Total recall'; }
   function buildMap() {
     var map = document.getElementById('m-map'); if (!map) return;
