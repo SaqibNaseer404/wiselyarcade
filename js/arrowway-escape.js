@@ -99,9 +99,12 @@
   // ---------------------------------------------------------------- levels
   function levelParams(level) {
     var L = Math.max(1, Math.min(100, level | 0));
-    var size = 4 + Math.floor((L - 1) * 6 / 99);              // 4x4 -> 10x10
-    var density = 0.42 + 0.33 * (L - 1) / 99;                 // boards fill up
-    var stones = L < 51 ? 0 : Math.min(6, 1 + Math.floor((L - 51) / 10));
+    // Toughness pass: effective level is identity for L<=20, then 1.5x slope
+    // to L60 and 2.5x slope after (L100 -> 180). return.level stays real.
+    var Le = L <= 20 ? L : L <= 60 ? 20 + (L - 20) * 1.5 : 80 + (L - 60) * 2.5;
+    var size = Math.min(10, 4 + Math.floor((Le - 1) * 6 / 99));              // 4x4 -> 10x10
+    var density = Math.min(0.86, 0.42 + 0.33 * (Le - 1) / 99);                 // boards fill up
+    var stones = Le < 51 ? 0 : Math.min(9, 1 + Math.floor((Le - 51) / 10));
     var arrows = Math.max(4, Math.round(size * size * density));
     return { level: L, size: size, arrows: arrows, stones: stones, hearts: 3 };
   }
