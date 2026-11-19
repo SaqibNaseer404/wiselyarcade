@@ -777,12 +777,19 @@
         s: -(2 - row) * 11, lat: col, alt: row * 3, speed: 0,
         latV: 0, altV: 0, steerSm: 0, altSm: 0, roll: 0, pitch: 0,
         lap: 1, done: false, finishTime: 0,
-        wob: Math.random() * 10, skill: 0.9 + Math.random() * 0.2,
+        wob: Math.random() * 10, skill: level > 60 ? 0.97 + Math.random() * 0.11
+          : level > 20 ? 0.93 + Math.random() * 0.16
+          : 0.9 + Math.random() * 0.2,
         boost: 1
       });
     }
   }
-  function aiLevel() { return level <= 10 ? 0.8 + (level - 1) * 0.022 : 0.998 + (level - 10) * 0.004; } // gentler slope past 10 so 100 stays beatable
+  function aiLevel() { // L1-20 unchanged; modest bump past 20, hard cap 1.45 so 100 stays beatable
+    if (level <= 10) return 0.8 + (level - 1) * 0.022;
+    if (level <= 20) return 0.998 + (level - 10) * 0.004;
+    if (level <= 60) return 1.038 + (level - 20) * 0.005;        // was 0.004 slope
+    return Math.min(1.45, 1.238 + (level - 60) * 0.006);         // L100: 1.45 (was 1.358)
+  }
 
   var _p = new THREE.Vector3(), _t = new THREE.Vector3(), _p2 = new THREE.Vector3(), _look = new THREE.Vector3();
   var _white = new THREE.Color(0xffffff);
@@ -842,7 +849,9 @@
     var aiTop = st.topSpeed * aiLevel() * r.skill;
     var pl = riders[0];
     var gap = (pl.lap - 1) * trackLen + pl.s - ((r.lap - 1) * trackLen + r.s);
-    var target = aiTop * (gap > 90 ? 1.06 : gap < -90 ? 0.95 : 1);
+    var gapLim = level > 60 ? 130 : 90;
+    var target = aiTop * (gap > gapLim ? (level > 60 ? 1.04 : 1.06)
+                        : gap < -gapLim ? (level > 60 ? 0.98 : 0.95) : 1);
     if (r.speed < target) r.speed += 24 * dt; else r.speed -= 34 * dt;
     r.speed = Math.max(0, Math.min(aiTop * 1.05, r.speed));
     // wander the sky: slow sinusoidal line + altitude, avoid the car ahead
