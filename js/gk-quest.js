@@ -117,11 +117,17 @@
   }
   function buildLevel() {
     var ti = tierIdx(cur), bank = BANKS[ti].slice();
-    /* mix a little of the previous tier in for variety from tier 2 up */
-    if (ti > 0) bank = bank.concat(BANKS[ti - 1].slice(0, 4));
+    /* mix a little of the previous tier in for variety from tier 2 up (only to L60 — late levels draw pure tier) */
+    if (ti > 0 && cur <= 60) bank = bank.concat(BANKS[ti - 1].slice(0, 4));
     var rng = seeded(cur * 131 + 7);
     for (var i = bank.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = bank[i]; bank[i] = bank[j]; bank[j] = t; }
-    return bank.slice(0, PER_LEVEL);
+    var qs = bank.slice(0, PER_LEVEL);
+    if (cur >= 61 && ti < 4) { // L61-75: last two questions come from the top bank
+      var hard = BANKS[4].slice();
+      for (var h = hard.length - 1; h > 0; h--) { var hj = Math.floor(rng() * (h + 1)); var ht = hard[h]; hard[h] = hard[hj]; hard[hj] = ht; }
+      qs[3] = hard[0]; qs[4] = hard[1];
+    }
+    return qs;
   }
   function buildMap() {
     var map = $('gk-map'); map.innerHTML = '';
