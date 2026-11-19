@@ -33,8 +33,11 @@
   }
   function configFor(l) {
     var t = (l - 1) / 99;
-    var size = Math.round(9 + t * 11);
-    var mines = Math.round(size * size * (0.123 + t * 0.077));
+    var size = Math.round(9 + t * 11);                       // unchanged
+    var dens = l <= 20 ? 0.123 + t * 0.077                   // unchanged: -> 13.8% at L20
+      : l <= 60 ? 0.1378 + (l - 20) * 0.00117                // 1.5x slope: -> 18.4% at L60
+      : Math.min(0.24, 0.1845 + (l - 60) * 0.00194);         // 2.5x slope, capped 24%
+    var mines = Math.round(size * size * dens);
     return { rows: size, cols: size, mines: mines, tile: size <= 9 ? 36 : size <= 13 ? 30 : size <= 16 ? 27 : 24 };
   }
   function parFor(l) { var c = configFor(l); return Math.round(c.rows * c.cols * 0.85); }
