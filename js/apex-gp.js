@@ -209,12 +209,16 @@
   function genSprint(lv) {
     var rng = mulberry32(lv * 7919 + 13);
     var t = lv - 10;
+    // Toughness pass: extra "course age" for the capped quantities only; 0 up to
+    // L20, then +0.5/level to L60 and +1.5/level after. Length, road width and
+    // aiPace keep using plain t, so rival speed is untouched.
+    var tx = t + (lv <= 20 ? 0 : lv <= 60 ? (lv - 20) * 0.5 : 20 + (lv - 60) * 1.5);
     var ADJ = ['Ember', 'Velvet', 'Thunder', 'Golden', 'Midnight', 'Scarlet', 'Emerald', 'Phantom', 'Solar', 'Iron'];
     var NOUN = ['Straight', 'Ridge Run', 'Valley Sprint', 'Coast Run', 'Canyon Dash', 'Highway Run', 'Bluff Charge', 'River Run', 'Summit Sprint', 'Mesa Run'];
     var len = Math.min(8200, 3200 + t * 55 + Math.floor(rng() * 150));
-    var nRivers = Math.min(8, 4 + Math.floor(t / 12)), rivers = [], ramps = [], i;
-    for (i = 0; i < nRivers; i++) rivers.push({ at: Math.round(500 + (len - 900) * (i + 0.5) / nRivers + (rng() * 120 - 60)), w: Math.min(44, 34 + Math.floor(t / 9)) });
-    var nRamps = Math.min(6, 3 + Math.floor(t / 15));
+    var nRivers = Math.min(11, 4 + Math.floor(tx / 12)), rivers = [], ramps = [], i;
+    for (i = 0; i < nRivers; i++) rivers.push({ at: Math.round(500 + (len - 900) * (i + 0.5) / nRivers + (rng() * 120 - 60)), w: Math.min(50, 34 + Math.floor(tx / 9)) });
+    var nRamps = Math.min(8, 3 + Math.floor(tx / 15));
     for (i = 0; i < nRamps; i++) {
       var at = Math.round(700 + (len - 1200) * (i + 0.7) / (nRamps + 0.4));
       for (var j = 0; j < rivers.length; j++) if (Math.abs(at - rivers[j].at) < 110) at += 160;
@@ -223,7 +227,7 @@
     return {
       name: ADJ[Math.floor(rng() * ADJ.length)] + ' ' + NOUN[Math.floor(rng() * NOUN.length)],
       len: len, roadHalf: Math.max(4.4, 5.1 - t * 0.008),
-      traffic: Math.min(16, 9 + Math.floor(t / 6)),
+      traffic: Math.min(26, 9 + Math.floor(tx / 6)),
       aiPace: Math.min(1.30, 1.12 + t * 0.002),
       rivers: rivers, ramps: ramps
     };
