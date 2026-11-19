@@ -41,9 +41,9 @@
     return {
       n: n,
       len: Math.min(12000, 4300 + t * 160),
-      a1: Math.min(150, 102 + t * 1.2), f1: Math.min(0.008, 0.0062 + t * 0.00004),
-      a2: Math.min(70, 46 + t * 0.6), f2: Math.min(0.02, 0.0155 + t * 0.0001),
-      flat: Math.max(150, 210 - t), maxSpeed: Math.min(520, 390 + t * 3)
+      a1: Math.min(150, 102 + t * 1.2) + (n > 60 ? Math.min(35, (n - 60) * 0.9) : 0), f1: Math.min(0.008, 0.0062 + t * 0.00004),
+      a2: Math.min(70, 46 + t * 0.6) + (n > 60 ? Math.min(18, (n - 60) * 0.45) : 0), f2: Math.min(0.02, 0.0155 + t * 0.0001),
+      flat: Math.max(150, 210 - t), maxSpeed: Math.min(520, 390 + t * 3) + (n > 60 ? Math.min(70, (n - 60) * 1.75) : 0)
     };
   }
   var _obCache = {};
@@ -51,7 +51,7 @@
     if (OBSTACLES[n]) return OBSTACLES[n];
     if (_obCache[n]) return _obCache[n];
     var Lv = levelFor(n), t = n - 3;
-    var nRamps = Math.min(9, 4 + Math.floor(t / 8));
+    var nRamps = Math.min(9, 4 + Math.floor(t / 8)) + (n > 60 ? Math.floor((n - 60) / 13) : 0);
     var ramps = [], hurdles = [], spikes = [], i, j, k;
     var span = Lv.len - Lv.flat - 500;
     for (i = 0; i < nRamps; i++) {
@@ -59,12 +59,25 @@
       ramps.push({ x: x, w: 110, h: 60 });
       if (i % 3 !== 2) hurdles.push({ x: x + 145, w: 28, h: 30 });
     }
-    var nSpikes = Math.min(5, Math.floor(t / 6));
+    var nSpikes = Math.min(12, Math.min(5, Math.floor(t / 6)) + (n > 60 ? Math.floor((n - 60) / 5) : 0));
     for (j = 0; j < nSpikes; j++) {
       var sx = Math.round(Lv.flat + 600 + (Lv.len - Lv.flat - 900) * (j + 0.5) / Math.max(1, nSpikes) + (hash(n * 57 + j) - 0.5) * 150);
       var clash = false;
       for (k = 0; k < ramps.length; k++) if (Math.abs(sx - ramps[k].x) < 260) clash = true;
-      if (!clash) spikes.push({ x: sx, w: 34 });
+      if (clash && n > 60) {
+        // Endgame only: denser spike fields phase-lock with the ramp grid and
+        // the clash filter would drop nearly every strip (0 placed at L100),
+        // so retry shifted spots before giving up on a strip.
+        var offs = [320, -320, 640, -640, 160, -160, 480, -480], oi;
+        for (oi = 0; oi < offs.length && clash; oi++) {
+          var cx = sx + offs[oi];
+          if (cx < Lv.flat + 300 || cx > Lv.len - 300) continue;
+          clash = false;
+          for (k = 0; k < ramps.length; k++) if (Math.abs(cx - ramps[k].x) < 260) clash = true;
+          if (!clash) sx = cx;
+        }
+      }
+      if (!clash) spikes.push({ x: sx, w: 34 + (n > 60 ? Math.min(14, Math.floor((n - 60) * 0.35)) : 0) });
     }
     var ob = { ramps: ramps, hurdles: hurdles, spikes: spikes };
     _obCache[n] = ob;
