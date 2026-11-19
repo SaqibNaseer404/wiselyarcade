@@ -1020,7 +1020,12 @@
     resetTraffic();
   }
 
-  function aiLevel() { return level <= 15 ? 0.8 + (level - 1) * 0.022 : 1.108 + (level - 15) * 0.004; } // rivals get faster (gentler slope past 15 so 100 stays beatable)
+  function aiLevel() { // rivals get faster; L1-20 unchanged, steeper past 20, hard cap 1.60 so top-3 stays reachable
+    if (level <= 15) return 0.8 + (level - 1) * 0.022;          // unchanged
+    if (level <= 20) return 1.108 + (level - 15) * 0.004;       // unchanged: -> 1.128
+    if (level <= 60) return 1.128 + (level - 20) * 0.006;       // 1.5x slope: -> 1.368 at L60
+    return Math.min(1.60, 1.368 + (level - 60) * 0.010);        // 2.5x slope, capped 1.60 (cap binds ~L84)
+  }
 
   var _p = new THREE.Vector3(), _t = new THREE.Vector3(), _p2 = new THREE.Vector3();
   function placeRider(r, dt) {
