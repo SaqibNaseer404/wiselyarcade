@@ -43,7 +43,7 @@
   function stageOf(l) { return Math.ceil(((l - 1) % 20 + 1) / 4); }
   function sceneInfo(l) { return SCENES[sceneOf(l) - 1]; }
   function paletteSize(l) { return Math.min(18, 8 + Math.floor((l - 1) / 10)); }
-  function missionCount(l) { return l < 6 ? 0 : l <= 20 ? 1 : l <= 40 ? 2 : l <= 60 ? 3 : l <= 80 ? 4 : 5; }
+  function missionCount(l) { return l < 6 ? 0 : l <= 20 ? 1 : l <= 40 ? 3 : l <= 60 ? 4 : l <= 80 ? 6 : 8; }
   function seeded(seed) { var t = seed * 2654435761 % 4294967296; return function () { t = (t * 1664525 + 1013904223) % 4294967296; return t / 4294967296; }; }
 
   var palette = document.getElementById('pr-palette');
