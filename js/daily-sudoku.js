@@ -139,7 +139,11 @@
       localStorage.setItem('wa_su_stars', JSON.stringify(campStars));
     } catch (e) {}
   }
-  function givensFor(l) { return Math.round(38 - (l - 1) * 14 / 99); }
+  function givensFor(l) {
+    if (l <= 20) return Math.round(38 - (l - 1) * 14 / 99); // 38 -> 35, unchanged
+    if (l <= 60) return Math.round(35 - (l - 20) * 8 / 40);  // 35 -> 27 (slope x1.4 vs today)
+    return Math.max(20, Math.round(27 - (l - 60) * 7 / 40)); // 27 -> 20
+  }
   function tierName(l) { return l <= 15 ? 'Gentle grids' : l <= 35 ? 'Getting tricky' : l <= 55 ? 'Logic workout' : l <= 75 ? 'Expert grids' : l <= 90 ? 'Master grids' : 'Grandmaster'; }
   function makeRng(seed) {
     var a = seed >>> 0;
