@@ -111,10 +111,9 @@
     if (l <= 10) return { c: 3, r: 3 };
     if (l <= 25) return { c: 4, r: 3 };
     if (l <= 40) return { c: 4, r: 4 };
-    if (l <= 55) return { c: 5, r: 4 };
-    if (l <= 70) return { c: 6, r: 4 };
-    if (l <= 85) return { c: 6, r: 5 };
-    return { c: 7, r: 5 };
+    if (l <= 60) return { c: 5, r: 5 };
+    if (l <= 80) return { c: 7, r: 5 };
+    return { c: 7, r: 6 };
   }
   function picFor(l) { return PICS[(l - 1) % PICS.length]; }
   function parFor(n) { return n + Math.ceil(n / 2); }
