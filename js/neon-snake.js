@@ -36,7 +36,11 @@
       localStorage.setItem('wa_ns_attempts', JSON.stringify(lvlAttempts));
     } catch (e) {}
   }
-  function target() { return Math.min(22, 5 + Math.floor((lvl - 1) / 5)); }
+  function target() {
+    if (lvl <= 20) return Math.min(22, 5 + Math.floor((lvl - 1) / 5));  // unchanged: 5 -> 8
+    if (lvl <= 60) return 8 + Math.floor((lvl - 20) * 3 / 10);          // 1.5x slope: -> 20 at L60
+    return Math.min(34, 20 + Math.floor((lvl - 60) / 3));                // cap raised 22 -> 34: -> 33 at L100
+  }
   function tierName(l) { return l <= 10 ? 'Warm-up' : l <= 25 ? 'Speeding up' : l <= 45 ? 'First walls' : l <= 65 ? 'The maze' : l <= 85 ? 'Tight corners' : 'Neon master'; }
   function seeded(seed) { var t = seed * 2654435761 % 4294967296; return function () { t = (t * 1664525 + 1013904223) % 4294967296; return t / 4294967296; }; }
   function buildObstacles() {
@@ -54,7 +58,7 @@
       [[3, 3], [3, 15], [15, 3], [15, 15]].forEach(function (c) { add(c[0], c[1]); add(c[0] + 1, c[1]); add(c[0], c[1] + 1); add(c[0] + 1, c[1] + 1); });
       for (i = -2; i <= 2; i++) { if (i) add(mid + i, mid - 6); }
     } else {
-      var rng = seeded(lvl * 31 + 7), want = lvl <= 85 ? 16 : 26, placed = 0, guard = 0;
+      var rng = seeded(lvl * 31 + 7), want = lvl <= 85 ? 22 : 34, placed = 0, guard = 0;
       while (placed < want && guard++ < 500) {
         x = 1 + Math.floor(rng() * (CELLS - 2)); y = 1 + Math.floor(rng() * (CELLS - 2));
         if (Math.abs(x - mid) <= 2 && Math.abs(y - mid) <= 2) continue;
@@ -165,7 +169,11 @@
   }
 
   // Speed: rises with level and with every orb eaten.
-  function stepMsBase() { return Math.max(72, 150 - (lvl - 1)); }
+  function stepMsBase() {
+    if (lvl <= 20) return Math.max(72, 150 - (lvl - 1));                 // unchanged
+    if (lvl <= 60) return Math.round(131 - (lvl - 20) * 1.5);            // -> 71 at L60
+    return Math.max(58, Math.round(71 - (lvl - 60) * 2.5));              // floor lowered 72 -> 58
+  }
   function stepMs() { return Math.max(52, stepMsBase() - score * 2); }
 
   function reset() {
