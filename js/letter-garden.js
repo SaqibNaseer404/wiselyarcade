@@ -76,7 +76,12 @@
     if (n <= 80) return BANKS.b3;
     return BANKS.b4;
   }
-  function trapsFor(n) { return n >= 21 ? 2 : 0; }
+  function trapsFor(n) {
+    if (n < 21) return 0;   // unchanged
+    if (n <= 60) return 2;  // unchanged
+    if (n <= 80) return 3;
+    return 4;
+  }
   function hintMode(n) { // 0 = always shown, 1 = hidden until first letter, 2 = hidden until word complete
     if (n <= 50) return 0;
     if (n <= 80) return 1;
