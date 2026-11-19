@@ -58,7 +58,11 @@
       localStorage.setItem('wa_md_stars', JSON.stringify(campStars));
     } catch (e) {}
   }
-  function timeFor(l) { return Math.max(11, 30 - Math.floor((l - 1) / 5)); }
+  function timeFor(l) {
+    if (l <= 20) return 30 - Math.floor((l - 1) / 5);        // unchanged: 30 -> 27
+    if (l <= 60) return 27 - Math.floor((l - 20) * 3 / 10);  // 1.5x slope: -> 15 at L60
+    return Math.max(10, 15 - Math.floor((l - 60) / 4));      // -> 10 floor from ~L80
+  }
   function tierName(l) { return l <= 15 ? 'Warming up' : l <= 35 ? 'Sharp thinker' : l <= 55 ? 'Quick mind' : l <= 75 ? 'Lightning mind' : l <= 90 ? 'Mind athlete' : 'Certified genius'; }
   function seededShuffle(a, seed) {
     a = a.slice();
