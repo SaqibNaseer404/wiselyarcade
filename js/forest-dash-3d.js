@@ -116,12 +116,14 @@
     var c = LEVELS[i];
     if (n <= LEVELS.length) return c;
     var extra = n - LEVELS.length;
+    var late = Math.max(0, n - 20); // toughness pass: zero effect at or below L20
     return {
-      name: c.name + ' +' + extra, leg: Math.min(2200, c.leg + extra * 60),
-      speed: Math.min(30, c.speed + extra * 2), max: Math.min(34, c.max + extra * 2),
+      name: c.name + ' +' + extra,
+      leg: Math.min(2200 + late * 25, c.leg + extra * 60 + late * 25),
+      speed: Math.min(30 + Math.min(6, late * 0.1), c.speed + extra * 2), max: Math.min(34 + Math.min(8, late * 0.15), c.max + extra * 2),
       near: c.near, far: c.far, bushes: c.bushes, tufts: c.tufts,
       fog: c.fog, fogNear: c.fogNear, fogFar: c.fogFar, grass: c.grass,
-      gap: Math.max(12, c.gap - extra)
+      gap: Math.max(12 - Math.min(3, Math.floor(late / 25)), c.gap - extra)
     };
   }
 
