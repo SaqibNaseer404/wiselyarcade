@@ -20,6 +20,7 @@
   ];
   function tierName(l) { for (var i = 0; i < TIERS.length; i++) if (l <= TIERS[i].to) return TIERS[i].name; return TIERS[5].name; }
   function band(l) { return l <= 10 ? 1 : l <= 25 ? 2 : l <= 45 ? 3 : l <= 65 ? 4 : l <= 80 ? 5 : 6; }
+  function boost() { return cur <= 20 ? 1 : cur <= 60 ? 1 + (cur - 20) * 0.0075 : 1.3 + (cur - 60) * 0.0125; }
 
   var cur = 1, unlocked = 1, starMap = {};
   var opKey = 'mix';
@@ -61,34 +62,34 @@
       if (bd === 1) { x = rnd(1, 7); y = rnd(1, 9 - x); pics = '🍎'.repeat(x) + ' &nbsp;+&nbsp; ' + '🍏'.repeat(y); }
       else if (bd === 2) { x = rnd(6, 40); y = rnd(5, 35); }
       else if (bd === 3) { x = rnd(25, 160); y = rnd(20, 140); }
-      else if (bd === 4) { x = rnd(120, 700); y = rnd(110, 650); }
-      else if (bd === 5) { if (rnd(0, 1)) { x = rnd(40, 300); y = rnd(40, 300); q = '? + ' + y + ' = ' + (x + y); a = x; } else { x = rnd(150, 900); y = rnd(150, 900); } }
-      else { if (rnd(0, 1)) { x = rnd(200, 1500); y = rnd(200, 1500); q = x + ' + ' + y + ' − ' + rnd(10, 99) + ' = ?'; a = x + y - parseInt(q.split('− ')[1], 10); q = q; } else { x = rnd(300, 2000); y = rnd(300, 2000); } }
+      else if (bd === 4) { x = rnd(120, Math.round(700 * boost())); y = rnd(110, Math.round(650 * boost())); }
+      else if (bd === 5) { if (rnd(0, 1)) { x = rnd(40, Math.round(300 * boost())); y = rnd(40, Math.round(300 * boost())); q = '? + ' + y + ' = ' + (x + y); a = x; } else { x = rnd(150, Math.round(900 * boost())); y = rnd(150, Math.round(900 * boost())); } }
+      else { if (rnd(0, 1)) { x = rnd(200, Math.round(1500 * boost())); y = rnd(200, Math.round(1500 * boost())); q = x + ' + ' + y + ' − ' + rnd(10, 99) + ' = ?'; a = x + y - parseInt(q.split('− ')[1], 10); q = q; } else { x = rnd(300, Math.round(2000 * boost())); y = rnd(300, Math.round(2000 * boost())); } }
       if (!q) { q = x + ' + ' + y + ' = ?'; a = x + y; }
     } else if (op === 'sub') {
       var m, n;
       if (bd === 1) { m = rnd(4, 10); n = rnd(1, m - 1); pics = '🎈'.repeat(m); }
       else if (bd === 2) { m = rnd(15, 60); n = rnd(5, m - 5); }
       else if (bd === 3) { m = rnd(60, 300); n = rnd(30, m - 20); }
-      else if (bd === 4) { m = rnd(300, 950); n = rnd(120, m - 100); }
-      else if (bd === 5) { if (rnd(0, 1)) { m = rnd(100, 500); n = rnd(40, m - 30); q = m + ' − ? = ' + (m - n); a = n; } else { m = rnd(400, 1200); n = rnd(200, m - 150); } }
-      else { m = rnd(800, 3000); n = rnd(300, m - 250); }
+      else if (bd === 4) { m = rnd(300, Math.round(950 * boost())); n = rnd(120, m - 100); }
+      else if (bd === 5) { if (rnd(0, 1)) { m = rnd(100, Math.round(500 * boost())); n = rnd(40, m - 30); q = m + ' − ? = ' + (m - n); a = n; } else { m = rnd(400, Math.round(1200 * boost())); n = rnd(200, m - 150); } }
+      else { m = rnd(800, Math.round(3000 * boost())); n = rnd(300, m - 250); }
       if (!q) { q = m + ' − ' + n + ' = ?'; a = m - n; }
     } else if (op === 'mul') {
       var f, g;
       if (bd <= 2) { f = rnd(2, 5); g = rnd(2, 6); }
       else if (bd === 3) { f = rnd(3, 9); g = rnd(3, 9); }
-      else if (bd === 4) { f = rnd(11, 40); g = rnd(2, 6); }
-      else if (bd === 5) { f = rnd(12, 60); g = rnd(3, 9); }
-      else { f = rnd(15, 99); g = rnd(4, 9); if (rnd(0, 1)) { q = f + ' × ' + g + ' + ' + rnd(2, 20) + ' = ?'; a = f * g + parseInt(q.split('+ ')[1], 10); } }
+      else if (bd === 4) { f = rnd(11, Math.round(40 * boost())); g = rnd(2, 6); }
+      else if (bd === 5) { f = rnd(12, Math.round(60 * boost())); g = rnd(3, 9); }
+      else { f = rnd(15, Math.round(99 * boost())); g = rnd(4, 9); if (rnd(0, 1)) { q = f + ' × ' + g + ' + ' + rnd(2, 20) + ' = ?'; a = f * g + parseInt(q.split('+ ')[1], 10); } }
       if (!q) { q = f + ' × ' + g + ' = ?'; a = f * g; }
     } else { /* div */
       var d, qt;
       if (bd <= 2) { d = rnd(2, 5); qt = rnd(2, 6); }
       else if (bd === 3) { d = rnd(3, 9); qt = rnd(3, 9); }
-      else if (bd === 4) { d = rnd(4, 12); qt = rnd(4, 12); }
-      else if (bd === 5) { d = rnd(6, 15); qt = rnd(6, 15); }
-      else { d = rnd(7, 19); qt = rnd(7, 19); if (rnd(0, 1)) { q = '? ÷ ' + d + ' = ' + qt; a = d * qt; } }
+      else if (bd === 4) { d = rnd(4, Math.round(12 * boost())); qt = rnd(4, Math.round(12 * boost())); }
+      else if (bd === 5) { d = rnd(6, Math.round(15 * boost())); qt = rnd(6, Math.round(15 * boost())); }
+      else { d = rnd(7, Math.round(19 * boost())); qt = rnd(7, Math.round(19 * boost())); if (rnd(0, 1)) { q = '? ÷ ' + d + ' = ' + qt; a = d * qt; } }
       if (!q) { q = (d * qt) + ' ÷ ' + d + ' = ?'; a = qt; }
     }
     /* distractors */
