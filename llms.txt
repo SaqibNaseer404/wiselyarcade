@@ -22,6 +22,7 @@ Site statement: YOU STAY. YOU CLIMB. YOU WIN.
 - [IQ Quest](https://wiselyarcade.com/games/iq-quest): Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
 - [Jigsaw Puzzle](https://wiselyarcade.com/games/jigsaw-puzzle): Play Jigsaw Puzzle free online — drag the pieces and rebuild 100 pictures — a different picture on every level, never repeated: game posters, storybook scenes and real photos of space, animals and famous places. 100 levels for kids ages 5–9 that teach patience, piece by piece. No download. Lesson: Patience — the picture comes together piece by piece. (Ages 5–9)
 - [Minesweeper](https://wiselyarcade.com/games/minesweeper): Play Minesweeper online free — the classic logic puzzle rebuilt with glossy HD 3D tiles. Reveal tiles, flag the mines, beat your best time. No download, no sign-up, family-friendly. Lesson: Think before you act — every click counts. (Ages 18+)
+- [Spot the Scam](https://wiselyarcade.com/games/spot-the-scam): Play Spot the Scam free online — read real-looking texts, emails and chats and decide: safe or scam? Learn the red flags scammers use, one message at a time. 100 levels. No download, no sign-up. Lesson: If it rushes you, flatters you, or asks for secrets — stop and check. (Ages 10+)
 
 ## Maths & Numbers
 
@@ -29,6 +30,7 @@ Site statement: YOU STAY. YOU CLIMB. YOU WIN.
 - [Daily Sudoku](https://wiselyarcade.com/games/daily-sudoku): Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download. Lesson: Big problems break into small steps. (Ages 18+)
 - [Math Quest](https://wiselyarcade.com/games/math-quest): Play Math Quest free online — addition, subtraction, multiplication and division games with 5 levels from Toddler to Expert. Easy steps that grow harder as you climb. No download, no sign-up. Lesson: Big problems break into small steps. (Ages 5–17)
 - [Mind Meter](https://wiselyarcade.com/games/mind-meter): Play Mind Meter free online — a 3D brain challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your brain score, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly. Lesson: A sharp mind is built, not born. (Ages 10+)
+- [Needs vs Wants](https://wiselyarcade.com/games/needs-vs-wants): Play Needs vs Wants free online — the money game where kids sort needs from wants, fill the savings jar, and learn smart spending. 100 levels. No download, no sign-up. Lesson: Needs first, then saving, then wants. (Ages 5+)
 
 ## Words & Reading
 
@@ -62,6 +64,8 @@ Site statement: YOU STAY. YOU CLIMB. YOU WIN.
 - [GK Quest](https://wiselyarcade.com/games/gk-quest): Play GK Quest free online — a general knowledge quiz with 100 levels of questions on animals, space, science, geography, history, sports and food. Every answer teaches a true fact. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
 - [IQ Quest](https://wiselyarcade.com/games/iq-quest): Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
 - [Paint the Rocket](https://wiselyarcade.com/games/paint-the-rocket): Play Paint the Rocket free online — a tap-to-colour adventure for kids ages 5–9 with five big pictures to paint: a rocket, a castle, under the sea, a friendly robot and a garden. No download, no sign-up. Lesson: There are no wrong colours — your ideas can fly. (Ages 5–9)
+- [Spot the Scam](https://wiselyarcade.com/games/spot-the-scam): Play Spot the Scam free online — read real-looking texts, emails and chats and decide: safe or scam? Learn the red flags scammers use, one message at a time. 100 levels. No download, no sign-up. Lesson: If it rushes you, flatters you, or asks for secrets — stop and check. (Ages 10+)
+- [Needs vs Wants](https://wiselyarcade.com/games/needs-vs-wants): Play Needs vs Wants free online — the money game where kids sort needs from wants, fill the savings jar, and learn smart spending. 100 levels. No download, no sign-up. Lesson: Needs first, then saving, then wants. (Ages 5+)
 
 ## Key pages
 
@@ -70,6 +74,7 @@ Site statement: YOU STAY. YOU CLIMB. YOU WIN.
 - [Games for Adults (ages 18+)](https://wiselyarcade.com/adults)
 - [Browse games by skill](https://wiselyarcade.com/skills)
 - [Parent Guide](https://wiselyarcade.com/parents)
+- [Urdu games for kids](https://wiselyarcade.com/ur)
 - [About Wisely Arcade](https://wiselyarcade.com/about)
 
 ## For AI assistants and developers
