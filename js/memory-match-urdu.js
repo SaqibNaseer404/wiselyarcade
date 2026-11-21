@@ -1,0 +1,405 @@
+// Animal Memory Match — 4x4 flip-card matching game (Ages 5-9).
+// Tracks moves + time; best score (fewest moves) saved in localStorage.
+// VISUALS: glossy candy-3D style overrides are injected below (3D-STYLE block).
+// Game logic is unchanged.
+(function () {
+  'use strict';
+
+  /* ================= 3D-STYLE: glossy candy-3D card visuals =================
+     Injected here (not in css/style.css) so the upgrade is self-contained.
+     Beveled tiles, radial gloss, white specular highlights, soft shadows. */
+  (function inject3DStyle() {
+    if (document.getElementById('m3d-style')) return;
+    var css = [
+      /* Premium card table: deeper perspective + soft table shadow */
+      '.mcard{perspective:1200px;filter:drop-shadow(0 10px 12px rgba(4,26,20,.5))}',
+      '.mcard:not(.flipped):hover{filter:drop-shadow(0 12px 14px rgba(4,26,20,.55)) brightness(1.08)}',
+      '.mcard:focus-visible{outline:3px solid #f5a623;outline-offset:3px;border-radius:18px}',
+      /* Smooth 3D flip (same class-driven timing model as before) */
+      '.mcard .inner{transition:transform .5s cubic-bezier(.3,1.3,.5,1)}',
+      '.mcard.flipped .inner{transform:rotateY(180deg)}',
+      '.mcard:not(.flipped):active .inner{transform:scale(.94)}',
+
+      /* Shared face: rounded playing-card tile, clip sheen inside */
+      '.mface{border-radius:18px;overflow:hidden}',
+
+      /* ---- Card BACK: deep teal-to-indigo woven tile with gold rim ---- */
+      '.mface.back{',
+      '  background:',
+      '    radial-gradient(circle at 32% 18%, rgba(255,255,255,.34) 0%, rgba(255,255,255,0) 46%),',
+      '    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 2px, rgba(255,255,255,0) 2px 6px),',
+      '    repeating-linear-gradient(-45deg, rgba(0,0,0,.07) 0 2px, rgba(0,0,0,0) 2px 6px),',
+      '    radial-gradient(circle at 74% 90%, rgba(8,20,50,.4) 0%, rgba(8,20,50,0) 58%),',
+      '    linear-gradient(150deg,#177d74 0%,#0f766e 34%,#134e6a 68%,#2b2a6e 100%);',
+      '  border:none;',
+      '  box-shadow:',
+      '    inset 3px 3px 0 rgba(255,255,255,.35),',
+      '    inset -5px -5px 0 rgba(4,16,44,.45),',
+      '    inset 0 0 0 3px rgba(216,178,90,.95),',
+      '    inset 0 0 0 5px rgba(90,60,8,.35),',
+      '    inset 0 0 26px rgba(6,30,50,.35);',
+      '}',
+      /* Soft sheen spot on the back */
+      '.mface.back::before{',
+      '  content:"";position:absolute;top:6%;left:8%;width:54%;height:28%;',
+      '  border-radius:50%;transform:rotate(-16deg);pointer-events:none;',
+      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.75) 0%, rgba(255,255,255,0) 70%);',
+      '}',
+      /* Paw print inside a gold-ring medallion */
+      '.mface.back .paw{',
+      '  display:flex;align-items:center;justify-content:center;',
+      '  width:58%;aspect-ratio:1;border-radius:50%;',
+      '  font-size:clamp(2rem,10.5vw,2.8rem);line-height:1;',
+      '  background:radial-gradient(circle at 50% 36%, rgba(255,236,170,.28) 0%, rgba(255,214,110,.12) 58%, rgba(0,0,0,.12) 100%);',
+      '  box-shadow:inset 0 0 0 2px rgba(240,199,102,.85), inset 0 3px 8px rgba(255,255,255,.25), inset 0 -6px 10px rgba(0,0,0,.3), 0 4px 10px rgba(2,12,30,.4);',
+      '  filter:drop-shadow(0 2px 2px rgba(2,12,30,.5));',
+      '}',
+
+      /* ---- Card FRONT: clean ivory face ---- */
+      '.mface.front{',
+      '  background:',
+      '    radial-gradient(circle at 50% 42%, #ffffff 0%, #fffaf0 52%, #f7ead0 100%);',
+      '  border:none;transform:rotateY(180deg);',
+      '  box-shadow:',
+      '    inset 3px 3px 0 rgba(255,255,255,.9),',
+      '    inset -5px -5px 0 rgba(146,104,32,.22),',
+      '    inset 0 0 0 2px rgba(190,150,60,.5);',
+      '}',
+      '.mface.front::before{',
+      '  content:"";position:absolute;top:6%;left:8%;width:54%;height:28%;',
+      '  border-radius:50%;transform:rotate(-16deg);pointer-events:none;',
+      '  background:radial-gradient(ellipse at center, rgba(255,255,255,.85) 0%, rgba(255,255,255,0) 70%);',
+      '}',
+      /* Animal in a soft spotlight disc, larger and crisper */
+      '.mface.front .critter{',
+      '  display:flex;align-items:center;justify-content:center;',
+      '  width:74%;aspect-ratio:1;border-radius:50%;',
+      '  font-size:clamp(2.3rem,12.5vw,3.3rem);line-height:1;',
+      '  background:radial-gradient(circle at 50% 36%, #ffffff 0%, #fff6dc 56%, #ffe9ae 100%);',
+      '  box-shadow:inset 0 2px 7px rgba(255,255,255,.95), inset 0 -7px 11px rgba(180,120,20,.2), 0 9px 15px rgba(96,64,4,.24);',
+      '  filter:drop-shadow(0 4px 3px rgba(120,70,0,.25));',
+      '}',
+
+      /* PAINT pilot: portrait fills the spotlight disc; emoji text hidden but kept in DOM */
+      '.mface.front .critter.paint{',
+      '  background-size:cover;background-position:center;',
+      '  color:transparent;font-size:0;line-height:0;text-shadow:none;',
+      '}',
+
+      /* ---- MATCHED pair: warm gold glow + celebratory pop ---- */
+      '.mcard.matched{cursor:default}',
+      '.mcard.matched .mface.front{',
+      '  background:',
+      '    radial-gradient(circle at 50% 42%, #fffef8 0%, #fff3cf 55%, #ffd873 100%);',
+      '  box-shadow:',
+      '    inset 3px 3px 0 rgba(255,255,255,.9),',
+      '    inset -5px -5px 0 rgba(160,100,6,.3),',
+      '    inset 0 0 0 3px rgba(245,166,35,.95),',
+      '    0 0 26px rgba(245,180,40,.65);',
+      '}',
+      '.mcard.matched .mface.front .critter{',
+      '  background:radial-gradient(circle at 50% 36%, #ffffff 0%, #ffedb8 55%, #ffd35e 100%);',
+      '  box-shadow:inset 0 2px 7px rgba(255,255,255,.95), inset 0 -7px 11px rgba(180,110,10,.3), 0 9px 15px rgba(120,70,0,.3);',
+      '}',
+      '.mcard.matched .inner{animation:m3d-pop .55s cubic-bezier(.3,1.4,.5,1)}',
+      '@keyframes m3d-pop{',
+      '  0%{transform:rotateY(180deg) scale(1)}',
+      '  40%{transform:rotateY(180deg) scale(1.15)}',
+      '  70%{transform:rotateY(180deg) scale(.97)}',
+      '  100%{transform:rotateY(180deg) scale(1)}',
+      '}',
+      /* Sparkle sweep across a just-matched pair */
+      '.mcard.matched .mface.front::after{',
+      '  content:"";position:absolute;top:-25%;bottom:-25%;left:-50%;width:45%;',
+      '  transform:skewX(-18deg);pointer-events:none;',
+      '  background:linear-gradient(100deg, rgba(255,255,255,0), rgba(255,255,255,.95), rgba(255,255,255,0));',
+      '  animation:m3d-sheen .7s ease .05s;',
+      '}',
+      '@keyframes m3d-sheen{from{left:-50%}to{left:135%}}',
+
+      /* Respect reduced motion */
+      '@media (prefers-reduced-motion:reduce){',
+      '  .mcard .inner{transition-duration:.2s}',
+      '  .mcard.matched .inner{animation:none}',
+      '  .mcard.matched .mface.front::after{animation:none;display:none}',
+      '}'
+    ].join('\n');
+    var el = document.createElement('style');
+    el.id = 'm3d-style';
+    el.textContent = css;
+    document.head.appendChild(el);
+  })();
+  /* ================= end 3D-STYLE ================= */
+
+
+  /* URDU edition: animal names shown on every match — the learning layer. */
+  var NAMES = { '🐶': ['کتا', 'Dog'], '🐱': ['بلی', 'Cat'], '🦊': ['لومڑی', 'Fox'], '🐼': ['پانڈا', 'Panda'],
+    '🐸': ['مینڈک', 'Frog'], '🦁': ['شیر', 'Lion'], '🐵': ['بندر', 'Monkey'], '🐯': ['چیتا', 'Tiger'],
+    '🐰': ['خرگوش', 'Rabbit'], '🦄': ['یونیکورن', 'Unicorn'], '🐷': ['سور', 'Pig'], '🐥': ['چوزہ', 'Chick'],
+    '🦋': ['تتلی', 'Butterfly'], '🐢': ['کچھوا', 'Turtle'], '🐳': ['وھیل', 'Whale'], '🦉': ['الو', 'Owl'],
+    '🐙': ['آکٹوپس', 'Octopus'], '🦩': ['فلیمنگو', 'Flamingo'], '🐿️': ['گلہری', 'Squirrel'], '🦜': ['طوطا', 'Parrot'] };
+  var ANIMALS = ['🐶', '🐱', '🦊', '🐼', '🐸', '🦁', '🐵', '🐯'];
+  var POOL = ANIMALS.concat(['🐰', '🦄', '🐷', '🐥', '🦋', '🐢', '🐳', '🦉', '🐙', '🦩', '🐿️', '🦜']);
+  var BEST_KEY = 'wisely_memory_best_urdu';
+
+  /* ================= PAINT pilot: painted portraits for the 8 core animals =================
+     The other 12 POOL animals stay emoji (intended mix for the pilot).
+     Portraits are preloaded up front; if one fails to load, its cards fall
+     back to the emoji (the emoji text is always in the DOM). */
+  var PORTRAITS = { '🐶': 'dog', '🐱': 'cat', '🦊': 'fox', '🐼': 'panda', '🐸': 'frog', '🦁': 'lion', '🐵': 'monkey', '🐯': 'tiger', '🐰': 'rabbit', '🦄': 'unicorn', '🐷': 'pig', '🐥': 'chick', '🦋': 'butterfly', '🐢': 'turtle', '🐳': 'whale', '🦉': 'owl', '🐙': 'octopus', '🦩': 'flamingo', '🐿️': 'squirrel', '🦜': 'parrot' };
+  var PORTRAIT_BASE = '../images/critters/';
+  var PORTRAIT_BAD = {};   // name -> true once its portrait failed to load
+  function unpaintPortrait(name) {
+    var spans = document.querySelectorAll('.critter.paint[data-portrait="' + name + '"]');
+    for (var i = 0; i < spans.length; i++) {
+      spans[i].classList.remove('paint');
+      spans[i].style.backgroundImage = '';
+    }
+  }
+  (function preloadPortraits() {
+    Object.keys(PORTRAITS).forEach(function (emoji) {
+      var name = PORTRAITS[emoji];
+      var img = new Image();
+      img.onerror = function () {
+        PORTRAIT_BAD[name] = true;
+        unpaintPortrait(name);
+      };
+      img.src = PORTRAIT_BASE + name + '.jpg';
+    });
+  })();
+  /* ================= end PAINT pilot setup ================= */
+
+  // ---- 100-level campaign: the board grows (6 pairs at L1 -> 17 at L100)
+  // and mismatched cards flip back faster. Stars by moves: efficient
+  // memory (<=1.6 moves per pair) earns 3 stars.
+  var MAX_LEVEL = 100;
+  var camp = 1, campUnlocked = 1, campStars = {}, pendingNext = false, curPairs = 8;
+  try {
+    camp = parseInt(localStorage.getItem('wa_mmu_current') || '1', 10) || 1;
+    campUnlocked = parseInt(localStorage.getItem('wa_mmu_unlocked') || '1', 10) || 1;
+    campStars = JSON.parse(localStorage.getItem('wa_mmu_stars') || '{}') || {};
+  } catch (e) {}
+  if (camp < 1) camp = 1; if (camp > MAX_LEVEL) camp = MAX_LEVEL;
+  if (campUnlocked < camp) campUnlocked = camp; if (campUnlocked > MAX_LEVEL) campUnlocked = MAX_LEVEL;
+  function saveCampaign() {
+    try {
+      localStorage.setItem('wa_mmu_current', String(camp));
+      localStorage.setItem('wa_mmu_unlocked', String(campUnlocked));
+      localStorage.setItem('wa_mmu_stars', JSON.stringify(campStars));
+    } catch (e) {}
+  }
+  function pairsFor(l) {
+    if (l <= 20) return 6 + Math.floor((l - 1) / 9);      // unchanged: 6 -> 8
+    if (l <= 60) return 8 + Math.floor((l - 20) / 6);     // ~1.5x slope: -> 14 at L60
+    return Math.min(20, 14 + Math.floor((l - 60) / 5));   // -> 20 at L90, POOL cap
+  }
+  function peekMs(l) {
+    if (l <= 20) return Math.max(380, 750 - (l - 1) * 4); // unchanged: 750 -> 674
+    if (l <= 60) return 674 - (l - 20) * 6;               // 1.5x slope: -> 434 at L60
+    return Math.max(260, 434 - (l - 60) * 10);            // 2.5x slope: -> 260 floor ~L78
+  }
+  function tierName(l) { return l <= 15 ? 'تیز شروعات' : l <= 35 ? 'مضبوط یادداشت' : l <= 55 ? 'یادداشت کا کھلاڑی' : l <= 75 ? 'یادوں کا محل' : l <= 90 ? 'یادداشت کا استاد' : 'مکمل یاد'; }
+  function buildMap() {
+    var map = document.getElementById('m-map'); if (!map) return;
+    map.innerHTML = '';
+    for (var l = 1; l <= MAX_LEVEL; l++) {
+      (function (l) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        if (campStars[l] != null && l !== camp) { b.className = 'mm-lvl mm-done'; b.textContent = l + (campStars[l] >= 3 ? ' ⭐' : ''); }
+        else if (l === camp) { b.className = 'mm-lvl mm-cur'; b.textContent = l; }
+        else if (l <= campUnlocked) { b.className = 'mm-lvl'; b.textContent = l; }
+        else { b.className = 'mm-lvl mm-lock'; b.textContent = '🔒'; }
+        b.disabled = l > campUnlocked;
+        b.setAttribute('aria-label', 'Level ' + l);
+        b.addEventListener('click', function () { if (l <= campUnlocked) { camp = l; pendingNext = false; saveCampaign(); newGame(); } });
+        map.appendChild(b);
+      })(l);
+    }
+    var ln = document.getElementById('m-level-now'); if (ln) ln.textContent = camp;
+    var pn = document.getElementById('m-progress-note');
+    if (pn) { var dc = 0; for (var k in campStars) dc++; pn.textContent = tierName(camp) + ' · 100 میں سے ' + dc + ' درجے مکمل'; }
+  }
+
+  var board = document.getElementById('mboard');
+  var movesEl = document.getElementById('m-moves');
+  var timeEl = document.getElementById('m-time');
+  var bestEl = document.getElementById('m-best');
+  var overlay = document.getElementById('m-win');
+  var winStats = document.getElementById('m-win-stats');
+  var restartBtn = document.getElementById('m-restart');
+  var againBtn = document.getElementById('m-again');
+
+  var firstCard = null;   // the first flipped (unmatched) card element
+  var lock = false;       // true while two cards are being compared
+  var matchedPairs = 0;
+  var moves = 0;
+  var seconds = 0;
+  var timerId = null;
+  var started = false;
+
+  function fmt(s) {
+    var m = Math.floor(s / 60), sec = s % 60;
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function getBest() {
+    try {
+      var raw = localStorage.getItem(BEST_KEY + '_' + camp);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  function renderBest() {
+    var b = getBest();
+    bestEl.textContent = b ? (b.moves + ' چالیں · ' + fmt(b.time)) : '—';
+  }
+
+  function shuffled(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function startTimer() {
+    if (started) return;
+    started = true;
+    timerId = setInterval(function () {
+      seconds++;
+      timeEl.textContent = fmt(seconds);
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerId) clearInterval(timerId);
+    timerId = null;
+  }
+
+  function onCardClick(card) {
+    if (lock) return;
+    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+    startTimer();
+    card.classList.add('flipped');
+
+    if (!firstCard) {
+      firstCard = card;
+      return;
+    }
+
+    // Second card flipped — count the move.
+    moves++;
+    movesEl.textContent = moves;
+
+    if (firstCard.dataset.animal === card.dataset.animal) {
+      // Match!
+      firstCard.classList.add('matched');
+      card.classList.add('matched');
+      firstCard = null;
+      matchedPairs++;
+      var nameEl = document.getElementById('m-name');
+      var nm = NAMES[card.dataset.animal];
+      if (nameEl && nm) nameEl.textContent = card.dataset.animal + ' ' + nm[0] + ' — ' + nm[1] + '!';
+      if (matchedPairs === curPairs) win();
+    } else {
+      // Not a match — flip both back after a short look.
+      lock = true;
+      var a = firstCard, b = card;
+      firstCard = null;
+      var wait = peekMs(camp);
+      setTimeout(function () {
+        a.classList.remove('flipped');
+        b.classList.remove('flipped');
+        lock = false;
+      }, wait);
+    }
+  }
+
+  function win() {
+    stopTimer();
+    var b = getBest();
+    var isBest = !b || moves < b.moves;
+    if (isBest) {
+      try { localStorage.setItem(BEST_KEY + '_' + camp, JSON.stringify({ moves: moves, time: seconds })); } catch (e) {}
+    }
+    renderBest();
+    var stars = moves <= Math.ceil(curPairs * 1.6) ? 3 : moves <= Math.ceil(curPairs * 2.2) ? 2 : 1;
+    if (campStars[camp] == null || stars > campStars[camp]) campStars[camp] = stars;
+    if (camp === campUnlocked && campUnlocked < MAX_LEVEL) campUnlocked++;
+    pendingNext = camp < MAX_LEVEL;
+    saveCampaign();
+    winStats.innerHTML =
+      'آپ نے تمام ' + curPairs + ' جوڑے <strong>' + moves + ' چالوں</strong> ' +
+      'اور <strong>' + fmt(seconds) + '</strong> میں تلاش کر لیے۔' +
+      (isBest ? '<br><strong>اس درجے کا نیا بہترین اسکور!</strong>' : '') +
+      '<br>🏆 <strong>درجہ ' + camp + ' مکمل — ' + stars + ' ستارے!</strong>' +
+      (camp < MAX_LEVEL ? ' درجہ ' + (camp + 1) + ' کھل گیا ہے۔' : ' آپ نے تمام 100 درجے یاد کر لیے!');
+    againBtn.textContent = camp < MAX_LEVEL ? 'اگلا درجہ ←' : 'دوبارہ کھیلیں';
+    buildMap();
+    overlay.classList.remove('hidden');
+  }
+
+  function newGame() {
+    stopTimer();
+    firstCard = null;
+    lock = false;
+    matchedPairs = 0;
+    moves = 0;
+    seconds = 0;
+    started = false;
+    movesEl.textContent = '0';
+    timeEl.textContent = '0:00';
+    overlay.classList.add('hidden');
+    renderBest();
+
+    // Build a shuffled deck for this level's pair count.
+    curPairs = pairsFor(camp);
+    var chosen = shuffled(POOL).slice(0, curPairs);
+    var deck = shuffled(chosen.concat(chosen));
+    board.style.gridTemplateColumns = 'repeat(' + (deck.length <= 12 ? 4 : deck.length <= 20 ? 5 : 6) + ', 1fr)';
+    board.innerHTML = '';
+    deck.forEach(function (animal) {
+      var card = document.createElement('div');
+      card.className = 'mcard';
+      card.dataset.animal = animal;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Memory card');
+      var pname = PORTRAITS[animal];
+      var critterHtml;
+      if (pname && !PORTRAIT_BAD[pname]) {
+        critterHtml = '<span class="critter paint" data-portrait="' + pname + '" style="background-image:url(' + PORTRAIT_BASE + pname + '.jpg)">' + animal + '</span>';
+      } else {
+        critterHtml = '<span class="critter">' + animal + '</span>';
+      }
+      card.innerHTML =
+        '<div class="inner">' +
+          '<div class="mface back"><span class="paw">🐾</span></div>' +
+          '<div class="mface front">' + critterHtml + '</div>' +
+        '</div>';
+      card.addEventListener('click', function () { onCardClick(card); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCardClick(card); }
+      });
+      board.appendChild(card);
+    });
+  }
+
+  restartBtn.addEventListener('click', function () { pendingNext = false; againBtn.textContent = 'دوبارہ کھیلیں'; newGame(); });
+  againBtn.addEventListener('click', function () {
+    if (pendingNext && camp < MAX_LEVEL) { camp++; pendingNext = false; saveCampaign(); }
+    againBtn.textContent = 'دوبارہ کھیلیں';
+    newGame();
+  });
+  buildMap();
+  newGame();
+
+  // Test hook (PAINT pilot verification).
+  window.__mm = {
+    state: function () { return { level: camp, pairs: curPairs, matched: matchedPairs }; },
+    paintedCount: function () { return document.querySelectorAll('.critter.paint').length; }
+  };
+})();
