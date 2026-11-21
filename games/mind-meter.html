@@ -15,9 +15,9 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#0EA5A4">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<title>Mind Meter — Free Online IQ Challenge Game | Wisely Arcade</title>
+<title>Mind Meter — Free Online Brain Challenge Game | Wisely Arcade</title>
 <link rel="canonical" href="https://wiselyarcade.com/games/mind-meter">
-<meta name="description" content="Play Mind Meter free online — a 3D IQ challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your estimated IQ, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly.">
+<meta name="description" content="Play Mind Meter free online — a 3D brain challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your brain score, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
@@ -182,7 +182,7 @@
 <main>
   <div class="game-head">
     <h1>Mind Meter</h1>
-    <p>An IQ challenge in glowing 3D — 12 timed brain-teasers across number logic, patterns, words, and math. <strong>100 levels</strong>: each level asks its own 12 questions, and the clock shrinks from 30 seconds per question down to 11. How high can your meter go?</p>
+    <p>A brain challenge in glowing 3D — 12 timed brain-teasers across number logic, patterns, words, and math. <strong>100 levels</strong>: each level asks its own 12 questions, and the clock shrinks from 30 seconds per question down to 11. How high can your meter go?</p>
   </div>
 
   <div class="wrap">
@@ -192,7 +192,7 @@
       <div class="stats">
         <div class="stat"><span>Score</span><div id="mm-score">0</div></div>
         <div class="stat"><span>Streak</span><div id="mm-streak"></div></div>
-        <div class="stat"><span>Best IQ</span><div id="mm-best">—</div></div>
+        <div class="stat"><span>Best Score</span><div id="mm-best">—</div></div>
       </div>
 
       <div class="mm-wrap" id="mm-stage">
@@ -201,7 +201,7 @@
         <div class="mm-screen" id="mm-start">
           <div class="mm-badge">🧠</div>
           <div class="mm-title">Measure your mind</div>
-          <p class="mm-sub">12 questions per level. The clock shrinks as you climb — and each level has its own set. Get 8+ correct to clear the level. Answer fast and keep a streak going for bonus points — then get your estimated IQ.</p>
+          <p class="mm-sub">12 questions per level. The clock shrinks as you climb — and each level has its own set. Get 8+ correct to clear the level. Answer fast and keep a streak going for bonus points — then get your brain score.</p>
           <button class="btn" id="mm-play">Start the challenge</button>
         </div>
 
@@ -231,9 +231,9 @@
 
         <div class="mm-screen hidden" id="mm-done">
           <div class="mm-badge">🏆</div>
-          <div class="mm-title">Your estimated IQ</div>
+          <div class="mm-title">Your Brain Score</div>
           <div class="mm-iq-ring"><div class="mm-iq-inner">
-            <span class="mm-iq-label">IQ</span><span id="mm-iq">0</span>
+            <span class="mm-iq-label">SCORE</span><span id="mm-iq">0</span>
           </div></div>
           <div id="mm-rank"></div>
           <p id="mm-acc"></p>
@@ -254,7 +254,7 @@
         <li>Read the question, pick one of the four answers — <strong>faster answers earn bigger time bonuses</strong>.</li>
         <li>Chain correct answers into a <strong>streak</strong> — every streak step adds bonus points, up to +100 per question.</li>
         <li>Run out of time and the question is gone — no points, streak resets. Keep moving!</li>
-        <li>At the end you get an <strong>estimated IQ score</strong> (85–145 scale) and a rank, from Curious Mind up to Certified Genius. Clear a level with 8+ correct — 10+ earns 2 stars, a perfect 12 earns 3. Beat your best next time.</li>
+        <li>At the end you get a <strong>brain score</strong> and a rank, from Curious Mind up to Certified Genius. The score is a game score for fun and practice — it is not a real IQ measurement. Clear a level with 8+ correct — 10+ earns 2 stars, a perfect 12 earns 3. Beat your best next time.</li>
       </ol>
     </div>
 
@@ -268,7 +268,7 @@
 
     <div class="lesson-box">
       <h2><span class="cap">The Lesson</span>A sharp mind is built, not born</h2>
-      <p>Every IQ question you solve is a rep for your brain — the same way every push-up is a rep for your muscles. Nobody is born a genius at puzzles; the people who ace them have simply done hundreds before you.</p>
+      <p>Every question you solve is a rep for your brain — the same way every push-up is a rep for your muscles. Nobody is born a genius at puzzles; the people who ace them have simply done hundreds before you.</p>
       <p>So a low score today means nothing except "you haven't practiced yet." Play again tomorrow, and the meter moves. Brains grow the same way everything else grows: one small effort, repeated.</p>
     </div>
 
@@ -281,7 +281,7 @@
       <h3>What happens when time runs out on a question?</h3>
       <p>The question is gone — no points, and your streak resets. Chain correct answers into a streak to add bonus points, up to 100 extra points per question.</p>
       <h3>What do I get at the end of a level?</h3>
-      <p>You get an estimated IQ score on an 85 to 145 scale and a rank, from Curious Mind up to Certified Genius. It is an estimate from a puzzle game — beat your best next time.</p>
+      <p>You get a brain score and a rank, from Curious Mind up to Certified Genius. It is a game score for fun and practice — not a real IQ measurement. Beat your best next time.</p>
       <h3>What does Mind Meter teach?</h3>
       <p>It teaches that a sharp mind is built, not born. Every question you solve is a rep for your brain, the same way every push-up is a rep for your muscles.</p>
     </div>
@@ -467,7 +467,7 @@ if ('serviceWorker' in navigator) {
       "name": "What do I get at the end of a level?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "You get an estimated IQ score on an 85 to 145 scale and a rank, from Curious Mind up to Certified Genius. It is an estimate from a puzzle game — beat your best next time."
+        "text": "You get a brain score and a rank, from Curious Mind up to Certified Genius. It is a game score for fun and practice — not a real IQ measurement. Beat your best next time."
       }
     },
     {
