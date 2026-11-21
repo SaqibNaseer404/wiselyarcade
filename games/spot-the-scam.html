@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Spot the Scam — Free Online Safety Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/spot-the-scam">
+<meta name="description" content="Play Spot the Scam free online — read real-looking texts, emails and chats and decide: safe or scam? Learn the red flags scammers use, one message at a time. 100 levels. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .ss-stage{
+    background:linear-gradient(180deg,#eef4ff,#dfe9fb 60%,#cfddf7);
+    border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(30,60,140,.20), inset 0 2px 0 #fff}
+  .ss-card{background:#fff;border-radius:18px;max-width:560px;margin:0 auto;text-align:left;
+    box-shadow:0 14px 30px rgba(30,50,110,.18);border:2px solid rgba(60,90,160,.18);overflow:hidden}
+  .ss-card.ss-right{border-color:#16a34a}
+  .ss-card.ss-wrong{border-color:#dc2626}
+  .ss-card-head{display:flex;justify-content:space-between;gap:10px;align-items:center;
+    background:linear-gradient(180deg,#f1f5fb,#e2eaf6);padding:10px 16px;border-bottom:1px solid rgba(60,90,160,.15)}
+  .ss-channel{font-weight:900;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:#3b5bdb}
+  .ss-from{font-weight:800;color:#26355e;font-size:.95rem;text-align:right}
+  .ss-text{padding:18px;font-size:1.12rem;line-height:1.55;color:#1c2745;font-weight:600}
+  .ss-q{font-weight:900;font-size:1.2rem;color:#26355e;margin:22px 0 4px}
+  .ss-btns{display:flex;gap:14px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .ss-btn{border:0;cursor:pointer;font:inherit;font-weight:900;font-size:1.15rem;color:#fff;
+    padding:15px 30px;border-radius:999px;min-width:190px}
+  .ss-btn-scam{background:linear-gradient(180deg,#f87171,#dc2626);box-shadow:0 10px 20px rgba(190,30,30,.35), inset 0 2px 0 rgba(255,255,255,.5)}
+  .ss-btn-safe{background:linear-gradient(180deg,#4ade80,#16a34a);box-shadow:0 10px 20px rgba(20,140,60,.35), inset 0 2px 0 rgba(255,255,255,.5)}
+  .ss-btn:hover{transform:translateY(-3px)}
+  .ss-btn:disabled{opacity:.55;cursor:default;transform:none}
+  .ss-btn.ss-picked-right{outline:4px solid #16a34a;opacity:1}
+  .ss-btn.ss-picked-wrong{outline:4px solid #dc2626;opacity:1}
+  .ss-why{max-width:560px;margin:18px auto 0;background:#fffbe8;border:2px solid #eab308;border-radius:16px;
+    padding:16px 18px;text-align:left;color:#3f3410}
+  .ss-why.hidden{display:none}
+  .ss-verdict{font-weight:900;font-size:1.08rem;margin-bottom:6px}
+  .ss-rule{font-weight:900;color:#92600a;margin-top:8px}
+  .ss-next{margin-top:12px}
+  .ss-levelbar{text-align:center;font-weight:800;color:#26355e;margin:0 auto 10px;font-size:1.05rem}
+  .ss-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .ss-lvl{border:2px solid rgba(60,90,160,.4);background:rgba(255,255,255,.85);color:#26355e;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.72rem;padding:6px 0;border-radius:10px}
+  .ss-lvl.ss-done{background:#dcfce7;border-color:#22c55e}
+  .ss-lvl.ss-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .ss-lvl.ss-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+<!-- MOBILE GAME-FIRST FIX 2026-11-19: on phones the play area comes first; level map moves below the game. Desktop layout untouched. -->
+<style>
+@media (max-width:768px){
+  .game-head{padding:14px 12px 2px}
+  .game-head h1{font-size:1.6rem;margin-bottom:4px}
+  .game-head p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-area{display:flex;flex-direction:column;padding:12px;margin-top:8px}
+  .game-area>.ss-levelbar{order:1}
+  .game-area>.stats{order:2}
+  .game-area>.ss-stage{order:3}
+  .game-area>.btn-row{order:5}
+  .game-area>.ss-map{order:9;max-height:46vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Spot the Scam</h1>
+    <p>A text, an email, a chat — is it safe, or is it a scam? Read each message like a detective, spot the red flags, and learn the golden rules that keep you safe. <strong>100 levels</strong> — the messages get sneakier the higher you climb.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="ss-levelbar">🛡️ You are on <strong>Level <span id="ss-level-now">1</span></strong> · <span id="ss-progress-note"></span></div>
+      <div class="ss-map" id="ss-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Message</span><div id="ss-round">1 / 5</div></div>
+        <div class="stat"><span>Correct</span><div id="ss-correct">0</div></div>
+        <div class="stat"><span>Stars</span><div id="ss-stars">0 ★</div></div>
+      </div>
+      <div class="ss-stage">
+        <div class="ss-card" id="ss-card">
+          <div class="ss-card-head"><span class="ss-channel" id="ss-channel">Text message</span><span class="ss-from" id="ss-from"></span></div>
+          <div class="ss-text" id="ss-text"></div>
+        </div>
+        <p class="ss-q">Is this message safe — or a scam?</p>
+        <div class="ss-btns">
+          <button class="ss-btn ss-btn-scam" id="ss-btn-scam" type="button">🚩 Scam</button>
+          <button class="ss-btn ss-btn-safe" id="ss-btn-safe" type="button">✅ Looks safe</button>
+        </div>
+        <div class="ss-why hidden" id="ss-why">
+          <div class="ss-verdict" id="ss-verdict"></div>
+          <p id="ss-why-text" style="margin:0"></p>
+          <p class="ss-rule" id="ss-rule" style="margin-bottom:0"></p>
+          <button class="btn ss-next" id="ss-next" type="button">Next message →</button>
+        </div>
+        <div class="overlay hidden" id="ss-done">
+          <h2 id="ss-done-title">🛡️ Scam Spotter!</h2>
+          <p id="ss-done-stats"></p>
+          <button class="btn" id="ss-again" type="button">Play again</button>
+          <button class="btn" id="ss-next-level" type="button">Next level →</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="ss-restart" type="button">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Read the message on the card carefully — who sent it, what it asks, and how it makes you feel.</li>
+        <li>Tap <strong>🚩 Scam</strong> or <strong>✅ Looks safe</strong>.</li>
+        <li>After every answer, read <strong>why</strong> — the red flag you missed, or the safety sign you spotted — and the golden rule it teaches.</li>
+        <li>Each level has <strong>5 messages</strong>. Get <strong>4 or more</strong> right to pass and unlock the next level.</li>
+        <li>There are <strong>100 levels</strong>. Early scams are loud and obvious; by level 61 they whisper — fake sender names, one wrong letter, pressure dressed as politeness.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click one of the two big buttons.</li>
+        <li><strong>Wrong answer?</strong> That is the best way to learn — the explanation shows you exactly what to look for next time.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>If it rushes you, flatters you, or asks for secrets — stop</h2>
+      <p>Almost every scam ever made uses the same three tricks. It <strong>rushes</strong> you, so you act before you think. It <strong>flatters</strong> or frightens you, so feelings drive instead of facts. And it asks for <strong>secrets</strong> — a password, an OTP, card details — because secrets are the keys to your money and your accounts.</p>
+      <p>Your protection is a pause. Real banks, real schools and real companies can wait ten minutes while you check. Scammers cannot — their whole trick dies the moment you slow down, read the address letter by letter, and ask, "Why is this message in such a hurry?" Learn to spot that hurry here, where mistakes cost nothing, and you will spot it out there, where they do.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>About This Game</h2>
+      <p>Spot the Scam trains <strong>critical thinking and digital safety</strong> — reading sender addresses, questioning urgency, and knowing which requests are never legitimate. It is made for ages <strong>10 and up</strong>: older kids, teens, and adults who want sharper scam radar. Every message in the game is fictional, and every answer teaches a real rule used by banks and safety experts.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Spot the Scam?</h3>
+      <p>Read the message on the card, then tap "Scam" or "Looks safe". After each answer you see why — the red flag or the safety sign — plus a golden rule to remember.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels, with 5 messages in each level. Get 4 or more right to pass. Messages start obvious and become much sneakier as you climb.</p>
+      <h3>Is Spot the Scam based on real scams?</h3>
+      <p>Every message is fictional, but each one copies a real trick scammers use — fake prize wins, OTP theft, look-alike addresses, hijacked friend accounts and boss fraud — so the lessons work in real life.</p>
+      <h3>Who is Spot the Scam for?</h3>
+      <p>It is made for ages 10 and up — anyone who uses a phone, email or social media. Parents often play it with kids as a safety lesson.</p>
+      <h3>What does Spot the Scam teach?</h3>
+      <p>It teaches that if a message rushes you, flatters you, or asks for secrets, you should stop and check. Real organisations never ask for PINs, passwords or OTP codes.</p>
+    </div>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"How do you play Spot the Scam?","acceptedAnswer":{"@type":"Answer","text":"Read the message on the card, then tap Scam or Looks safe. After each answer you see why — the red flag or the safety sign — plus a golden rule to remember."}},
+      {"@type":"Question","name":"How many levels are there?","acceptedAnswer":{"@type":"Answer","text":"There are 100 levels, with 5 messages in each level. Get 4 or more right to pass. Messages start obvious and become much sneakier as you climb."}},
+      {"@type":"Question","name":"Is Spot the Scam based on real scams?","acceptedAnswer":{"@type":"Answer","text":"Every message is fictional, but each one copies a real trick scammers use — fake prize wins, OTP theft, look-alike addresses, hijacked friend accounts and boss fraud — so the lessons work in real life."}},
+      {"@type":"Question","name":"Who is Spot the Scam for?","acceptedAnswer":{"@type":"Answer","text":"It is made for ages 10 and up — anyone who uses a phone, email or social media. Parents often play it with kids as a safety lesson."}},
+      {"@type":"Question","name":"What does Spot the Scam teach?","acceptedAnswer":{"@type":"Answer","text":"It teaches that if a message rushes you, flatters you, or asks for secrets, you should stop and check. Real organisations never ask for PINs, passwords or OTP codes."}}
+    ]}
+    </script>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../teens">← More games for ages 10–17</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/spot-the-scam.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Missing Letters?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Look at the big picture, then read the word below it — one letter is missing, shown as a yellow tile. Tap the letter, from the three big buttons, that finishes the word."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels, with 5 words in each level. Words start tiny, like CAT and DOG, and grow longer as you climb — and from level 66, two letters run away at once."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I tap the wrong letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No problem — the tile shakes and you can try again. A star is earned when you find the letter on your first try."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Missing Letters for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is made for young readers who are learning letters and first words. The picture gives a clue for every word, so early readers can play on their own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Missing Letters teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that reading grows one letter at a time. One letter, then one word, then one sentence — small step by small step."
+      }
+    }
+  ]
+}
+</script>
+</body>
+</html>
