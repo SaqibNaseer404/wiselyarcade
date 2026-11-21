@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Needs vs Wants — Free Money Game for Kids | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/needs-vs-wants">
+<meta name="description" content="Play Needs vs Wants free online — the money game where kids sort needs from wants, fill the savings jar, and learn smart spending. 100 levels. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  .nv-stage{
+    background:linear-gradient(180deg,#fff8ec,#ffefdb 60%,#ffe6c7);
+    border-radius:26px;padding:26px 18px 30px;text-align:center;position:relative;
+    box-shadow:0 24px 48px rgba(140,90,20,.20), inset 0 2px 0 #fff}
+  .nv-emoji{font-size:6.2rem;line-height:1.1;filter:drop-shadow(0 10px 14px rgba(120,70,0,.25))}
+  .nv-name{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;font-size:2.4rem;color:#43307a;margin-top:6px}
+  .nv-context{font-size:1.15rem;font-weight:700;color:#5b3a8a;max-width:520px;margin:8px auto 0;line-height:1.5}
+  .nv-price{display:inline-block;margin-top:12px;background:#fff;border:2px solid #e8930c;color:#8a5a00;
+    font-weight:900;padding:6px 18px;border-radius:999px;font-size:1.05rem}
+  .nv-q{font-weight:900;font-size:1.2rem;color:#43307a;margin:22px 0 4px}
+  .nv-btns{display:flex;gap:14px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .nv-btn{border:0;cursor:pointer;font:inherit;font-weight:900;font-size:1.15rem;color:#fff;
+    padding:15px 30px;border-radius:999px;min-width:190px}
+  .nv-btn-need{background:linear-gradient(180deg,#38bdf8,#0284c7);box-shadow:0 10px 20px rgba(2,110,180,.35), inset 0 2px 0 rgba(255,255,255,.5)}
+  .nv-btn-want{background:linear-gradient(180deg,#f0abfc,#c026d3);box-shadow:0 10px 20px rgba(160,30,180,.32), inset 0 2px 0 rgba(255,255,255,.5)}
+  .nv-btn:hover{transform:translateY(-3px)}
+  .nv-btn:disabled{opacity:.55;cursor:default;transform:none}
+  .nv-btn.nv-picked-right{outline:4px solid #16a34a;opacity:1}
+  .nv-btn.nv-picked-wrong{outline:4px solid #dc2626;opacity:1}
+  .nv-why{max-width:560px;margin:18px auto 0;background:#f0fdf4;border:2px solid #22c55e;border-radius:16px;
+    padding:16px 18px;text-align:left;color:#14532d}
+  .nv-why.hidden{display:none}
+  .nv-verdict{font-weight:900;font-size:1.08rem;margin-bottom:6px}
+  .nv-next{margin-top:12px}
+  .nv-levelbar{text-align:center;font-weight:800;color:#43307a;margin:0 auto 10px;font-size:1.05rem}
+  .nv-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .nv-lvl{border:2px solid rgba(122,96,178,.4);background:rgba(255,255,255,.85);color:#43307a;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.72rem;padding:6px 0;border-radius:10px}
+  .nv-lvl.nv-done{background:#dcfce7;border-color:#22c55e}
+  .nv-lvl.nv-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .nv-lvl.nv-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+</style>
+<!-- MOBILE GAME-FIRST FIX 2026-11-19: on phones the play area comes first; level map moves below the game. Desktop layout untouched. -->
+<style>
+@media (max-width:768px){
+  .game-head{padding:14px 12px 2px}
+  .game-head h1{font-size:1.6rem;margin-bottom:4px}
+  .game-head p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-area{display:flex;flex-direction:column;padding:12px;margin-top:8px}
+  .game-area>.nv-levelbar{order:1}
+  .game-area>.stats{order:2}
+  .game-area>.nv-stage{order:3}
+  .game-area>.btn-row{order:5}
+  .game-area>.nv-map{order:9;max-height:46vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Needs vs Wants</h1>
+    <p>Every coin can only be spent once — so spend it wisely! Look at each item, hear its story, and decide: is it a <strong>need</strong> or a <strong>want</strong>? Every want you spot drops its price into your savings jar. <strong>100 levels</strong> of smarter spending.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="nv-levelbar">🐷 You are on <strong>Level <span id="nv-level-now">1</span></strong> · <span id="nv-progress-note"></span></div>
+      <div class="nv-map" id="nv-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>Item</span><div id="nv-round">1 / 8</div></div>
+        <div class="stat"><span>Correct</span><div id="nv-correct">0</div></div>
+        <div class="stat"><span>Savings jar</span><div id="nv-jar">0 🪙</div></div>
+      </div>
+      <div class="nv-stage">
+        <div class="nv-emoji" id="nv-emoji">🍞</div>
+        <div class="nv-name" id="nv-name">Bread</div>
+        <p class="nv-context" id="nv-context"></p>
+        <div><span class="nv-price" id="nv-price">🪙 3 coins</span></div>
+        <p class="nv-q">Need — or want?</p>
+        <div class="nv-btns">
+          <button class="nv-btn nv-btn-need" id="nv-btn-need" type="button">💙 Need it</button>
+          <button class="nv-btn nv-btn-want" id="nv-btn-want" type="button">💜 Want it</button>
+        </div>
+        <div class="nv-why hidden" id="nv-why">
+          <div class="nv-verdict" id="nv-verdict"></div>
+          <p id="nv-why-text" style="margin:0"></p>
+          <button class="btn nv-next" id="nv-next" type="button">Next item →</button>
+        </div>
+        <div class="overlay hidden" id="nv-done">
+          <h2 id="nv-done-title">🐷 Smart Spender!</h2>
+          <p id="nv-done-stats"></p>
+          <button class="btn" id="nv-again" type="button">Play again</button>
+          <button class="btn" id="nv-next-level" type="button">Next level →</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="nv-restart" type="button">Start again</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Look at the item and read its story — the story is the clue.</li>
+        <li>Tap <strong>💙 Need it</strong> if it keeps you safe, healthy, fed, or learning. Tap <strong>💜 Want it</strong> if it is fun, tasty, pretty, or extra.</li>
+        <li>Every <strong>want</strong> you spot correctly drops its price in coins into your <strong>savings jar</strong> — money you did not spend is money saved.</li>
+        <li>Each level has <strong>8 items</strong> — 4 needs and 4 wants. Sort <strong>6 or more</strong> correctly to pass.</li>
+        <li>There are <strong>100 levels</strong>. Watch out: the same item can flip! Broken shoes are a need; shiny extra shoes are a want.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap or click one of the two big buttons.</li>
+        <li><strong>Wrong answer?</strong> Read the story again in the explanation — the clue was hiding there.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Needs first, then saving, then wants</h2>
+      <p>A <strong>need</strong> keeps you alive, healthy, safe, and learning: food, water, warm clothes, medicine, school things. A <strong>want</strong> is everything else — fun, tasty, shiny, extra. Wants are not bad! A life with no treats would be a dull life. But money has an order: <strong>needs first, a little saving second, wants last</strong> — with whatever is left.</p>
+      <p>The secret this game teaches is that the same thing can be both. Shoes are a need when yours have holes, and a want when yours are fine and you just like the colour. Smart spenders do not ask "do I like it?" — they ask "what is its job in my life right now?" Ask that question here, and one day your grown-up money will thank you.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>About This Game</h2>
+      <p>Needs vs Wants teaches <strong>money sense and decision-making</strong> — telling essentials from extras, noticing how stories and adverts push us to buy, and feeling the reward of a growing savings jar. It is made for ages <strong>5 and up</strong>, and parents often play along: the tricky levels fool plenty of grown-ups too.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Needs vs Wants?</h3>
+      <p>Read each item's story, then tap "Need it" or "Want it". Every correctly spotted want drops its price into your savings jar. Sort 6 of 8 correctly to pass the level.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 levels, with 8 items in each level — 4 needs and 4 wants. The stories get trickier as you climb: the same item can be a need in one story and a want in another.</p>
+      <h3>What is the difference between a need and a want?</h3>
+      <p>A need keeps you safe, healthy, fed, or learning — like food, medicine, or a school book. A want is fun, tasty, or extra — like candy, toys, or a fifth teddy bear. Wants are not bad; they just come after needs and saving.</p>
+      <h3>Who is Needs vs Wants for?</h3>
+      <p>It is made for ages 5 and up — kids learning about money, and families who want a gentle first money lesson.</p>
+      <h3>What does Needs vs Wants teach?</h3>
+      <p>It teaches the order of smart spending: needs first, then saving a little, then wants with what is left — and that the story around an item decides which one it is.</p>
+    </div>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"How do you play Needs vs Wants?","acceptedAnswer":{"@type":"Answer","text":"Read each item's story, then tap Need it or Want it. Every correctly spotted want drops its price into your savings jar. Sort 6 of 8 correctly to pass the level."}},
+      {"@type":"Question","name":"How many levels are there?","acceptedAnswer":{"@type":"Answer","text":"There are 100 levels, with 8 items in each level — 4 needs and 4 wants. The stories get trickier as you climb: the same item can be a need in one story and a want in another."}},
+      {"@type":"Question","name":"What is the difference between a need and a want?","acceptedAnswer":{"@type":"Answer","text":"A need keeps you safe, healthy, fed, or learning — like food, medicine, or a school book. A want is fun, tasty, or extra — like candy, toys, or a fifth teddy bear. Wants are not bad; they just come after needs and saving."}},
+      {"@type":"Question","name":"Who is Needs vs Wants for?","acceptedAnswer":{"@type":"Answer","text":"It is made for ages 5 and up — kids learning about money, and families who want a gentle first money lesson."}},
+      {"@type":"Question","name":"What does Needs vs Wants teach?","acceptedAnswer":{"@type":"Answer","text":"It teaches the order of smart spending: needs first, then saving a little, then wants with what is left — and that the story around an item decides which one it is."}}
+    ]}
+    </script>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–9</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/needs-vs-wants.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Missing Letters?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Look at the big picture, then read the word below it — one letter is missing, shown as a yellow tile. Tap the letter, from the three big buttons, that finishes the word."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels, with 5 words in each level. Words start tiny, like CAT and DOG, and grow longer as you climb — and from level 66, two letters run away at once."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens if I tap the wrong letter?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No problem — the tile shakes and you can try again. A star is earned when you find the letter on your first try."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who is Missing Letters for?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is made for young readers who are learning letters and first words. The picture gives a clue for every word, so early readers can play on their own."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Missing Letters teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that reading grows one letter at a time. One letter, then one word, then one sentence — small step by small step."
+      }
+    }
+  ]
+}
+</script>
+</body>
+</html>
