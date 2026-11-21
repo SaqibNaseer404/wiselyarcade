@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>جانوروں کی یادداشت — اردو یادداشت کھیل | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/memory-match-urdu"
+<link rel="alternate" hreflang="en" href="https://wiselyarcade.com/games/memory-match"
+<link rel="alternate" hreflang="ur" href="https://wiselyarcade.com/games/memory-match-urdu">
+<meta name="description" content="جانوروں کی یادداشت مفت آن لائن کھیلیں — کارڈز میں چھپے جانوروں کے جوڑے تلاش کریں اور ہر جوڑے کے ساتھ جانور کا اردو نام سیکھیں۔ 100 درجے۔ کوئی ڈاؤن لوڈ نہیں، کوئی سائن اپ نہیں۔">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  /* ---- premium card table ---- */
+  /* dark-glass stat chips with amber numbers */
+  .game-area .stats{gap:12px;margin-bottom:16px}
+  .game-area .stat{
+    background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(245,166,35,.55);
+    border-radius:16px;padding:9px 18px;min-width:112px;color:#eef2ff;
+    box-shadow:0 12px 24px rgba(9,14,28,.32), inset 0 1px 0 rgba(255,255,255,.14)}
+  .game-area .stat span{color:rgba(196,208,232,.78);letter-spacing:.09em}
+  .game-area .stat>div{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:1.6rem;line-height:1.15;letter-spacing:.04em;color:#ffc46b}
+  /* the table: dark walnut frame around deep green felt */
+  .game-area .stage{
+    background:linear-gradient(145deg,#4b3016,#2e1c0c 58%,#221304);
+    padding:12px;border-radius:26px;
+    box-shadow:0 32px 62px rgba(43,25,4,.48), 0 6px 16px rgba(43,25,4,.3),
+      inset 0 2px 0 rgba(255,201,110,.4), inset 0 0 0 2px rgba(0,0,0,.25)}
+  .game-area .mboard{
+    background:
+      radial-gradient(560px 380px at 50% 30%, rgba(255,255,255,.1), rgba(255,255,255,0) 62%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 2px, rgba(0,0,0,0) 2px 4px),
+      repeating-linear-gradient(90deg, rgba(0,0,0,.02) 0 2px, rgba(0,0,0,0) 2px 4px),
+      radial-gradient(circle at 50% 34%, #1e7d57 0%, #145c40 56%, #0b3a27 100%);
+    padding:14px;border-radius:18px;gap:12px;
+    box-shadow:inset 0 0 46px rgba(0,0,0,.52), inset 0 3px 10px rgba(0,0,0,.45)}
+  /* win overlay: dark trophy card over the table */
+  .game-area .overlay{border-radius:26px;padding:24px;
+    background:radial-gradient(420px 300px at 50% 30%, rgba(245,166,35,.16), rgba(245,166,35,0) 65%),
+      linear-gradient(165deg,rgba(15,23,40,.96),rgba(7,11,20,.97));
+    box-shadow:inset 0 0 0 2px rgba(245,166,35,.5), inset 0 0 44px rgba(0,0,0,.5);
+    -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+  .game-area .overlay h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-weight:700;
+    font-size:2.3rem;letter-spacing:.05em;color:#ffd98a;text-shadow:0 3px 12px rgba(0,0,0,.5)}
+  .game-area .overlay p{color:rgba(231,238,255,.92);font-size:1.02rem}
+  .game-area .overlay p strong{color:#ffc46b}
+  /* amber primary / dark ghost buttons (page scope) */
+  .game-area .btn{background:linear-gradient(180deg,#ffc44d,#f59e0b);color:#26160a;
+    border-bottom:4px solid #b45309;text-shadow:none;
+    box-shadow:0 10px 22px rgba(180,110,10,.35), inset 0 2px 0 rgba(255,255,255,.6)}
+  .game-area .btn.ghost{background:linear-gradient(180deg,rgba(21,30,48,.96),rgba(11,17,29,.96));
+    color:#ffc46b;border:2px solid rgba(245,166,35,.45);border-bottom:4px solid rgba(245,166,35,.5);
+    box-shadow:0 10px 22px rgba(10,16,30,.35);text-shadow:none}
+  .mm-levelbar{text-align:center;font-weight:800;color:#14532d;margin:0 auto 10px;font-size:1.05rem}
+  .mm-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;max-width:640px;margin:0 auto 16px}
+  .mm-lvl{border:2px solid rgba(30,125,87,.4);background:rgba(255,255,255,.85);color:#14532d;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.78rem;padding:6px 0;border-radius:10px}
+  .mm-lvl.mm-done{background:#dcfce7;border-color:#22c55e}
+  .mm-lvl.mm-cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .mm-lvl.mm-lock{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .mm-name{min-height:2.2em;text-align:center;font-family:"Noto Nastaliq Urdu",serif;font-weight:700;
+    font-size:1.5rem;color:#43307a;margin-bottom:8px}
+  main p, main li{line-height:2.1}
+</style>
+<!-- MOBILE GAME-FIRST FIX 2026-11-19: on phones the play area comes first; level map moves below the game. Desktop layout untouched. -->
+<style>
+@media (max-width:768px){
+  .game-head{padding:14px 12px 2px}
+  .game-head h1{font-size:1.6rem;margin-bottom:4px}
+  .game-head p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-area{display:flex;flex-direction:column;padding:12px;margin-top:8px}
+  .game-area>.mm-levelbar{order:1}
+  .game-area>.stats{order:2}
+  .game-area>.stage{order:3}
+  .game-area>.btn-row{order:5}
+  .game-area>.mm-map{order:9;max-height:46vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>جانوروں کی یادداشت</h1>
+    <p>کارڈز میں چھپے جانوروں کے جوڑے تلاش کریں۔ آرام سے کھیلیں — جلدی اس کھیل میں کبھی نہیں جیتتی۔ <strong>100 درجے</strong>: بورڈ 6 جوڑوں سے بڑھ کر 17 جوڑوں تک جاتا ہے، اور غلط کارڈ تیزی سے واپس پلٹتے ہیں۔ ہر ملنے والے جوڑے کے ساتھ جانور کا <strong>اردو نام</strong> بھی سیکھیں!</p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="mm-levelbar">🧠 آپ <strong>درجہ <span id="m-level-now">1</span></strong> · <span id="m-progress-note"></span></div>
+      <div class="mm-map" id="m-map" role="group" aria-label="Choose your level"></div>
+      <div class="stats">
+        <div class="stat"><span>چالیں</span><div id="m-moves">0</div></div>
+        <div class="stat"><span>وقت</span><div id="m-time">0:00</div></div>
+        <div class="stat"><span>بہترین</span><div id="m-best">—</div></div>
+      </div>
+      <div class="stage">
+        <div class="mm-name" id="m-name" aria-live="polite"></div>
+        <div class="mboard" id="mboard"></div>
+        <div class="overlay hidden" id="m-win">
+          <h2>آپ نے کر دکھایا!</h2>
+          <p id="m-win-stats"></p>
+          <button class="btn" id="m-again">دوبارہ کھیلیں</button>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;margin-top:14px">
+        <button class="btn ghost" id="m-restart">دوبارہ شروع کریں</button>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>کھیلنے کا طریقہ</h2>
+      <ol>
+        <li>کسی کارڈ پر ٹیپ کریں تاکہ وہ پلٹے اور جانور ظاہر ہو۔</li>
+        <li>دوسرا کارڈ پلٹیں اور اس کا جوڑا تلاش کریں۔ جوڑا مل جائے تو اوپر جانور کا <strong>اردو نام</strong> آئے گا — اسے بلند آواز میں پڑھیں!</li>
+        <li>جوڑا نہ ملے تو دونوں کارڈ واپس پلٹ جائیں گے۔ یاد رکھیں وہ کہاں تھے!</li>
+        <li>تمام جوڑے تلاش کر لیں تو درجہ مکمل۔ کم چالوں میں مکمل کرنے پر زیادہ ستارے ملتے ہیں۔</li>
+        <li>کل <strong>100 درجے</strong> ہیں — بورڈ بڑھتا جاتا ہے اور کارڈ تیزی سے پلٹتے ہیں۔</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>کنٹرول</h2>
+      <ul>
+        <li><strong>ماؤس / ٹچ:</strong> کارڈ پلٹنے کے لیے اس پر ٹیپ یا کلک کریں۔</li>
+        <li><strong>جلدی؟</strong> اس کھیل میں جلدی ہمیشہ ہراتی ہے۔ آرام سے دیکھیں، یاد رکھیں، پھر چنیں۔</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">سبق</span>صبر اور توجہ ہمیشہ رنگ لاتی ہے</h2>
+      <p>یادداشت کوئی جادو نہیں — یہ توجہ کی عادت ہے۔ جو بچہ ہر کارڈ کو غور سے دیکھتا ہے اور اس کی جگہ یاد رکھتا ہے، وہ اس بچے سے جیت جاتا ہے جو تیزی سے اندازے لگاتا ہے۔ زندگی میں بھی یہی اصول ہے: جو دھیان دیتا ہے، وہ یاد رکھتا ہے؛ جو جلدی کرتا ہے، وہ بھول جاتا ہے۔</p>
+      <p>اور ہر جوڑے کے ساتھ ایک نیا اردو لفظ — شیر، ہاتھی، خرگوش — کھیلتے کھیلتے آپ کی زبان بھی مضبوط ہوتی جاتی ہے۔</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>اکثر پوچھے گئے سوالات</h2>
+      <h3>جانوروں کی یادداشت کیسے کھیلتے ہیں؟</h3>
+      <p>کارڈ پلٹیں، جانور دیکھیں، اور اس کا جوڑا تلاش کریں۔ جوڑا ملنے پر جانور کا اردو نام اوپر ظاہر ہوتا ہے۔ تمام جوڑے مل جائیں تو درجہ مکمل ہو جاتا ہے۔</p>
+      <h3>کتنے درجے ہیں؟</h3>
+      <p>کل 100 درجے ہیں۔ بورڈ 6 جوڑوں سے شروع ہو کر 17 جوڑوں تک بڑھتا ہے، اور غلط کارڈ تیزی سے واپس پلٹتے ہیں۔</p>
+      <h3>یہ کھیل کیا سکھاتا ہے؟</h3>
+      <p>یہ یادداشت اور توجہ کی مشق کراتا ہے، اور ہر جوڑے کے ساتھ جانوروں کے اردو نام سکھاتا ہے — جیسے شیر، بلی، ہاتھی اور خرگوش۔</p>
+      <h3>یہ کھیل کس کے لیے ہے؟</h3>
+      <p>یہ 5 سال اور اس سے بڑے بچوں کے لیے ہے — خاص طور پر ان کے لیے جو اردو سیکھ رہے ہیں۔</p>
+    </div>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"جانوروں کی یادداشت کیسے کھیلتے ہیں؟","acceptedAnswer":{"@type":"Answer","text":"کارڈ پلٹیں، جانور دیکھیں، اور اس کا جوڑا تلاش کریں۔ جوڑا ملنے پر جانور کا اردو نام ظاہر ہوتا ہے۔"}},
+      {"@type":"Question","name":"کتنے درجے ہیں؟","acceptedAnswer":{"@type":"Answer","text":"کل 100 درجے ہیں۔ بورڈ 6 جوڑوں سے 17 جوڑوں تک بڑھتا ہے۔"}},
+      {"@type":"Question","name":"یہ کھیل کیا سکھاتا ہے؟","acceptedAnswer":{"@type":"Answer","text":"یہ یادداشت اور توجہ کی مشق کراتا ہے اور جانوروں کے اردو نام سکھاتا ہے۔"}}
+    ]}
+    </script>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../ur">→ تمام اردو کھیل</a>
+      <a class="btn ghost" href="memory-match">Play in English</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="../js/memory-match-urdu.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do you play Animal Memory Match?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Tap any card to flip it over and see the animal hiding underneath, then tap a second card. If the two animals match, the pair stays face-up; if not, both cards flip back."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many levels are there?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "There are 100 levels. Higher levels hide more pairs and flip mismatched cards back sooner, so your memory has to work harder."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I earn 3 stars?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Clear the level in 1.6 moves per pair or fewer. Winning is not about being the fastest tapper — it is about remembering where each animal was."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I play with a keyboard?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Use Tab to move between cards and Enter or Space to flip a card, or simply tap and click with mouse or touch."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What does Memory Match teach?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It teaches that patience and paying attention always pay off. The people who notice the details are the people who succeed."
+      }
+    }
+  ]
+}
+</script>
+</body>
+</html>
