@@ -68,7 +68,11 @@
       lesson: 'Smooth is fast — control beats raw speed.' },
     { slug: 'sky-gp',        name: 'Sky GP',               ages: ['teens'], seed: 32,
       lesson: 'Aim high, but fly calm — panic crashes, patience lands.' }
-  ];
+      { slug: 'spot-the-scam', name: 'Spot the Scam', ages: ['teens', 'adults'], seed: 56,
+      lesson: 'If it rushes you, flatters you, or asks for secrets — stop and check.' },
+    { slug: 'needs-vs-wants', name: 'Needs vs Wants', ages: ['kids', 'teens'], seed: 57,
+      lesson: 'Needs first, then saving, then wants.' },
+];
 
   var path = location.pathname;
   var inGamesDir = path.indexOf('/games/') !== -1;
