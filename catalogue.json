@@ -1,0 +1,821 @@
+{
+  "site": "Wisely Arcade",
+  "url": "https://wiselyarcade.com/",
+  "generated": "2026-11-21",
+  "note": "One record per published game. Age bands are guidance — children develop differently, and parents should choose what fits. Lessons and descriptions come from the live site.",
+  "skills": {
+    "memory": {
+      "name": "Memory & Attention",
+      "url": "https://wiselyarcade.com/skill-memory"
+    },
+    "logic": {
+      "name": "Logic & Puzzles",
+      "url": "https://wiselyarcade.com/skill-logic"
+    },
+    "maths": {
+      "name": "Maths & Numbers",
+      "url": "https://wiselyarcade.com/skill-maths"
+    },
+    "words": {
+      "name": "Words & Reading",
+      "url": "https://wiselyarcade.com/skill-words"
+    },
+    "racing": {
+      "name": "Racing & Action",
+      "url": "https://wiselyarcade.com/skill-racing"
+    },
+    "strategy": {
+      "name": "Strategy & Board Games",
+      "url": "https://wiselyarcade.com/skill-strategy"
+    },
+    "knowledge": {
+      "name": "Knowledge & Creativity",
+      "url": "https://wiselyarcade.com/skill-knowledge"
+    }
+  },
+  "games": [
+    {
+      "slug": "2048-merge",
+      "title": "2048 Merge",
+      "url": "https://wiselyarcade.com/games/2048-merge",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/2048-merge.jpg",
+      "description": "Play 2048 Merge free online — the famous 2048 puzzle game with a 100-level campaign. Slide the tiles, merge matching numbers, and chase the 2048 tile. No download, no sign-up.",
+      "card_text": "Slide, merge, and chase the legendary 2048 tile in this addictive number puzzle.",
+      "age_bands": [
+        "teens",
+        "adults"
+      ],
+      "age_guidance": "Ages 10+",
+      "skills": [
+        "maths",
+        "logic",
+        "strategy"
+      ],
+      "practises": "Number sense and planning merges ahead",
+      "lesson": "Small smart steps add up to big wins.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 5,
+      "controls": "Swipe or arrow keys",
+      "structure": "100-level campaign, plus free play",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "memory-match",
+      "title": "Animal Memory Match",
+      "url": "https://wiselyarcade.com/games/memory-match",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/memory-match.jpg",
+      "description": "Play Animal Memory Match free online — flip cards and find all 8 animal pairs. A fun memory game for kids ages 5–9 that teaches patience and paying attention. No download.",
+      "card_text": "Flip the cards and find all eight animal pairs. A perfect first game for sharp young minds.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "memory"
+      ],
+      "practises": "Remembering where things are, and paying close attention",
+      "lesson": "Patience and paying attention always pay off.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap cards to flip them",
+      "structure": "Boards grow bigger as you climb",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "apex-gp",
+      "title": "Apex GP",
+      "url": "https://wiselyarcade.com/games/apex-gp",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/apex-gp.jpg",
+      "description": "Play Apex GP free online — a real 3D motorcycle Grand Prix racer. Race the classic circuit and 99 daylight sprint levels with jump ramps and river gaps, earn points, upgrade your bike's engine, tires and nitro, and climb 100 career levels. No download, no sign-up, family-friendly.",
+      "card_text": "Real 3D motorcycle Grand Prix racing — 3 laps against 5 rivals, 10 career levels, and a garage where your points buy engine, tire and nitro upgrades.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Control and smoothness over raw speed",
+      "lesson": "Smooth is fast — control beats raw speed.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Arrow keys, touch or tilt steering",
+      "structure": "100 career levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "arrowway-escape",
+      "title": "Arrowway Escape",
+      "url": "https://wiselyarcade.com/games/arrowway-escape",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/arrowway-escape.jpg",
+      "description": "Play Arrowway Escape free online — an arrow escape puzzle: tap an arrow to slide it off the board, but only when its path to the edge is clear. Blocked taps cost a heart. 100 levels, no download, no sign-up.",
+      "card_text": "An arrow escape puzzle — tap arrows to slide them off the tray, but only when the path is clear, so free them in the right order. 100 levels.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Working out the right order to free blocked pieces",
+      "lesson": "Order matters — free the blocked pieces in the right sequence.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap an arrow to slide it off the board",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "block-bloom",
+      "title": "Block Bloom",
+      "url": "https://wiselyarcade.com/games/block-bloom",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/block-bloom.jpg",
+      "description": "Play Block Bloom free online — a Block Blast-style block puzzle — drag, place, clear. 100 levels, no download, no sign-up. Glossy 3D blocks, rising targets and a best-score endless mode, family-friendly.",
+      "card_text": "Fit glossy gem blocks on an 8×8 board, clear rows and columns, and climb 100 levels of pure planning.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Planning ahead and leaving room for what comes next",
+      "lesson": "Plan ahead — leave room for the future.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 4,
+      "controls": "Drag blocks onto the board",
+      "structure": "100 levels, plus an endless best-score mode",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "bubble-pop",
+      "title": "Bubble Pop",
+      "url": "https://wiselyarcade.com/games/bubble-pop",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/bubble-pop.jpg",
+      "description": "Play Bubble Pop free online — the classic bubble shooter with glossy 3D bubbles! Aim the cannon, match 3 or more bubbles to pop them, and drop whole clusters for bonus points. A new row slides in every 6 shots. No download, no sign-up, family-friendly.",
+      "card_text": "A bubble shooter game — match 3 bubbles, aim with intention.",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5–17",
+      "skills": [
+        "memory"
+      ],
+      "practises": "Aiming with intention and planning the next shot",
+      "lesson": "Aim with intention, not in a hurry.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 3,
+      "controls": "Aim and tap to shoot",
+      "structure": "Endless rows — beat your best score",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "calm-fist-arena",
+      "title": "Calm Fist Arena",
+      "url": "https://wiselyarcade.com/games/calm-fist-arena",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/calm-fist-arena.jpg",
+      "description": "Play Calm Fist Arena free online — a martial-arts fighting game with real painted fighters and big-screen arenas. Block to build Calm, then strike with focus. Beat 100 rivals across 50 lively places — street markets, ship decks, train tops, waterfalls and mountain temples — and learn that real strength is self-control. No download.",
+      "card_text": "A martial-arts fighting game with real painted fighters — block to build Calm, then unleash the Focus Strike. Beat 100 rivals across 50 lively places.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing",
+        "strategy"
+      ],
+      "practises": "Self-control, timing and striking with focus",
+      "lesson": "Real strength is self-control — stay calm and strike with focus.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap or keys — block to build Calm, then strike",
+      "structure": "100 rivals across 50 places",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "chess",
+      "title": "Chess",
+      "url": "https://wiselyarcade.com/games/chess",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/chess.jpg",
+      "description": "Play Chess free online against the computer — full rules, three difficulty levels, no download, no sign-up. Every move has a consequence: think before you act. Family-friendly.",
+      "card_text": "Play chess online — full classic chess vs the computer, three difficulties.",
+      "age_bands": [
+        "teens",
+        "adults"
+      ],
+      "age_guidance": "Ages 10+",
+      "skills": [
+        "strategy"
+      ],
+      "practises": "Thinking ahead and weighing the consequence of every move",
+      "lesson": "Every move has a consequence — think before you act.",
+      "difficulty": "Hard",
+      "estimated_minutes_per_round": 15,
+      "controls": "Tap a piece, then tap its square",
+      "structure": "Full games vs the computer, 3 difficulty levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "crown-logic",
+      "title": "Crown Logic",
+      "url": "https://wiselyarcade.com/games/crown-logic",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/crown-logic.jpg",
+      "description": "Play Crown Logic free online — a Queens-style crown placement logic puzzle. Place exactly one crown in every row, column and colour region, and never let two crowns touch, not even diagonally. 100 levels, each with exactly one solution, no download, no sign-up.",
+      "card_text": "A crown logic puzzle — seat one crown in every row, column and colour, with no two crowns ever touching. 100 levels.",
+      "age_bands": [
+        "adults"
+      ],
+      "age_guidance": "Ages 18+",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Pure logic — using every constraint as a clue",
+      "lesson": "Every constraint is a clue — limits don't block you, they quietly tell you where the answer must be.",
+      "difficulty": "Hard",
+      "estimated_minutes_per_round": 5,
+      "controls": "Tap cells to place crowns",
+      "structure": "100 levels, each with exactly one solution",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "daily-sudoku",
+      "title": "Daily Sudoku",
+      "url": "https://wiselyarcade.com/games/daily-sudoku",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/daily-sudoku.jpg",
+      "description": "Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download.",
+      "card_text": "A fresh Sudoku puzzle every single day. Logic, patience, and one certain number at a time.",
+      "age_bands": [
+        "adults"
+      ],
+      "age_guidance": "Ages 18+",
+      "skills": [
+        "maths",
+        "logic"
+      ],
+      "practises": "Logic and breaking a big problem into small steps",
+      "lesson": "Big problems break into small steps.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 10,
+      "controls": "Tap a cell, then a number",
+      "structure": "A new puzzle every day",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "daily-word-guess",
+      "title": "Daily Word Guess",
+      "url": "https://wiselyarcade.com/games/daily-word-guess",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/daily-word-guess.jpg",
+      "description": "Play Daily Word Guess free online — one new word to crack every day, plus a 100-level word climb from 4-letter starters to 7-letter giants. Green, gold, grey — every wrong guess teaches you something. No download, no sign-up.",
+      "card_text": "A daily word-guessing game — crack today's hidden word in six tries, keep your streak alive, and climb 100 levels.",
+      "age_bands": [
+        "teens",
+        "adults"
+      ],
+      "age_guidance": "Ages 10+",
+      "skills": [
+        "words"
+      ],
+      "practises": "Vocabulary and learning from every wrong guess",
+      "lesson": "Never give up — every wrong guess teaches you something.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Type letters on the keyboard",
+      "structure": "A daily word, plus a 100-level climb",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "forest-dash",
+      "title": "Forest Dash",
+      "url": "https://wiselyarcade.com/games/forest-dash",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/forest-dash.jpg",
+      "description": "Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, climb 100 levels from Sunny Grove to the storm peaks, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly.",
+      "card_text": "Run, jump, and slide through a magical forest. Dodge the logs, grab the fireflies — how far can you go?",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Quick reactions and keeping going after a stumble",
+      "lesson": "Keep going, even when you stumble.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap or arrow keys — jump and slide",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "gk-quest",
+      "title": "GK Quest",
+      "url": "https://wiselyarcade.com/games/gk-quest",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/gk-quest.jpg",
+      "description": "Play GK Quest free online — a general knowledge quiz with 100 levels of questions on animals, space, science, geography, history, sports and food. Every answer teaches a true fact. No download, no sign-up.",
+      "card_text": "A general knowledge quiz — 100 levels of animals, space, science, history and sport. Every answer teaches a true fact.",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5–17",
+      "skills": [
+        "knowledge"
+      ],
+      "practises": "General knowledge — animals, space, science, geography, history, sports and food",
+      "lesson": "Smart is not magic — it's noticing patterns.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap the answer",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "gem-grove-quest",
+      "title": "Gem Grove Quest",
+      "url": "https://wiselyarcade.com/games/gem-grove-quest",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/gem-grove-quest.jpg",
+      "description": "Play Gem Grove Quest free online — a Candy Crush-style match-3 puzzle adventure — swap glossy gems, chain cascades and grow line and star gems. 100 levels, no download, no sign-up. Family-friendly.",
+      "card_text": "Swap glossy gems to match 3 or more, set off chain cascades, and blast whole rows with special gems across 100 levels.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Spotting matches and thinking one move ahead",
+      "lesson": "Small moves add up — one good match sets off a chain.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Drag to swap gems",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "iq-quest",
+      "title": "IQ Quest",
+      "url": "https://wiselyarcade.com/games/iq-quest",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/iq-quest.jpg",
+      "description": "Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up.",
+      "card_text": "Solve the puzzle — picture patterns and odd-one-out for little ones, growing to sequences and grids for experts.",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5–17",
+      "skills": [
+        "logic",
+        "knowledge"
+      ],
+      "practises": "Patterns, sequences, analogies and riddles",
+      "lesson": "Smart is not magic — it's noticing patterns.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap the answer",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "jigsaw-puzzle",
+      "title": "Jigsaw Puzzle",
+      "url": "https://wiselyarcade.com/games/jigsaw-puzzle",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/jigsaw-puzzle.jpg",
+      "description": "Play Jigsaw Puzzle free online — drag the pieces and rebuild 100 pictures — a different picture on every level, never repeated: game posters, storybook scenes and real photos of space, animals and famous places. 100 levels for kids ages 5–9 that teach patience, piece by piece. No download.",
+      "card_text": "Your favourite Wisely Arcade posters, cut into pieces! Drag each piece home and watch the picture come together across 100 levels.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Patience, shapes and seeing how parts make a whole",
+      "lesson": "Patience — the picture comes together piece by piece.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 5,
+      "controls": "Drag the pieces into place",
+      "structure": "100 levels — a different picture every level",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "letter-garden",
+      "title": "Letter Garden",
+      "url": "https://wiselyarcade.com/games/letter-garden",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/letter-garden.jpg",
+      "description": "Play Letter Garden free online — tap the letters in order to complete each word and watch your plant grow from seed to full bloom. 100 levels, a garden that grows with you. No download, no sign-up.",
+      "card_text": "Tap the letters in order to finish the word — every word waters the seed, and the plant grows one stage. Finish all 100 levels to grow the Golden Tree.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "words"
+      ],
+      "practises": "Spelling words letter by letter",
+      "lesson": "Small steps every day make big things grow.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap letters in order",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "ludo",
+      "title": "Ludo",
+      "url": "https://wiselyarcade.com/games/ludo",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/ludo.jpg",
+      "description": "Play Ludo free online — vs the computer or pass-and-play with up to 4 players, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly.",
+      "card_text": "Ludo online — the classic family race, vs computer or pass-and-play.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "strategy"
+      ],
+      "practises": "Making the best of every roll — strategy with luck in the mix",
+      "lesson": "You can't control the dice — only how you play the roll.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 10,
+      "controls": "Tap the dice, then a piece",
+      "structure": "Full matches — vs the computer or pass-and-play, up to 4 players",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "math-quest",
+      "title": "Math Quest",
+      "url": "https://wiselyarcade.com/games/math-quest",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/math-quest.jpg",
+      "description": "Play Math Quest free online — addition, subtraction, multiplication and division games with 5 levels from Toddler to Expert. Easy steps that grow harder as you climb. No download, no sign-up.",
+      "card_text": "Add, subtract, multiply and divide — count apples as a Toddler, climb to two-step Expert sums.",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5–17",
+      "skills": [
+        "maths"
+      ],
+      "practises": "Adding, subtracting, multiplying and dividing",
+      "lesson": "Big problems break into small steps.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap the answer",
+      "structure": "5 stages, from Toddler to Expert",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "mind-meter",
+      "title": "Mind Meter",
+      "url": "https://wiselyarcade.com/games/mind-meter",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/mind-meter.jpg",
+      "description": "Play Mind Meter free online — a 3D IQ challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your estimated IQ, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly.",
+      "card_text": "A 3D IQ challenge — 12 timed brain-teasers. How high can your meter go?",
+      "age_bands": [
+        "teens",
+        "adults"
+      ],
+      "age_guidance": "Ages 10+",
+      "skills": [
+        "memory",
+        "maths"
+      ],
+      "practises": "Number logic, patterns and verbal reasoning under time pressure",
+      "lesson": "A sharp mind is built, not born.",
+      "difficulty": "Hard",
+      "estimated_minutes_per_round": 5,
+      "controls": "Tap answers against the clock",
+      "structure": "12 timed brain-teasers — beat your best score",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "minesweeper",
+      "title": "Minesweeper",
+      "url": "https://wiselyarcade.com/games/minesweeper",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/minesweeper.jpg",
+      "description": "Play Minesweeper online free — the classic logic puzzle rebuilt with glossy HD 3D tiles. Reveal tiles, flag the mines, beat your best time. No download, no sign-up, family-friendly.",
+      "card_text": "Minesweeper online free — think before you act, every click counts.",
+      "age_bands": [
+        "adults"
+      ],
+      "age_guidance": "Ages 18+",
+      "skills": [
+        "logic"
+      ],
+      "practises": "Careful logic — thinking before every click",
+      "lesson": "Think before you act — every click counts.",
+      "difficulty": "Hard",
+      "estimated_minutes_per_round": 5,
+      "controls": "Tap to reveal, long-press to flag",
+      "structure": "Endless boards — beat your best time",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "missing-letters",
+      "title": "Missing Letters",
+      "url": "https://wiselyarcade.com/games/missing-letters",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/missing-letters.jpg",
+      "description": "Play Missing Letters free online — look at the picture, find the missing letter, and finish the word. A friendly reading game for kids ages 5–9. No download, no sign-up.",
+      "card_text": "A letter ran away from the word! Look at the picture and find it. Toddler words to Expert long words with two missing letters.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "words"
+      ],
+      "practises": "Letter sounds and early reading",
+      "lesson": "Reading grows one letter at a time.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap the missing letter",
+      "structure": null,
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "neon-snake",
+      "title": "Neon Snake",
+      "url": "https://wiselyarcade.com/games/neon-snake",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/neon-snake.jpg",
+      "description": "Play Neon Snake free online — the classic snake game with a glowing neon twist. Eat, grow, and don't get greedy. Keyboard + swipe controls, works on mobile.",
+      "card_text": "The classic snake game with a glowing neon twist. Eat, grow, survive — and don't get greedy.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Planning your path and knowing when enough is enough",
+      "lesson": "Greed traps you — know when enough is enough.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Arrow keys or swipe",
+      "structure": "Endless — beat your best score",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "nitro-gp",
+      "title": "Nitro GP",
+      "url": "https://wiselyarcade.com/games/nitro-gp",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/nitro-gp.jpg",
+      "description": "Play Nitro GP free online — Need-for-Speed-style 3D street racing. Race 3 laps against 5 rivals on neon night circuits, then take on daylight sprint levels with jump ramps and river gaps — 100 career levels in all. Dodge traffic, drift corners, earn points and upgrade your car. No download, no sign-up, family-friendly.",
+      "card_text": "Real 3D car racing Grand Prix — 3 laps against 5 rivals, 10 career levels, and a garage where your points buy engine, tire and nitro upgrades.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Control and smoothness over raw speed",
+      "lesson": "Smooth is fast — control beats raw speed.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Arrow keys, touch or tilt steering",
+      "structure": "100 career levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "paint-the-rocket",
+      "title": "Paint the Rocket",
+      "url": "https://wiselyarcade.com/games/paint-the-rocket",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/paint-the-rocket.jpg",
+      "description": "Play Paint the Rocket free online — a tap-to-colour adventure for kids ages 5–9 with five big pictures to paint: a rocket, a castle, under the sea, a friendly robot and a garden. No download, no sign-up.",
+      "card_text": "A tap-to-color space adventure with 5 levels — from a toddler's first rocket to an Expert masterpiece. Paint it, then watch it blast off.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "knowledge"
+      ],
+      "practises": "Colour choices, creativity and a steady hand",
+      "lesson": "There are no wrong colours — your ideas can fly.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 5,
+      "controls": "Tap to colour",
+      "structure": "5 big pictures to paint",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "peak-dash",
+      "title": "Peak Dash",
+      "url": "https://wiselyarcade.com/games/peak-dash",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/peak-dash.jpg",
+      "description": "Play Peak Dash free online — a precision platform game. Run and jump across mountain peaks, dodge spikes, ride moving platforms, bounce on springs, collect coins and plant the summit flag. 100 levels in 10 worlds, no download, no sign-up.",
+      "card_text": "Run, jump and bounce across snowy mountain ledges, dodge the spikes, grab the coins and plant the flag on the summit across 100 levels.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Timing, precision and learning from every fall",
+      "lesson": "Falling is information — every failed jump teaches the timing.",
+      "difficulty": "Hard",
+      "estimated_minutes_per_round": 2,
+      "controls": "Arrow keys or tap — run and jump",
+      "structure": "100 levels in 10 worlds",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "sky-gp",
+      "title": "Sky GP",
+      "url": "https://wiselyarcade.com/games/sky-gp",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/sky-gp.jpg",
+      "description": "Play Sky GP free online — a 3D flying car racing game in a bright daytime sky. Race 5 rival flying cars through golden checkpoint rings, dodge bird flocks, cruise past airliners, beat 100 career levels or chase the clock in Time Trial. No download, no sign-up, family-friendly.",
+      "card_text": "Real 3D flying car racing in a bright daytime sky — 3 laps through golden rings against 5 rivals, bird flocks to dodge, 10 career levels plus a Time Trial mode, and a garage where your points buy engine, wings and boost upgrades.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Staying calm at height — patience lands, panic crashes",
+      "lesson": "Aim high, but fly calm — panic crashes, patience lands.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Arrow keys, touch or tilt steering",
+      "structure": "100 career levels, plus Time Trial",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "spot-the-difference",
+      "title": "Spot the Difference",
+      "url": "https://wiselyarcade.com/games/spot-the-difference",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/spot-the-difference.jpg",
+      "description": "Play Spot the Difference free online — a sharp-eyes puzzle game for kids ages 5–9. Two pictures, five scenes, 100 levels of hidden differences to find. No download, no sign-up.",
+      "card_text": "Two pictures that look exactly the same… but they're NOT! Hunt for the sneaky hidden differences across five pictures and 100 levels.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "memory"
+      ],
+      "practises": "Looking carefully and noticing small details",
+      "lesson": "Slow down and really look.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap the difference when you spot it",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "tower-stack",
+      "title": "Tower Stack",
+      "url": "https://wiselyarcade.com/games/tower-stack",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/tower-stack.jpg",
+      "description": "Play Tower Stack online — a free tower stack game. Drop each sliding block at just the right moment and build the tallest tower you can. Levels get faster, wind kicks in, and patience wins. No download.",
+      "card_text": "Drop each sliding block at just the right moment. Levels get faster — and then the wind starts.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Timing and a steady hand",
+      "lesson": "Big things are built one careful step at a time.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 1,
+      "controls": "Tap to drop the sliding block",
+      "structure": "Levels get faster, with wind at high levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "trail-stunts",
+      "title": "Trail Stunts",
+      "url": "https://wiselyarcade.com/games/trail-stunts",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/trail-stunts.jpg",
+      "description": "Play Trail Stunts free online — a Moto X3M-style physics bike stunt game with 100% original trails. Throttle, tilt, backflip and stick the landing across 3 wild trails. Fans of Moto X3M will feel right at home. No download.",
+      "card_text": "Throttle, tilt, and flip your dirt bike over wild hills. Stick the landing — balance beats speed.",
+      "age_bands": [
+        "teens"
+      ],
+      "age_guidance": "Ages 10–17",
+      "skills": [
+        "racing"
+      ],
+      "practises": "Balance and control over raw speed",
+      "lesson": "Balance beats speed.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap or keys — throttle and tilt",
+      "structure": "3 wild trails",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "word-pet",
+      "title": "Word Pet",
+      "url": "https://wiselyarcade.com/games/word-pet",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/word-pet.jpg",
+      "description": "Play Word Pet free online — tap the letters in order to finish each word, feed Biscuit the puppy, and watch him grow from a tiny egg to a crowned champion across 100 levels. A friendly word game for kids ages 5–9. No download, no sign-up.",
+      "card_text": "Meet Biscuit — a real 3D puppy on your screen! Every word you complete makes him hop, spin and grow, from a tiny egg-stage pup to a crowned Champion.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "words"
+      ],
+      "practises": "Spelling, and caring for something that grows",
+      "lesson": "Love and care help everything grow.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap letters in order",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "word-town",
+      "title": "Word Town",
+      "url": "https://wiselyarcade.com/games/word-town",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/word-town.jpg",
+      "description": "Play Word Town free online — tap letter tiles in order to complete each word and watch your 3D town grow, one building at a time. A friendly spelling game for kids ages 5–9. No download, no sign-up.",
+      "card_text": "Empty land, one road — and your words are the builders. Every finished word raises a house, a shop, a school or a tower in a real 3D town that keeps growing.",
+      "age_bands": [
+        "kids"
+      ],
+      "age_guidance": "Ages 5–9",
+      "skills": [
+        "words"
+      ],
+      "practises": "Spelling words and building with them",
+      "lesson": "Great towns are built one brick — and one word — at a time.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 2,
+      "controls": "Tap letters in order",
+      "structure": "100 levels",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    }
+  ]
+}
