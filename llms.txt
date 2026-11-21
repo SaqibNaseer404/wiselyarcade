@@ -1,0 +1,78 @@
+# Wisely Arcade
+
+> Wisely Arcade is a free, family-safe games website. Every game teaches a life lesson and climbs 100 levels, getting harder as you go. No downloads, no accounts, no sign-up. Progress is saved on the player's device only.
+
+Site statement: YOU STAY. YOU CLIMB. YOU WIN.
+
+## Memory & Attention
+
+- [Animal Memory Match](https://wiselyarcade.com/games/memory-match): Play Animal Memory Match free online — flip cards and find all 8 animal pairs. A fun memory game for kids ages 5–9 that teaches patience and paying attention. No download. Lesson: Patience and paying attention always pay off. (Ages 5–9)
+- [Bubble Pop](https://wiselyarcade.com/games/bubble-pop): Play Bubble Pop free online — the classic bubble shooter with glossy 3D bubbles! Aim the cannon, match 3 or more bubbles to pop them, and drop whole clusters for bonus points. A new row slides in every 6 shots. No download, no sign-up, family-friendly. Lesson: Aim with intention, not in a hurry. (Ages 5–17)
+- [Mind Meter](https://wiselyarcade.com/games/mind-meter): Play Mind Meter free online — a 3D brain challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your brain score, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly. Lesson: A sharp mind is built, not born. (Ages 10+)
+- [Spot the Difference](https://wiselyarcade.com/games/spot-the-difference): Play Spot the Difference free online — a sharp-eyes puzzle game for kids ages 5–9. Two pictures, five scenes, 100 levels of hidden differences to find. No download, no sign-up. Lesson: Slow down and really look. (Ages 5–9)
+
+## Logic & Puzzles
+
+- [2048 Merge](https://wiselyarcade.com/games/2048-merge): Play 2048 Merge free online — the famous 2048 puzzle game with a 100-level campaign. Slide the tiles, merge matching numbers, and chase the 2048 tile. No download, no sign-up. Lesson: Small smart steps add up to big wins. (Ages 10+)
+- [Arrowway Escape](https://wiselyarcade.com/games/arrowway-escape): Play Arrowway Escape free online — an arrow escape puzzle: tap an arrow to slide it off the board, but only when its path to the edge is clear. Blocked taps cost a heart. 100 levels, no download, no sign-up. Lesson: Order matters — free the blocked pieces in the right sequence. (Ages 10–17)
+- [Block Bloom](https://wiselyarcade.com/games/block-bloom): Play Block Bloom free online — a Block Blast-style block puzzle — drag, place, clear. 100 levels, no download, no sign-up. Glossy 3D blocks, rising targets and a best-score endless mode, family-friendly. Lesson: Plan ahead — leave room for the future. (Ages 10–17)
+- [Crown Logic](https://wiselyarcade.com/games/crown-logic): Play Crown Logic free online — a Queens-style crown placement logic puzzle. Place exactly one crown in every row, column and colour region, and never let two crowns touch, not even diagonally. 100 levels, each with exactly one solution, no download, no sign-up. Lesson: Every constraint is a clue — limits don't block you, they quietly tell you where the answer must be. (Ages 18+)
+- [Daily Sudoku](https://wiselyarcade.com/games/daily-sudoku): Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download. Lesson: Big problems break into small steps. (Ages 18+)
+- [Gem Grove Quest](https://wiselyarcade.com/games/gem-grove-quest): Play Gem Grove Quest free online — a Candy Crush-style match-3 puzzle adventure — swap glossy gems, chain cascades and grow line and star gems. 100 levels, no download, no sign-up. Family-friendly. Lesson: Small moves add up — one good match sets off a chain. (Ages 10–17)
+- [IQ Quest](https://wiselyarcade.com/games/iq-quest): Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
+- [Jigsaw Puzzle](https://wiselyarcade.com/games/jigsaw-puzzle): Play Jigsaw Puzzle free online — drag the pieces and rebuild 100 pictures — a different picture on every level, never repeated: game posters, storybook scenes and real photos of space, animals and famous places. 100 levels for kids ages 5–9 that teach patience, piece by piece. No download. Lesson: Patience — the picture comes together piece by piece. (Ages 5–9)
+- [Minesweeper](https://wiselyarcade.com/games/minesweeper): Play Minesweeper online free — the classic logic puzzle rebuilt with glossy HD 3D tiles. Reveal tiles, flag the mines, beat your best time. No download, no sign-up, family-friendly. Lesson: Think before you act — every click counts. (Ages 18+)
+
+## Maths & Numbers
+
+- [2048 Merge](https://wiselyarcade.com/games/2048-merge): Play 2048 Merge free online — the famous 2048 puzzle game with a 100-level campaign. Slide the tiles, merge matching numbers, and chase the 2048 tile. No download, no sign-up. Lesson: Small smart steps add up to big wins. (Ages 10+)
+- [Daily Sudoku](https://wiselyarcade.com/games/daily-sudoku): Play today's free Sudoku puzzle online — a fresh challenge every day. Fill the 9×9 grid using logic, with pencil notes, mistake tracking and timer. No download. Lesson: Big problems break into small steps. (Ages 18+)
+- [Math Quest](https://wiselyarcade.com/games/math-quest): Play Math Quest free online — addition, subtraction, multiplication and division games with 5 levels from Toddler to Expert. Easy steps that grow harder as you climb. No download, no sign-up. Lesson: Big problems break into small steps. (Ages 5–17)
+- [Mind Meter](https://wiselyarcade.com/games/mind-meter): Play Mind Meter free online — a 3D brain challenge with 12 timed brain-teasers: number logic, patterns, verbal reasoning and math puzzles. Get your brain score, beat your best, and learn: a sharp mind is built, not born. No download, no sign-up, family-friendly. Lesson: A sharp mind is built, not born. (Ages 10+)
+
+## Words & Reading
+
+- [Daily Word Guess](https://wiselyarcade.com/games/daily-word-guess): Play Daily Word Guess free online — one new word to crack every day, plus a 100-level word climb from 4-letter starters to 7-letter giants. Green, gold, grey — every wrong guess teaches you something. No download, no sign-up. Lesson: Never give up — every wrong guess teaches you something. (Ages 10+)
+- [Letter Garden](https://wiselyarcade.com/games/letter-garden): Play Letter Garden free online — tap the letters in order to complete each word and watch your plant grow from seed to full bloom. 100 levels, a garden that grows with you. No download, no sign-up. Lesson: Small steps every day make big things grow. (Ages 5–9)
+- [Missing Letters](https://wiselyarcade.com/games/missing-letters): Play Missing Letters free online — look at the picture, find the missing letter, and finish the word. A friendly reading game for kids ages 5–9. No download, no sign-up. Lesson: Reading grows one letter at a time. (Ages 5–9)
+- [Word Pet](https://wiselyarcade.com/games/word-pet): Play Word Pet free online — tap the letters in order to finish each word, feed Biscuit the puppy, and watch him grow from a tiny egg to a crowned champion across 100 levels. A friendly word game for kids ages 5–9. No download, no sign-up. Lesson: Love and care help everything grow. (Ages 5–9)
+- [Word Town](https://wiselyarcade.com/games/word-town): Play Word Town free online — tap letter tiles in order to complete each word and watch your 3D town grow, one building at a time. A friendly spelling game for kids ages 5–9. No download, no sign-up. Lesson: Great towns are built one brick — and one word — at a time. (Ages 5–9)
+
+## Racing & Action
+
+- [Apex GP](https://wiselyarcade.com/games/apex-gp): Play Apex GP free online — a real 3D motorcycle Grand Prix racer. Race the classic circuit and 99 daylight sprint levels with jump ramps and river gaps, earn points, upgrade your bike's engine, tires and nitro, and climb 100 career levels. No download, no sign-up, family-friendly. Lesson: Smooth is fast — control beats raw speed. (Ages 10–17)
+- [Calm Fist Arena](https://wiselyarcade.com/games/calm-fist-arena): Play Calm Fist Arena free online — a martial-arts fighting game with real painted fighters and big-screen arenas. Block to build Calm, then strike with focus. Beat 100 rivals across 50 lively places — street markets, ship decks, train tops, waterfalls and mountain temples — and learn that real strength is self-control. No download. Lesson: Real strength is self-control — stay calm and strike with focus. (Ages 10–17)
+- [Forest Dash](https://wiselyarcade.com/games/forest-dash): Play Forest Dash free online — an endless runner where fans of Subway Surfers and Temple Run will feel at home. Dodge, jump, and slide through a living forest, grab glowing fireflies, climb 100 levels from Sunny Grove to the storm peaks, and learn: keep going, every obstacle passes. No download, no sign-up, family-friendly. Lesson: Keep going, even when you stumble. (Ages 5–17)
+- [Neon Snake](https://wiselyarcade.com/games/neon-snake): Play Neon Snake free online — the classic snake game with a glowing neon twist. Eat, grow, and don't get greedy. Keyboard + swipe controls, works on mobile. Lesson: Greed traps you — know when enough is enough. (Ages 10–17)
+- [Nitro GP](https://wiselyarcade.com/games/nitro-gp): Play Nitro GP free online — Need-for-Speed-style 3D street racing. Race 3 laps against 5 rivals on neon night circuits, then take on daylight sprint levels with jump ramps and river gaps — 100 career levels in all. Dodge traffic, drift corners, earn points and upgrade your car. No download, no sign-up, family-friendly. Lesson: Smooth is fast — control beats raw speed. (Ages 10–17)
+- [Peak Dash](https://wiselyarcade.com/games/peak-dash): Play Peak Dash free online — a precision platform game. Run and jump across mountain peaks, dodge spikes, ride moving platforms, bounce on springs, collect coins and plant the summit flag. 100 levels in 10 worlds, no download, no sign-up. Lesson: Falling is information — every failed jump teaches the timing. (Ages 10–17)
+- [Sky GP](https://wiselyarcade.com/games/sky-gp): Play Sky GP free online — a 3D flying car racing game in a bright daytime sky. Race 5 rival flying cars through golden checkpoint rings, dodge bird flocks, cruise past airliners, beat 100 career levels or chase the clock in Time Trial. No download, no sign-up, family-friendly. Lesson: Aim high, but fly calm — panic crashes, patience lands. (Ages 10–17)
+- [Tower Stack](https://wiselyarcade.com/games/tower-stack): Play Tower Stack online — a free tower stack game. Drop each sliding block at just the right moment and build the tallest tower you can. Levels get faster, wind kicks in, and patience wins. No download. Lesson: Big things are built one careful step at a time. (Ages 10–17)
+- [Trail Stunts](https://wiselyarcade.com/games/trail-stunts): Play Trail Stunts free online — a Moto X3M-style physics bike stunt game with 100% original trails. Throttle, tilt, backflip and stick the landing across 3 wild trails. Fans of Moto X3M will feel right at home. No download. Lesson: Balance beats speed. (Ages 10–17)
+
+## Strategy & Board Games
+
+- [2048 Merge](https://wiselyarcade.com/games/2048-merge): Play 2048 Merge free online — the famous 2048 puzzle game with a 100-level campaign. Slide the tiles, merge matching numbers, and chase the 2048 tile. No download, no sign-up. Lesson: Small smart steps add up to big wins. (Ages 10+)
+- [Calm Fist Arena](https://wiselyarcade.com/games/calm-fist-arena): Play Calm Fist Arena free online — a martial-arts fighting game with real painted fighters and big-screen arenas. Block to build Calm, then strike with focus. Beat 100 rivals across 50 lively places — street markets, ship decks, train tops, waterfalls and mountain temples — and learn that real strength is self-control. No download. Lesson: Real strength is self-control — stay calm and strike with focus. (Ages 10–17)
+- [Chess](https://wiselyarcade.com/games/chess): Play Chess free online against the computer — full rules, three difficulty levels, no download, no sign-up. Every move has a consequence: think before you act. Family-friendly. Lesson: Every move has a consequence — think before you act. (Ages 10+)
+- [Ludo](https://wiselyarcade.com/games/ludo): Play Ludo free online — vs the computer or pass-and-play with up to 4 players, full classic rules, no download, no sign-up. You can't control the dice, only how you play the roll. Family-friendly. Lesson: You can't control the dice — only how you play the roll. (Ages 5–9)
+
+## Knowledge & Creativity
+
+- [GK Quest](https://wiselyarcade.com/games/gk-quest): Play GK Quest free online — a general knowledge quiz with 100 levels of questions on animals, space, science, geography, history, sports and food. Every answer teaches a true fact. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
+- [IQ Quest](https://wiselyarcade.com/games/iq-quest): Play IQ Quest free online — 100 levels of patterns, number sequences, odd-one-out, analogies, riddles and puzzle grids. The higher you climb, the tougher it gets. No download, no sign-up. Lesson: Smart is not magic — it's noticing patterns. (Ages 5–17)
+- [Paint the Rocket](https://wiselyarcade.com/games/paint-the-rocket): Play Paint the Rocket free online — a tap-to-colour adventure for kids ages 5–9 with five big pictures to paint: a rocket, a castle, under the sea, a friendly robot and a garden. No download, no sign-up. Lesson: There are no wrong colours — your ideas can fly. (Ages 5–9)
+
+## Key pages
+
+- [Games for Kids (ages 5-9)](https://wiselyarcade.com/kids)
+- [Games for Teens (ages 10-17)](https://wiselyarcade.com/teens)
+- [Games for Adults (ages 18+)](https://wiselyarcade.com/adults)
+- [Browse games by skill](https://wiselyarcade.com/skills)
+- [Parent Guide](https://wiselyarcade.com/parents)
+- [About Wisely Arcade](https://wiselyarcade.com/about)
+
+## For AI assistants and developers
+
+- MCP server (remote, read-only, no key): https://wiselyarcade.com/mcp — tools: list_games, get_game, search_games, recommend_games, list_skills, about_wisely_arcade
+- Full game catalogue as open JSON: https://wiselyarcade.com/catalogue.json
