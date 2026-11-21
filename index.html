@@ -110,6 +110,53 @@
       <a class="age-btn age-adults" href="adults">Ages 18+<small>Brain games for grown-ups</small></a>
     </div>
 
+    <style>
+      .wl-card{background:#fff;border:1px solid #e3e9e5;border-radius:18px;padding:22px 24px;margin:0 0 8px;
+        box-shadow:0 2px 10px rgba(20,40,30,.05)}
+      .wl-kicker{font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#0f766e;margin:0 0 6px}
+      .wl-card h2{margin:0 0 6px}
+      .wl-sub{margin:0 0 14px;color:#44554c}
+      .wl-box{border:2px dashed #b9cfc4;border-radius:14px;padding:16px 18px;background:#f4faf6}
+      .wl-lesson{font-size:1.15rem;font-weight:700;margin:0;color:#17352a}
+      .wl-locked{margin:0;color:#5a6f64}
+      .wl-row{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    </style>
+    <section class="block" id="lesson-card">
+      <div class="wl-card">
+        <p class="wl-kicker">A lesson in every game</p>
+        <h2>Your lesson is waiting</h2>
+        <p class="wl-sub">Every game on Wisely ends with one idea worth keeping. Today's is hiding inside <strong id="wl-game">a game</strong>.</p>
+        <div class="wl-box">
+          <p class="wl-locked" id="wl-locked">Finish a level — or tap below — to see it.</p>
+          <p class="wl-lesson" id="wl-lesson" style="display:none"></p>
+        </div>
+        <div class="wl-row">
+          <button class="btn" id="wl-btn" type="button">Reveal the lesson</button>
+          <a class="btn ghost" id="wl-play" href="games" style="display:none">Play it</a>
+        </div>
+      </div>
+    </section>
+    <script>
+    (function () {
+      var GAMES = [{"slug": "memory-match", "name": "Animal Memory Match", "lesson": "Patience and paying attention always pay off."}, {"slug": "forest-dash", "name": "Forest Dash", "lesson": "Keep going, even when you stumble."}, {"slug": "paint-the-rocket", "name": "Paint the Rocket", "lesson": "There are no wrong colours — your ideas can fly."}, {"slug": "spot-the-difference", "name": "Spot the Difference", "lesson": "Slow down and really look."}, {"slug": "jigsaw-puzzle", "name": "Jigsaw Puzzle", "lesson": "Patience — the picture comes together piece by piece."}, {"slug": "calm-fist-arena", "name": "Calm Fist Arena", "lesson": "Real strength is self-control — stay calm and strike with focus."}, {"slug": "block-bloom", "name": "Block Bloom", "lesson": "Plan ahead — leave room for the future."}, {"slug": "gem-grove-quest", "name": "Gem Grove Quest", "lesson": "Small moves add up — one good match sets off a chain."}, {"slug": "arrowway-escape", "name": "Arrowway Escape", "lesson": "Order matters — free the blocked pieces in the right sequence."}, {"slug": "crown-logic", "name": "Crown Logic", "lesson": "Every constraint is a clue — limits don\\"}, {"slug": "peak-dash", "name": "Peak Dash", "lesson": "Falling is information — every failed jump teaches the timing."}, {"slug": "missing-letters", "name": "Missing Letters", "lesson": "Reading grows one letter at a time."}, {"slug": "letter-garden", "name": "Letter Garden", "lesson": "Small steps every day make big things grow."}, {"slug": "word-pet", "name": "Word Pet", "lesson": "Love and care help everything grow."}, {"slug": "word-town", "name": "Word Town", "lesson": "Great towns are built one brick — and one word — at a time."}, {"slug": "math-quest", "name": "Math Quest", "lesson": "Big problems break into small steps."}, {"slug": "iq-quest", "name": "IQ Quest", "lesson": "Smart is not magic — it\\"}, {"slug": "gk-quest", "name": "GK Quest", "lesson": "Smart is not magic — it\\"}, {"slug": "bubble-pop", "name": "Bubble Pop", "lesson": "Aim with intention, not in a hurry."}, {"slug": "neon-snake", "name": "Neon Snake", "lesson": "Greed traps you — know when enough is enough."}, {"slug": "tower-stack", "name": "Tower Stack", "lesson": "Big things are built one careful step at a time."}, {"slug": "trail-stunts", "name": "Trail Stunts", "lesson": "Balance beats speed."}, {"slug": "2048-merge", "name": "2048 Merge", "lesson": "Small smart steps add up to big wins."}, {"slug": "daily-sudoku", "name": "Daily Sudoku", "lesson": "Big problems break into small steps."}, {"slug": "daily-word-guess", "name": "Daily Word Guess", "lesson": "Never give up — every wrong guess teaches you something."}, {"slug": "minesweeper", "name": "Minesweeper", "lesson": "Think before you act — every click counts."}, {"slug": "mind-meter", "name": "Mind Meter", "lesson": "A sharp mind is built, not born."}, {"slug": "ludo", "name": "Ludo", "lesson": "Every move has a consequence — think before you act."}, {"slug": "apex-gp", "name": "Apex GP", "lesson": "Smooth is fast — control beats raw speed."}, {"slug": "nitro-gp", "name": "Nitro GP", "lesson": "Smooth is fast — control beats raw speed."}, {"slug": "sky-gp", "name": "Sky GP", "lesson": "Aim high, but fly calm — panic crashes, patience lands."}, {"slug": "spot-the-scam", "name": "Spot the Scam", "lesson": "If it rushes you, flatters you, or asks for secrets — stop and check."}, {"slug": "needs-vs-wants", "name": "Needs vs Wants", "lesson": "Needs first, then saving, then wants."}, {"slug": "chess", "name": "Chess", "lesson": "Every move has a consequence — think before you act."}];
+      var now = new Date();
+      var day = Math.floor(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) / 86400000);
+      var g = GAMES[day % GAMES.length];
+      document.getElementById('wl-game').textContent = g.name;
+      var play = document.getElementById('wl-play');
+      play.href = 'games/' + g.slug;
+      play.textContent = 'Play ' + g.name;
+      document.getElementById('wl-btn').addEventListener('click', function () {
+        document.getElementById('wl-locked').style.display = 'none';
+        var l = document.getElementById('wl-lesson');
+        l.textContent = '\u201C' + g.lesson + '\u201D';
+        l.style.display = 'block';
+        play.style.display = 'inline-block';
+        this.style.display = 'none';
+      });
+    })();
+    </script>
+
     <section class="block">
       <h2>Browse by skill</h2>
       <p class="sub">Pick the skill you want to practise — every game still climbs 100 levels.</p>
