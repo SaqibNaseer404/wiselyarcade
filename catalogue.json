@@ -816,6 +816,58 @@
       "progress_saved": "On this device only (no account)",
       "format": "HTML5 browser game — no download",
       "status": "published"
+    },
+    {
+      "slug": "spot-the-scam",
+      "title": "Spot the Scam",
+      "url": "https://wiselyarcade.com/games/spot-the-scam",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/spot-the-scam.jpg",
+      "description": "Play Spot the Scam free online — read real-looking texts, emails and chats and decide: safe or scam? Learn the red flags scammers use, one message at a time. 100 levels. No download, no sign-up.",
+      "card_text": "Read real-looking texts, emails and chats — and decide: safe or scam? Every answer teaches a red flag scammers use.",
+      "age_bands": [
+        "teens",
+        "adults"
+      ],
+      "age_guidance": "Ages 10+",
+      "skills": [
+        "knowledge",
+        "logic"
+      ],
+      "practises": "Digital safety — spotting phishing, fake prizes, OTP theft and look-alike addresses",
+      "lesson": "If it rushes you, flatters you, or asks for secrets — stop and check.",
+      "difficulty": "Medium",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap Scam or Looks safe",
+      "structure": "100 levels · 5 messages per level",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
+    },
+    {
+      "slug": "needs-vs-wants",
+      "title": "Needs vs Wants",
+      "url": "https://wiselyarcade.com/games/needs-vs-wants",
+      "thumbnail": "https://wiselyarcade.com/images/thumbs/needs-vs-wants.jpg",
+      "description": "Play Needs vs Wants free online — the money game where kids sort needs from wants, fill the savings jar, and learn smart spending. 100 levels. No download, no sign-up.",
+      "card_text": "Sort needs from wants, fill the savings jar, and learn the order of smart spending.",
+      "age_bands": [
+        "kids",
+        "teens"
+      ],
+      "age_guidance": "Ages 5+",
+      "skills": [
+        "maths",
+        "knowledge"
+      ],
+      "practises": "Money sense — telling needs from wants, and saving before spending",
+      "lesson": "Needs first, then saving, then wants.",
+      "difficulty": "Easy",
+      "estimated_minutes_per_round": 3,
+      "controls": "Tap Need it or Want it",
+      "structure": "100 levels · 8 items per level",
+      "progress_saved": "On this device only (no account)",
+      "format": "HTML5 browser game — no download",
+      "status": "published"
     }
   ]
 }
