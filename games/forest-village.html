@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-SG15MEKNRW"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-SG15MEKNRW');
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#0EA5A4">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<title>Forest Village — Free Online 3D Survival Planning Game | Wisely Arcade</title>
+<link rel="canonical" href="https://wiselyarcade.com/games/forest-village">
+<meta name="description" content="Play Forest Village free online — a real 3D village survival game. Assign villagers to gather, chop and build, plan backwards from tonight's meal and fire, and learn real survival skills like making fire by rubbing sticks. 100 days, tough from Day 1. No download, no sign-up.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css?v=10">
+<style>
+  .game-area{max-width:880px}
+  .fv-hud{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:14px}
+  .fv-hud span{background:linear-gradient(180deg,rgba(16,26,42,.95),rgba(9,14,25,.93));
+    border:1px solid rgba(255,255,255,.14);border-bottom:3px solid rgba(74,222,128,.55);
+    border-radius:999px;padding:7px 16px;color:#eef2ff;font-weight:800;font-size:.98rem;
+    box-shadow:0 10px 20px rgba(9,14,28,.28)}
+  .fv-stage{background:linear-gradient(180deg,#dff3e4,#cdeeda 55%,#b7e3c8);
+    border-radius:26px;padding:18px 16px 24px;position:relative;
+    box-shadow:0 24px 48px rgba(20,90,50,.20), inset 0 2px 0 #fff}
+  #fv-3d{position:relative;border-radius:18px;overflow:hidden;background:#8ec9e8;
+    box-shadow:0 14px 30px rgba(20,60,40,.30);min-height:170px}
+  #fv-3d canvas{display:block;width:100%}
+  #fv-float{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .fv-float-t{position:absolute;left:0;top:0;font-weight:900;font-size:.95rem;
+    text-shadow:0 2px 6px rgba(0,0,0,.55);white-space:nowrap;will-change:transform,opacity}
+  #fv-3d-fallback{display:none;background:#fff7e0;border:2px solid #eab308;border-radius:14px;
+    padding:14px 16px;margin-top:10px;color:#4a3a05;font-weight:700}
+  .fv-panel{margin-top:16px;text-align:left}
+  .fv-day-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .fv-day-head h2{font-family:"Barlow Condensed",Nunito,sans-serif;font-size:1.7rem;letter-spacing:.03em;color:#14532d;margin:0}
+  .fv-ev{background:#14532d;color:#d9fbe7;font-weight:900;padding:6px 14px;border-radius:999px;font-size:.95rem}
+  .fv-hearts{font-size:1.25rem}
+  .fv-note{color:#23402e;font-weight:600;line-height:1.5}
+  .fv-stores{background:rgba(255,255,255,.75);border:2px solid rgba(20,83,45,.25);border-radius:12px;
+    padding:9px 14px;font-weight:800;color:#14532d;margin:10px 0}
+  .fv-goal{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #22c55e;border-radius:16px;
+    padding:14px 16px;color:#1c2b21;box-shadow:0 10px 22px rgba(20,90,50,.14);margin:10px 0;line-height:1.5}
+  .fv-goal-ic{font-size:2rem}
+  .fv-skill-card{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:#fffbe8;border:2px solid #eab308;
+    border-radius:16px;padding:14px 16px;color:#3f3410;margin:10px 0;line-height:1.5}
+  .fv-skill-ic{font-size:2rem}
+  .fv-skill-tx{flex:1;min-width:220px}
+  .fv-skill-done{font-weight:800;color:#166534;width:100%}
+  .fv-h3{color:#14532d;margin:16px 0 8px;font-size:1.12rem}
+  .fv-job{display:flex;gap:12px;align-items:center;background:rgba(255,255,255,.85);border:2px solid rgba(20,83,45,.22);
+    border-radius:14px;padding:10px 14px;margin:8px 0;color:#1c2b21}
+  .fv-job-ic{font-size:1.7rem}
+  .fv-job-tx{flex:1;line-height:1.35}
+  .fv-job-tx span{color:#44604e;font-weight:600;font-size:.92rem}
+  .fv-step{display:flex;align-items:center;gap:10px}
+  .fv-step span{font-weight:900;font-size:1.25rem;min-width:26px;text-align:center;color:#14532d}
+  .fv-step button{width:42px;height:42px;border-radius:50%;border:0;cursor:pointer;font-size:1.4rem;font-weight:900;color:#fff;
+    background:linear-gradient(180deg,#4ade80,#16a34a);box-shadow:0 6px 14px rgba(20,140,60,.35)}
+  .fv-step button.fv-minus{background:linear-gradient(180deg,#fca5a5,#dc2626);box-shadow:0 6px 14px rgba(190,30,30,.3)}
+  .fv-step button:active{transform:scale(.94)}
+  .fv-tip{background:rgba(255,255,255,.7);border-left:5px solid #eab308;border-radius:10px;padding:10px 14px;color:#3f3410;line-height:1.5}
+  .fv-btn{border:0;cursor:pointer;font:inherit;font-weight:900;font-size:1.08rem;color:#fff;padding:14px 28px;border-radius:999px;
+    background:linear-gradient(180deg,#4ade80,#16a34a);box-shadow:0 10px 20px rgba(20,140,60,.35), inset 0 2px 0 rgba(255,255,255,.5);margin:10px 6px 0 0}
+  .fv-btn:hover{transform:translateY(-2px)}
+  .fv-btn-alt{background:linear-gradient(180deg,#fbbf24,#d97706);box-shadow:0 10px 20px rgba(190,120,10,.35), inset 0 2px 0 rgba(255,255,255,.5)}
+  .fv-btn-ghost{background:rgba(255,255,255,.85);color:#14532d;box-shadow:0 6px 14px rgba(20,60,40,.18)}
+  .fv-opts{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .fv-opt{border:2px solid rgba(20,83,45,.35);background:#fff;border-radius:14px;padding:13px 16px;cursor:pointer;
+    font:inherit;font-weight:700;color:#1c2b21;text-align:left;line-height:1.45}
+  .fv-opt:hover{border-color:#16a34a}
+  .fv-opt.good{background:#dcfce7;border-color:#16a34a}
+  .fv-opt.bad{background:#fee2e2;border-color:#dc2626}
+  .fv-opt:disabled{opacity:.75;cursor:default}
+  .fv-wrong{color:#b91c1c;font-weight:800}
+  .fv-steps-done{margin:10px 0}
+  .fv-step-done{background:#dcfce7;border:2px solid #22c55e;border-radius:10px;padding:8px 12px;margin:6px 0;font-weight:700;color:#14532d}
+  .fv-fact{background:#fff;border:2px solid rgba(20,83,45,.3);border-radius:14px;padding:14px 16px;color:#1c2b21;line-height:1.55}
+  .fv-progress{background:rgba(20,83,45,.18);border-radius:999px;height:18px;overflow:hidden;margin:12px 0}
+  #fv-bar{background:linear-gradient(90deg,#4ade80,#16a34a);height:100%;width:0%;transition:width .2s}
+  .fv-log{min-height:96px}
+  .fv-log-line{background:rgba(255,255,255,.85);border-radius:10px;padding:8px 12px;margin:6px 0;font-weight:700;color:#1c2b21}
+  .fv-rows{background:rgba(255,255,255,.88);border-radius:14px;padding:8px 14px;margin:10px 0}
+  .fv-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed rgba(20,83,45,.25);color:#1c2b21;flex-wrap:wrap}
+  .fv-row:last-child{border-bottom:0}
+  .fv-problems{background:#fee2e2;border:2px solid #dc2626;color:#7f1d1d;border-radius:14px;padding:12px 16px;font-weight:700;line-height:1.6}
+  .fv-ok{background:#dcfce7;border:2px solid #22c55e;color:#14532d;border-radius:14px;padding:12px 16px;font-weight:800}
+  .fv-stars{font-size:2.4rem;color:#f59e0b;text-align:center;letter-spacing:.15em;margin:10px 0 0;text-shadow:0 2px 0 #b45309}
+  .fv-map-head h2{color:#14532d;margin:0 0 4px}
+  .fv-map{display:grid;grid-template-columns:repeat(10,1fr);gap:5px;margin-top:10px}
+  .fv-lvl{border:2px solid rgba(20,83,45,.4);background:rgba(255,255,255,.9);color:#14532d;cursor:pointer;
+    font:inherit;font-weight:800;font-size:.72rem;padding:6px 0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:1px}
+  .fv-lvl.cur{background:linear-gradient(180deg,#ffc44d,#f59e0b);border-color:#b45309;color:#26160a}
+  .fv-lvl:disabled{background:rgba(226,232,240,.6);color:#94a3b8;cursor:not-allowed}
+  .fv-lvl-s{font-size:.6rem;color:#d97706;letter-spacing:.05em}
+  .fv-lvl:disabled .fv-lvl-s{color:#94a3b8}
+</style>
+<!-- MOBILE GAME-FIRST FIX 2026-11-19: on phones the play area comes first. Desktop layout untouched. -->
+<style>
+@media (max-width:768px){
+  .game-head{padding:14px 12px 2px}
+  .game-head h1{font-size:1.6rem;margin-bottom:4px}
+  .game-head p{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-area{padding:12px;margin-top:8px}
+  .fv-map{grid-template-columns:repeat(5,1fr);max-height:40vh;overflow-y:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="brand-dot"></span>Wisely Arcade</a>
+    <nav class="main">
+      <a href="/">Home</a>
+      <a href="../kids">Kids</a>
+      <a href="../teens">Teens</a>
+      <a href="../adults">Adults</a>
+      <a href="../about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="game-head">
+    <h1>Forest Village</h1>
+    <p>Run a real 3D forest village. Every morning, assign your villagers — gather food, chop wood, build shelter. Every night, the village eats, the fire burns, and the weather tests your plan. Learn <strong>real survival skills</strong> — making fire by rubbing sticks, sparking flint, even a battery-and-wires trick — to solve real problems. <strong>100 days, tough from Day 1.</strong></p>
+  </div>
+
+  <div class="wrap">
+    <div class="game-area">
+      <div class="fv-hud" id="fv-hud"><span>🌲 Forest Village — pick a day to begin</span></div>
+      <div class="fv-stage">
+        <div id="fv-3d"><div id="fv-float"></div></div>
+        <div id="fv-3d-fallback">🌲 Your browser could not start the 3D view — no problem, the game still plays fully below. The village is working hard, even if you cannot see it!</div>
+        <div class="fv-panel" id="fv-panel"></div>
+      </div>
+    </div>
+
+    <div class="howto">
+      <h2>How to Play</h2>
+      <ol>
+        <li>Pick a day. Read the <strong>weather</strong>, the <strong>goal</strong>, and tonight's costs — the meal and the fire.</li>
+        <li>Assign every villager a job with the <strong>+ / −</strong> buttons: 🧺 gather food, 🪓 chop wood, 🔨 build. Watch them work in real 3D — drag the view to look around your village.</li>
+        <li>On <strong>skill days</strong>, a real problem appears — the fire is out, the water is unsafe, the shelter is falling. Learn the real survival skill, answer the question, and put the steps in order. Solve it with no mistakes to earn the bonus.</li>
+        <li>Press <strong>Start the day</strong>. At nightfall you see the full maths: what came in, what the meal and fire cost, and what is left.</li>
+        <li>Hit the target with the village safe to earn stars and unlock the next day. There are <strong>100 days</strong> — and this game is <strong>tough from Day 1</strong>. There is no easy warm-up. Plan backwards from tonight.</li>
+      </ol>
+    </div>
+
+    <div class="howto">
+      <h2>Controls</h2>
+      <ul>
+        <li><strong>Mouse / touch:</strong> tap + and − to assign villagers, tap answers and steps.</li>
+        <li><strong>Look around:</strong> drag the 3D village left or right to turn the camera.</li>
+        <li><strong>Failed a day?</strong> The night summary shows every number. Change the plan, not the goal — then try again.</li>
+      </ul>
+    </div>
+
+    <div class="lesson-box">
+      <h2><span class="cap">The Lesson</span>Plan backwards: tonight decides today</h2>
+      <p>Every real village, camp and household runs on the same rule Forest Village teaches: <strong>tonight's costs are fixed — today's work must cover them.</strong> The meal will be eaten. The fire will burn. The storm will not wait. So wise planners do not ask "what shall we do today?" They ask "what must be true by tonight?" — and work backwards from there.</p>
+      <p>That is budgeting, in its oldest form. Food in, food out. Wood in, wood out. Hands are limited, so every choice costs another choice: a builder cannot gather, a gatherer cannot chop. And woven through the days are <strong>real survival skills</strong> — friction fire, flint sparks, boiling water, lashings, finding north by shadow — taught the way they are used in life: as answers to problems, exactly when the problem bites.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>About This Game</h2>
+      <p>Forest Village trains <strong>planning, budgeting maths and real-world problem solving</strong> in a real-time 3D world you can turn and explore. It is made for ages <strong>7 and up</strong>: children who love building and strategy, teens, and adults who enjoy a hard planning puzzle. The survival skills taught are real, safe-to-know knowledge — the battery fire lesson includes its safety rule, and the game always teaches adult supervision for real fire. Progress is saved on your device only — no account, no sign-up.</p>
+    </div>
+
+    <div class="lesson-box">
+      <h2>Frequently Asked Questions</h2>
+      <h3>How do you play Forest Village?</h3>
+      <p>Each day, assign your villagers to gather food, chop wood or build. At night the village eats a set amount of food and the fire burns wood. End the night with the target stock still in store, and keep everyone fed, warm and sheltered to pass the day.</p>
+      <h3>How many levels are there?</h3>
+      <p>There are 100 days. The village grows from 5 villagers to 14, the weather turns harsher, and the targets keep rising. The game is tough from Day 1 by design — Day 1 already has one best plan.</p>
+      <h3>Are the survival skills in the game real?</h3>
+      <p>Yes. Friction fire (rubbing sticks), flint and steel sparks, the battery-and-steel-wool method, boiling water to kill germs, lashings, the shadow-stick compass and the rule of three for rescue signals are all real techniques, taught step by step. Real fire should only ever be practised with an adult.</p>
+      <h3>Is Forest Village really 3D?</h3>
+      <p>Yes — the village is a real 3D scene. Your villagers walk to their jobs, tents and huts appear as you build them, rain falls on wet days, and the sky darkens at nightfall. Drag the view to look around.</p>
+      <h3>Who is Forest Village for?</h3>
+      <p>It is made for ages 7 and up — kids who like building and strategy games, teens, and adults. It teaches planning and budgeting maths through play, plus genuine outdoor know-how.</p>
+    </div>
+    <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+      {"@type":"Question","name":"How do you play Forest Village?","acceptedAnswer":{"@type":"Answer","text":"Each day, assign your villagers to gather food, chop wood or build. At night the village eats a set amount of food and the fire burns wood. End the night with the target stock still in store, and keep everyone fed, warm and sheltered to pass the day."}},
+      {"@type":"Question","name":"How many levels are there?","acceptedAnswer":{"@type":"Answer","text":"There are 100 days. The village grows from 5 villagers to 14, the weather turns harsher, and the targets keep rising. The game is tough from Day 1 by design."}},
+      {"@type":"Question","name":"Are the survival skills in the game real?","acceptedAnswer":{"@type":"Answer","text":"Yes. Friction fire, flint and steel sparks, the battery-and-steel-wool method, boiling water, lashings, the shadow-stick compass and the rule of three for rescue signals are all real techniques, taught step by step. Real fire should only ever be practised with an adult."}},
+      {"@type":"Question","name":"Is Forest Village really 3D?","acceptedAnswer":{"@type":"Answer","text":"Yes — the village is a real 3D scene. Villagers walk to their jobs, tents and huts appear as you build them, rain falls on wet days, and the sky darkens at nightfall. Drag the view to look around."}},
+      {"@type":"Question","name":"Who is Forest Village for?","acceptedAnswer":{"@type":"Answer","text":"It is made for ages 7 and up — kids who like building and strategy games, teens, and adults. It teaches planning and budgeting maths through play, plus genuine outdoor know-how."}}
+    ]}
+    </script>
+
+    <div class="center" style="margin-bottom:10px">
+      <a class="btn ghost" href="../kids">← More games for ages 5–12</a>
+    </div>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap foot">
+    <div class="fbrand">Wisely Arcade — Play. Learn. Repeat.</div>
+    <nav>
+      <a href="../about">About</a>
+      <a href="../privacy">Privacy</a>
+      <a href="../contact">Contact</a>
+      <a href="../terms">Terms</a>
+    </nav>
+    <div class="copy">© <span id="year"></span> Wisely Arcade. Every game teaches a lesson.</div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+<script src="../js/recommend.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="../js/forest-village.js?v=1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>
