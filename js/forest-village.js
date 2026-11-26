@@ -635,7 +635,7 @@
     }
     function setSky(night) {
       var S = night ? NIGHT : DAY;
-      scene.background.copy(S.bg); scene.fog.color.copy(S.fog);
+      scene.background.copy(S.bg); scene.fog.color.set(S.fog);
       dirLight.color.set(S.dir); dirLight.intensity = S.di; hemi.intensity = S.hi;
     }
     function animate() {
