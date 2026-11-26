@@ -35,7 +35,12 @@
   #fv-3d{position:relative;border-radius:18px;overflow:hidden;background:#8ec9e8;
     box-shadow:0 14px 30px rgba(20,60,40,.30);min-height:170px}
   #fv-3d canvas{display:block;width:100%}
-  #fv-float{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  #fv-float{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+  .fv-cam{position:absolute;right:10px;bottom:10px;display:flex;gap:8px;z-index:2}
+  .fv-cam button{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.35);cursor:pointer;
+    background:rgba(9,20,16,.6);color:#fff;font:inherit;font-size:1.15rem;font-weight:900;line-height:1}
+  #fv-3d.fv-full{position:fixed;inset:0;z-index:9999;border-radius:0;background:#000}
+  body.fv-noscroll{overflow:hidden}
   .fv-float-t{position:absolute;left:0;top:0;font-weight:900;font-size:.95rem;
     text-shadow:0 2px 6px rgba(0,0,0,.55);white-space:nowrap;will-change:transform,opacity}
   #fv-3d-fallback{display:none;background:#fff7e0;border:2px solid #eab308;border-radius:14px;
@@ -222,7 +227,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-<script src="../js/forest-village.js?v=2"></script>
+<script src="../js/forest-village.js?v=3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
