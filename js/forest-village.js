@@ -168,16 +168,17 @@
   }
 
   /* ================= SIMULATION ================= */
-  function simulate(L, assign, skillOk) {
+  function simulate(L, assign, skillOk, me) {
+    me = me || { food: 0, wood: 0, builder: false };   // work done by hand in walk-and-play mode
     var gYield = 5 + (L.event === 'berries' ? 1 : 0) - (L.event === 'rain' ? 1 : 0);
     var wYield = 5 - (L.event === 'wind' ? 1 : 0);
     if (skillOk && L.skill && L.skill.effect === 'grove') gYield += 1;
-    var foodMade = assign.g * gYield;
-    var woodMade = assign.w * wYield;
+    var foodMade = assign.g * gYield + me.food;
+    var woodMade = assign.w * wYield + me.wood;
     var totalFood = L.startFood + foodMade;
     var totalWood = L.startWood + woodMade;
     var built = false, shelter = L.shelterStart;
-    if (L.buildDay && assign.b >= L.build.builders && totalWood >= L.build.cost) {
+    if (L.buildDay && assign.b + (me.builder ? 1 : 0) >= L.build.builders && totalWood >= L.build.cost) {
       built = true; totalWood -= L.build.cost; shelter += L.build.capAdd;
     }
     if (skillOk && L.skill && L.skill.effect === 'shelterPlus') shelter += 2;
@@ -216,7 +217,7 @@
   function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
   var state = {
     current: lsGet(LS.cur, 1), unlocked: lsGet(LS.unl, 1), stars: lsGet(LS.stars, {}),
-    level: null, assign: { g: 0, w: 0, b: 0 }, skillOk: false, skillDone: false, phase: 'map'
+    level: null, playMode: lsGet('wa_fv_play', true), assign: { g: 0, w: 0, b: 0 }, skillOk: false, skillDone: false, phase: 'map'
   };
 
   function $(id) { return document.getElementById(id); }
@@ -260,6 +261,14 @@
   }
 
   function assigned() { return state.assign.g + state.assign.w + state.assign.b; }
+  function playing() { return state.playMode && !!(window.FV3D && FV3D.ok); }
+  function team() { return state.level.villagers - (playing() ? 1 : 0); }   // in play mode you are one villager
+  function setMode(play) {
+    state.playMode = play; lsSet('wa_fv_play', play);
+    ['b', 'w', 'g'].forEach(function (k) { while (assigned() > team() && state.assign[k] > 0) state.assign[k]--; });
+    renderPlan();
+    if (window.FV3D) FV3D.setJobs(state.assign, state.level);
+  }
 
   function renderPlan() {
     var L = state.level, ev = EVENTS[L.event];
@@ -291,7 +300,9 @@
       '<p class="fv-note">' + ev.note + '</p>' +
       '<div class="fv-stores">🏠 Shelter for ' + L.shelterStart + ' of ' + L.villagers + ' &nbsp;·&nbsp; 🍽️ Tonight\'s meal: ' + L.eatTotal + ' food &nbsp;·&nbsp; 🔥 Fire: ' + L.fireWood + ' wood</div>' +
       goalHtml + skillHtml +
-      '<h3 class="fv-h3">Assign your ' + L.villagers + ' villagers — <span id="fv-left">' + (L.villagers - assigned()) + '</span> still idle</h3>' +
+      (window.FV3D && FV3D.ok ? '<div class="fv-modes"><button class="fv-mode' + (playing() ? ' on' : '') + '" id="fv-mode-play">🚶 Walk and work myself</button><button class="fv-mode' + (playing() ? '' : ' on') + '" id="fv-mode-watch">👀 Manage and watch</button></div>' : '') +
+      (playing() ? '<p class="fv-note">You are one of the ' + L.villagers + ' villagers. You choose <strong>one job</strong> and do it by hand in the forest (90 seconds of daylight). Give jobs to the other ' + team() + '.</p>' : '') +
+      '<h3 class="fv-h3">Assign ' + team() + ' villagers — <span id="fv-left">' + (team() - assigned()) + '</span> still idle</h3>' +
       jobsHtml +
       '<p class="fv-tip">🧙 <strong>Elder\'s tip:</strong> ' + elderTip(L) + '</p>' +
       '<button id="fv-start" class="fv-btn">▶ Start the day</button>' +
@@ -301,6 +312,10 @@
     for (var i = 0; i < plus.length; i++) plus[i].addEventListener('click', function () { stepJob(this.getAttribute('data-k'), 1); });
     for (var j = 0; j < minus.length; j++) minus[j].addEventListener('click', function () { stepJob(this.getAttribute('data-k'), -1); });
     $('fv-start').addEventListener('click', startWork);
+    if ($('fv-mode-play')) {
+      $('fv-mode-play').addEventListener('click', function () { setMode(true); });
+      $('fv-mode-watch').addEventListener('click', function () { setMode(false); });
+    }
     $('fv-tomap').addEventListener('click', renderMap);
     var sb = $('fv-skill-btn');
     if (sb) sb.addEventListener('click', renderSkill);
@@ -308,10 +323,10 @@
 
   function stepJob(k, d) {
     var L = state.level;
-    if (d > 0 && assigned() >= L.villagers) return;
+    if (d > 0 && assigned() >= team()) return;
     state.assign[k] = Math.max(0, state.assign[k] + d);
     $('fv-as-' + k).textContent = state.assign[k];
-    $('fv-left').textContent = L.villagers - assigned();
+    $('fv-left').textContent = team() - assigned();
     if (window.FV3D) FV3D.setJobs(state.assign, L);
   }
 
@@ -374,6 +389,7 @@
   function startWork() {
     var L = state.level;
     if (L.skill && !state.skillDone) { renderSkill(); return; }
+    if (playing() && startPlay()) return;
     var R = simulate(L, state.assign, state.skillOk);
     state.phase = 'work';
     var panel = $('fv-panel');
@@ -398,6 +414,26 @@
       }
       if (p >= 1) { clearInterval(iv); setTimeout(function () { renderNight(R); }, 600); }
     }, 200);
+  }
+
+  /* ================= WALK-AND-PLAY DAY ================= */
+  function startPlay() {
+    var L = state.level, base = simulate(L, state.assign, state.skillOk);
+    FV3D.setJobs(state.assign, L);
+    var ok = FV3D.play({
+      level: L, assign: state.assign,
+      yields: { g: base.gYield, w: base.wYield },
+      preview: function (me) { return simulate(L, state.assign, state.skillOk, me); },
+      onDone: function (me) { renderNight(simulate(L, state.assign, state.skillOk, me)); },
+      onFail: function () { state.playMode = false; renderPlan(); }
+    });
+    if (!ok) return false;
+    state.phase = 'work';
+    $('fv-panel').innerHTML = '<div class="fv-day-head"><h2>Day ' + L.day + ' — you are in the forest</h2></div>' +
+      '<p class="fv-note">Work, then walk to the campfire and light it to end the day.</p>' +
+      '<button id="fv-end" class="fv-btn">🌙 End the day now</button>';
+    $('fv-end').addEventListener('click', function () { FV3D.endPlay(); });
+    return true;
   }
 
   /* ================= NIGHT SUMMARY ================= */
@@ -457,11 +493,13 @@
     api.setJobs = function () {};
     api.setWorking = function () {};
     api.setNight = function () {};
+    api.play = function () { return false; };
+    api.endPlay = function () {};
     if (typeof THREE === 'undefined') return api;
 
     var container, renderer, scene, camera, clock;
     var low = false, calm = false, onScreen = true;
-    var U = { uTime: { value: 0 }, uWind: { value: 0.35 }, uSnow: { value: 0 }, uCamDir: { value: new THREE.Vector2(1, 0) }, uCutR: { value: 30 } };
+    var U = { uTime: { value: 0 }, uWind: { value: 0.35 }, uSnow: { value: 0 }, uCam: { value: new THREE.Vector2(29, 0) }, uFocus: { value: new THREE.Vector2(0, 0) }, uCutW: { value: 13 }, uCutT: { value: 0.45 } };
     var yaw = 0.7, pitch = 0.28, dist = 29, idleUntil = 0;
     var working = false, night = false, fireOn = true, event = 'clear', level = null;
     var sun, hemi, fireLight, sky, skyU, water, waterU, ground, groundMat;
@@ -471,6 +509,7 @@
     var berryExtra, tentGroup, frameMesh, builtMesh = null, logStock = [], foodStock = [], grassMeshes = [];
     var bolt, flash = 0, nextBolt = 3, windowMat;
     var spots = { gather: [], wood: [], build: [], home: [] };
+    var trees = [], solids = [], tentSolids = [], bushState = [];
     var SHIRTS = [0xc0392b, 0x2874a6, 0xd68910, 0x7d3c98, 0x148f77, 0xba4a00, 0xb03a75, 0x1e8449, 0xb7950b, 0x707b7c, 0xe56b8f, 0x117a65, 0x5b4fc4, 0x922b21];
 
     /* ---------- helpers ---------- */
@@ -513,10 +552,10 @@
     function patch(material, o) {
       material.onBeforeCompile = function (sh) {
         sh.uniforms.uTime = U.uTime; sh.uniforms.uWind = U.uWind; sh.uniforms.uSnow = U.uSnow;
-        sh.uniforms.uCamDir = U.uCamDir; sh.uniforms.uCutR = U.uCutR;
+        sh.uniforms.uCam = U.uCam; sh.uniforms.uFocus = U.uFocus; sh.uniforms.uCutW = U.uCutW; sh.uniforms.uCutT = U.uCutT;
         sh.uniforms.uSway = { value: o.sway || 0 }; sh.uniforms.uH = { value: o.h || 1 };
         sh.uniforms.uCut = { value: o.cut ? 1 : 0 }; sh.uniforms.uSnowAmt = { value: o.snow == null ? 1 : o.snow };
-        sh.vertexShader = 'uniform float uTime,uWind,uSway,uH,uCut,uCutR;\nuniform vec2 uCamDir;\nvarying float vUp;\n' +
+        sh.vertexShader = 'uniform float uTime,uWind,uSway,uH,uCut,uCutW,uCutT;\nuniform vec2 uCam,uFocus;\nvarying float vUp;\n' +
           sh.vertexShader.replace('#include <begin_vertex>', [
             '#include <begin_vertex>',
             'vec3 wn = objectNormal;',
@@ -528,9 +567,10 @@
             '  float s = sin(uTime * (1.2 + uWind) + ph) * 0.6 + sin(uTime * 3.3 + ph * 2.3) * 0.25 + uWind * 0.45;',
             '  vec3 wd = vec3(0.9, 0.0, 0.4) * s * uWind * uSway * hh * hh;',
             '  vec3 lw = wd * mat3(instanceMatrix);',
-            '  float rr = length(ip);',
-            '  float al = dot(ip / max(rr, 0.001), uCamDir);',
-            '  float cut = uCut * smoothstep(0.70, 0.92, al) * (1.0 - smoothstep(uCutR - 2.0, uCutR + 6.0, rr));',
+            '  vec2 seg = uFocus - uCam;',
+            '  float tt = dot(ip - uCam, seg) / max(dot(seg, seg), 0.001);',
+            '  float dd = length(ip - uCam - seg * clamp(tt, 0.0, 1.0));',
+            '  float cut = uCut * (1.0 - smoothstep(uCutW * 0.65, uCutW, dd)) * (1.0 - smoothstep(uCutT - 0.08, uCutT + 0.04, tt));',
             '  transformed *= 1.0 - 0.84 * cut;',
             '  transformed += lw / max(dot(instanceMatrix[0].xyz, instanceMatrix[0].xyz), 0.001);',
             '#endif',
@@ -730,7 +770,13 @@
         spots.wood.push({ pos: new THREE.Vector3(Math.cos(ang) * 11.8, 0, Math.sin(ang) * 11.8), look: new THREE.Vector3(tx, 0, tz) });
       });
       var mats = [leafMat({ sway: 0.42, h: 5.4, cut: true, snow: 0.85 }), leafMat({ sway: 0.36, h: 5, cut: true, snow: 0.7 }), leafMat({ sway: 0.55, h: 4.8, cut: true, snow: 0.6 })];
-      for (var q = 0; q < 3; q++) { scatter(kinds[q], mats[q], near[q], true); scatter(kinds[q], mats[q], far[q], false); }
+      for (var q = 0; q < 3; q++) {
+        var im = scatter(kinds[q], mats[q], near[q], true); scatter(kinds[q], mats[q], far[q], false);
+        near[q].forEach(function (r, index) {
+          r.im = im; r.index = index; r.hp = 3; r.shake = 0; trees.push(r);
+          solids.push({ x: r.x, z: r.z, r: 0.3 * r.s, tree: r });
+        });
+      }
       // distant forest on the hills
       var cheap = merge([part(new THREE.ConeGeometry(1.3, 4.4, 6), 0x214d31, 0, 2.2, 0)]), ring = [];
       for (var i = 0; i < (low ? 350 : 900); i++) {
@@ -803,6 +849,9 @@
       });
       var bushes = [], berries = [], extra = [];
       BUSH.forEach(function (p, i) {
+        var b0 = berries.length, e0 = extra.length;
+        bushState.push({ x: p[0], z: p[1], left: 3, from: [b0, e0] });
+        solids.push({ x: p[0], z: p[1], r: 0.8 });
         bushes.push({ x: p[0], y: 0, z: p[1], s: range(0.95, 1.2), ry: rand() * 6 });
         for (var k = 0; k < 26; k++) {
           var th = rand() * 6.28, el = range(-0.1, 1.2), R = range(0.82, 0.98);
@@ -815,8 +864,11 @@
       });
       scatter(merge(bp), leafMat({ sway: 0.08, h: 1.4, snow: 0.7 }), bushes, true);
       var berryGeo = merge([part(new THREE.IcosahedronGeometry(0.085, 0), 0xd81b60)]), berryMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.35 });
-      scatter(berryGeo, berryMat, berries, false);
+      var berryBase = scatter(berryGeo, berryMat, berries, false);
       berryExtra = scatter(berryGeo, berryMat, extra, false);
+      bushState.forEach(function (b) {
+        b.ranges = [{ im: berryBase, list: berries, from: b.from[0], to: b.from[0] + 10 }, { im: berryExtra, list: extra, from: b.from[1], to: b.from[1] + 16 }];
+      });
     }
 
     function tentGeometry() {
@@ -856,6 +908,7 @@
 
     function buildCamp() {
       var fire = new THREE.Group(); scene.add(fire);
+      solids.push({ x: 0, z: 0, r: 1.15 }, { x: 7.1, z: 4.5, r: 1.2 }, { x: -1.6, z: 7.2, r: 0.9 }, { x: 0.2, z: 7.2, r: 0.9 });
       for (var s = 0; s < 11; s++) {
         var a = s / 11 * Math.PI * 2;
         var st = mesh(new THREE.DodecahedronGeometry(range(0.2, 0.27)), mat(0x6d7276), Math.cos(a) * 0.86, 0.1, Math.sin(a) * 0.86, fire); st.rotation.set(rand() * 3, rand() * 3, 0);
@@ -1100,6 +1153,13 @@
       var w = LOOK[event] || LOOK.clear, t = {};
       for (var k in w) t[k] = w[k];
       t.night = night ? 1 : 0;
+      if (play) {
+        var dusk = smooth(0.6, 1, play.elapsed / DAY_SECONDS), clearness = 1 - w.cover * 0.6;
+        t.sun = new THREE.Color(w.sun).lerp(new THREE.Color(0xff7a2e), dusk * 0.85).getHex();
+        t.hor = new THREE.Color(w.hor).lerp(new THREE.Color(0xe08a5c), dusk * clearness * 0.8).getHex();
+        t.top = new THREE.Color(w.top).lerp(new THREE.Color(0x2a3566), dusk * 0.7).getHex();
+        t.si = w.si * (1 - dusk * 0.35); t.hemi = w.hemi * (1 - dusk * 0.3);
+      }
       if (night) {
         var grim = w.cover > 0.9;
         t.top = grim ? 0x070a12 : 0x07102a; t.hor = grim ? 0x1a222e : 0x1d3154; t.cloud = grim ? 0x141a24 : 0x27344e;
@@ -1162,6 +1222,18 @@
           }
           on = !on; if (on) ctx.resume(); else ctx.suspend(); return on;
         },
+        start: function () { if (!on && !this.muted) { this.toggle(); if (this.button) this.button.textContent = on ? '🔊' : '🔇'; } },
+        sfx: function (k) {
+          if (!on) return;
+          if (k === 'chop') { burst('lowpass', 480, 0.8, 0.005, 0.16); burst('highpass', 2200, 0.18, 0.004, 0.06); }
+          else if (k === 'fall') { burst('lowpass', 700, 0.35, 0.2, 0.9); burst('lowpass', 140, 0.9, 0.02, 0.6, 0.9); }
+          else if (k === 'pick') tone(520, 880, 0.12, 0.1, 0);
+          else if (k === 'hammer') { burst('bandpass', 900, 0.8, 0.003, 0.1); tone(240, 180, 0.15, 0.09, 0); }
+          else if (k === 'spark') burst('highpass', 1800, 0.35, 0.02, 0.4);
+          else if (k === 'step') burst('lowpass', 900, 0.07, 0.01, 0.09);
+          else if (k === 'done') { tone(523, 523, 0.12, 0.16, 0); tone(659, 659, 0.12, 0.16, 0.14); tone(784, 784, 0.12, 0.3, 0.28); }
+          else if (k === 'no') tone(220, 150, 0.12, 0.22, 0);
+        },
         pause: function (hidden) { if (ctx && on) { if (hidden) ctx.suspend(); else ctx.resume(); } },
         thunder: function (delay) { if (on) { burst('lowpass', 220, 0.9, 0.08, 2.8, delay); burst('lowpass', 90, 0.9, 0.3, 3.6, delay + 0.2); } },
         update: function (dt, t) {
@@ -1181,6 +1253,7 @@
 
     /* ---------- camera, buttons, sizing ---------- */
     function isFull() { return container.classList.contains('fv-full'); }
+    function zoom(f) { if (play) playDist = clamp(playDist * f, 5, 16); else dist = clamp(dist * f, 14, 46); }
     function setFull(on) {
       container.classList.toggle('fv-full', on); document.body.classList.toggle('fv-noscroll', on);
       renderer.domElement.style.touchAction = on ? 'none' : 'pan-y'; resize();
@@ -1191,9 +1264,9 @@
         var b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.title = title; b.setAttribute('aria-label', title);
         b.addEventListener('click', function () { fn(b); }); bar.appendChild(b); return b;
       }
-      btn('🔇', 'Sound on or off', function (b) { b.textContent = Sound.toggle() ? '🔊' : '🔇'; });
-      btn('＋', 'Zoom in', function () { dist = clamp(dist - 4, 14, 46); });
-      btn('－', 'Zoom out', function () { dist = clamp(dist + 4, 14, 46); });
+      Sound.button = btn('🔇', 'Sound on or off', function (b) { var is = Sound.toggle(); Sound.muted = !is; b.textContent = is ? '🔊' : '🔇'; });
+      btn('＋', 'Zoom in', function () { zoom(0.8); });
+      btn('－', 'Zoom out', function () { zoom(1.25); });
       btn('⛶', 'Full screen', function () { setFull(!isFull()); });
       container.appendChild(bar);
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isFull()) setFull(false); });
@@ -1210,13 +1283,13 @@
         p.x = e.clientX; p.y = e.clientY; idleUntil = U.uTime.value + 5;
         if (ids.length > 1) {
           var a = pts[ids[0]], b = pts[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (pinch) dist = clamp(dist * pinch / Math.max(d, 1), 14, 46);
+          if (pinch) zoom(pinch / Math.max(d, 1));
           pinch = d; return;
         }
         yaw += dx * 0.006;
         if (e.pointerType === 'mouse' || isFull()) pitch = clamp(pitch + dy * 0.004, 0.1, 1.15);
       });
-      el.addEventListener('wheel', function (e) { if (!isFull() && !e.ctrlKey) return; e.preventDefault(); dist = clamp(dist + e.deltaY * 0.02, 14, 46); }, { passive: false });
+      el.addEventListener('wheel', function (e) { if (!isFull() && !e.ctrlKey) return; e.preventDefault(); zoom(1 + clamp(e.deltaY, -100, 100) * 0.0012); }, { passive: false });
     }
     function resize() {
       if (!renderer) return;
@@ -1244,10 +1317,10 @@
       sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.04; scene.add(sun);
       windowMat = new THREE.MeshStandardMaterial({ color: 0x4a6070, emissive: 0xffb347, emissiveIntensity: 0 });
 
-      buildSky(); buildGround(); buildWater(); buildForest(); buildUndergrowth(); buildCamp(); buildLife(); buildWeather();
+      buildSky(); buildGround(); buildWater(); buildForest(); buildUndergrowth(); buildCamp(); buildLife(); buildWeather(); buildPlayer();
 
       container.appendChild(renderer.domElement);
-      controls(); clock = new THREE.Clock(); resize();
+      controls(); buildPlayUI(); clock = new THREE.Clock(); resize();
       window.addEventListener('resize', resize);
       if (window.ResizeObserver) { var lastW = 0; new ResizeObserver(function () { if (container.clientWidth !== lastW) { lastW = container.clientWidth; resize(); } }).observe(container); }
       if (window.IntersectionObserver) new IntersectionObserver(function (en) { onScreen = en[0].isIntersecting; }).observe(container);
@@ -1335,7 +1408,7 @@
         var c = tmpColor;
         for (i = 0; i < rippleData.length; i++) {
           u = rippleData[i]; u.life += dt * 2.4;
-          if (u.life > 1) { u.life -= 1; var a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * 12; u.x = Math.cos(a) * r; u.z = Math.sin(a) * r; }
+          if (u.life > 1) { u.life -= 1; var a = Math.random() * 6.28, r = Math.sqrt(Math.random()) * 12; u.x = focus.x + Math.cos(a) * r; u.z = focus.z + Math.sin(a) * r; }
           dummy.position.set(u.x, 0.07, u.z); dummy.rotation.set(0, 0, 0); dummy.scale.setScalar(0.04 + u.life * 0.26); dummy.updateMatrix(); ripples.setMatrixAt(i, dummy.matrix);
           var b = (1 - u.life) * cur.rain * (0.45 - cur.night * 0.3); ripples.setColorAt(i, c.setRGB(b * 0.8, b * 0.9, b));
         }
@@ -1369,6 +1442,16 @@
         fo.el.style.opacity = Math.min(1, fo.life / 0.5);
       }
     }
+    function animateTrees(dt) {
+      for (var i = 0; i < trees.length; i++) {
+        var tr = trees[i]; if (tr.shake <= 0) continue;
+        tr.shake -= dt; if (tr.hp > 0) setInstance(tr.im, tr.index, tr, 1, Math.sin(tr.shake * 45) * Math.max(0, tr.shake) * 0.12, 0);
+      }
+      for (var j = falling.length - 1; j >= 0; j--) {
+        var f = falling[j]; f.t += dt; f.tip.rotation.x = Math.min(1.5, f.t * f.t * 1.4);
+        if (f.t > 2.4) { scene.remove(f.g); falling.splice(j, 1); }
+      }
+    }
     var slow = 0, quality = 0;
     function adapt(raw) {   // drop detail automatically on weak devices
       if (raw > 0.2) return;
@@ -1383,19 +1466,34 @@
       if (!onScreen && !isFull()) return;
       U.uTime.value += dt; var t = U.uTime.value;
       adapt(raw);
-      if (!calm && t > idleUntil) yaw += dt * 0.025;
-      var ty = mix(6, 1, clamp((pitch - 0.1) / 0.8, 0, 1)), flat = Math.cos(pitch) * dist;
-      camera.position.set(Math.cos(yaw) * flat, ty + Math.sin(pitch) * dist, Math.sin(yaw) * flat);
-      camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + 3);
-      camera.lookAt(0, ty, 0); sky.position.copy(camera.position);
-      U.uCamDir.value.set(Math.cos(yaw), Math.sin(yaw)); U.uCutR.value = flat + 6;
+      if (play) { updatePlay(dt, t); }
+      if (play) {
+        focus.x += (me.position.x - focus.x) * Math.min(1, dt * 9); focus.z += (me.position.z - focus.z) * Math.min(1, dt * 9); focus.y = me.position.y + 1.5;
+        var pf = Math.cos(pitch) * playDist;
+        camera.position.set(focus.x + Math.cos(yaw) * pf, focus.y + Math.sin(pitch) * playDist, focus.z + Math.sin(yaw) * pf);
+        camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + 1.2);
+        camera.lookAt(focus.x, focus.y, focus.z);
+        U.uCutW.value = 2.8; U.uCutT.value = 0.88;
+      } else {
+        focus.set(0, 1, 0);
+        if (!calm && t > idleUntil) yaw += dt * 0.025;
+        var ty = mix(6, 1, clamp((pitch - 0.1) / 0.8, 0, 1)), flat = Math.cos(pitch) * dist;
+        camera.position.set(Math.cos(yaw) * flat, ty + Math.sin(pitch) * dist, Math.sin(yaw) * flat);
+        camera.position.y = Math.max(camera.position.y, heightAt(camera.position.x, camera.position.z) + 3);
+        camera.lookAt(0, ty, 0);
+        U.uCutW.value = 13; U.uCutT.value = 0.45;
+      }
+      sky.position.copy(camera.position);
+      U.uCam.value.set(camera.position.x, camera.position.z); U.uFocus.value.set(focus.x, focus.z);
+      animateTrees(dt);
       applyLook(dt); animateVillagers(dt, t); animateLife(dt, t); animateEffects(dt, t); Sound.update(dt, t);
       if (builtMesh && builtMesh.scale.x < 1) builtMesh.scale.setScalar(Math.min(1, builtMesh.scale.x + dt * 0.8));
       renderer.render(scene, camera);
     }
     function fail(e) {
       if (window.console) console.error('Forest Village 3D stopped:', e);
-      failed = true; api.ok = false; if (renderer) renderer.setAnimationLoop(null); showFallback();
+      var lost = play && play.onFail; if (play) { play = null; container.classList.remove('fv-playing', 'fv-full'); document.body.classList.remove('fv-noscroll'); }
+      failed = true; api.ok = false; if (renderer) renderer.setAnimationLoop(null); showFallback(); if (lost) lost();
     }
     function animate() { try { frame(); } catch (e) { fail(e); } }
     function spawnFloat(worldPos, text, color) {
@@ -1410,11 +1508,270 @@
       logStock.forEach(function (m, i) { m.visible = i < nw; });
     }
 
-    /* ---------- the four calls the game uses ---------- */
+    /* ---------- walk-and-play mode: you are one villager and do one worker's job ---------- */
+    var DAY_SECONDS = 90, HAMMER_HITS = 8, FIRE_HITS = 3;
+    var play = null, me = null, meRing, targetRing, stumps = [], falling = [];
+    var playDist = 8.5, saved = null, keys = {}, joy = { x: 0, y: 0, id: null }, held = false, ui = null;
+    var focus = new THREE.Vector3(0, 1, 0);
+
+    function buildPlayUI() {
+      function div(cls, parent) { var d = document.createElement('div'); d.className = cls; (parent || container).appendChild(d); return d; }
+      ui = {};
+      ui.info = div('fv-g fv-g-info');
+      ui.time = div('fv-g-time', ui.info); ui.job = div('fv-g-job', ui.info); ui.fore = div('fv-g-fore', ui.info);
+      ui.toast = div('fv-g fv-g-toast');
+      ui.prompt = div('fv-g fv-g-prompt');
+      ui.map = document.createElement('canvas'); ui.map.className = 'fv-g fv-g-map'; ui.map.width = ui.map.height = 128; container.appendChild(ui.map);
+      ui.joy = div('fv-g fv-g-joy'); ui.knob = div('fv-g-knob', ui.joy);
+      ui.act = document.createElement('button'); ui.act.type = 'button'; ui.act.className = 'fv-g fv-g-act'; ui.act.textContent = '✋'; ui.act.setAttribute('aria-label', 'Action'); container.appendChild(ui.act);
+
+      function moveJoy(e) {
+        var b = ui.joy.getBoundingClientRect(), x = (e.clientX - b.left - b.width / 2) / (b.width * 0.36), y = (e.clientY - b.top - b.height / 2) / (b.height * 0.36);
+        var l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; }
+        joy.x = x; joy.y = y; ui.knob.style.transform = 'translate(' + (x * 34) + 'px,' + (y * 34) + 'px)';
+      }
+      function dropJoy(e) { if (e && e.pointerId !== joy.id) return; joy.x = joy.y = 0; joy.id = null; ui.knob.style.transform = ''; }
+      ui.joy.addEventListener('pointerdown', function (e) { e.preventDefault(); joy.id = e.pointerId; if (ui.joy.setPointerCapture) ui.joy.setPointerCapture(e.pointerId); moveJoy(e); });
+      ui.joy.addEventListener('pointermove', function (e) { if (e.pointerId === joy.id) moveJoy(e); });
+      ui.joy.addEventListener('pointerup', dropJoy); ui.joy.addEventListener('pointercancel', dropJoy); ui.joy.addEventListener('lostpointercapture', dropJoy);
+      ui.act.addEventListener('pointerdown', function (e) { e.preventDefault(); held = true; act(); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (n) { ui.act.addEventListener(n, function () { held = false; }); });
+      ui.act.addEventListener('click', function (e) { if (e.detail === 0) act(); });   // keyboard / screen reader
+
+      var MOVE = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ShiftLeft', 'ShiftRight'];
+      window.addEventListener('keydown', function (e) {
+        if (!play) return;
+        if (e.code === 'KeyE' || e.code === 'Space') { e.preventDefault(); if (!held) { held = true; act(); } }
+        else if (MOVE.indexOf(e.code) >= 0) { e.preventDefault(); keys[e.code] = true; }
+      });
+      window.addEventListener('keyup', function (e) { keys[e.code] = false; if (e.code === 'KeyE' || e.code === 'Space') held = false; });
+      window.addEventListener('blur', clearInput);
+    }
+    function clearInput() { keys = {}; held = false; joy.x = joy.y = 0; joy.id = null; if (ui) ui.knob.style.transform = ''; }
+
+    function buildPlayer() {
+      me = makeVillager(2); me.scale.setScalar(1.08);
+      var u = me.userData;
+      mesh(new THREE.BoxGeometry(0.52, 0.72, 0.07), mat(0xd32f2f), 0, 0.3, -0.29, u.up);   // red cape
+      meRing = new THREE.Mesh(new THREE.RingGeometry(0.52, 0.66, 28), new THREE.MeshBasicMaterial({ color: 0xffe066, transparent: true, opacity: 0.85, depthWrite: false }));
+      meRing.rotation.x = -Math.PI / 2; meRing.position.y = 0.06; me.add(meRing);
+      me.visible = false; scene.add(me);
+      targetRing = new THREE.Mesh(new THREE.RingGeometry(0.85, 1, 32), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, depthWrite: false }));
+      targetRing.rotation.x = -Math.PI / 2; targetRing.visible = false; scene.add(targetRing);
+    }
+
+    function setInstance(im, i, r, scale, tiltX, tiltZ) {
+      dummy.position.set(r.x, r.y, r.z); dummy.rotation.set((r.rx || 0) + (tiltX || 0), r.ry || 0, (r.rz || 0) + (tiltZ || 0));
+      dummy.scale.set(r.s * scale, r.s * (r.sy || 1) * scale, r.s * scale); dummy.updateMatrix(); im.setMatrixAt(i, dummy.matrix); im.instanceMatrix.needsUpdate = true;
+    }
+    function resetWorld() {
+      stumps.forEach(function (s) { scene.remove(s); discard(s); }); stumps = [];
+      falling.forEach(function (f) { scene.remove(f.g); }); falling = [];
+      trees.forEach(function (tr) { if (tr.hp < 3) setInstance(tr.im, tr.index, tr, 1); tr.hp = 3; tr.shake = 0; });
+      bushState.forEach(function (b) { if (b.left < 3) showBerries(b, true); b.left = 3; });
+    }
+    function showBerries(b, on) {
+      b.ranges.forEach(function (rg) { for (var i = rg.from; i < rg.to; i++) setInstance(rg.im, i, rg.list[i], on ? 1 : 0.001); });
+    }
+    function fellTree(tr) {
+      setInstance(tr.im, tr.index, tr, 0.001);
+      var away = Math.atan2(tr.x - me.position.x, tr.z - me.position.z);
+      var g = new THREE.Group(), tip = new THREE.Group(), m = new THREE.Mesh(tr.im.geometry, tr.im.material);
+      g.position.set(tr.x, tr.y, tr.z); g.rotation.y = away; g.add(tip); tip.add(m);
+      m.rotation.y = tr.ry - away; m.scale.set(tr.s, tr.s * tr.sy, tr.s); m.castShadow = true; scene.add(g);
+      falling.push({ g: g, tip: tip, t: 0 });
+      var st = new THREE.Group(); st.position.set(tr.x, tr.y, tr.z); scene.add(st); stumps.push(st);
+      mesh(cyl(0.24 * tr.s, 0.32 * tr.s, 0.4, 9), mat(0x5c3d22), 0, 0.2, 0, st);
+      mesh(cyl(0.23 * tr.s, 0.23 * tr.s, 0.02, 9), mat(0xc19a68), 0, 0.41, 0, st);
+    }
+
+    function toast(text) { if (!play) return; ui.toast.textContent = text; ui.toast.style.opacity = 1; play.toast = 3.2; }
+
+    /* what can I use from here? */
+    function findTarget() {
+      var best = null, bestD = 99, px = me.position.x, pz = me.position.z;
+      function consider(kind, x, z, reach, radius, ref, label) {
+        var d = Math.hypot(px - x, pz - z) - radius;
+        if (d < reach && d < bestD) { bestD = d; best = { kind: kind, x: x, z: z, radius: radius, ref: ref, label: label }; }
+      }
+      if (play.elapsed > 4) consider('fire', 0, 0, 1.5, 1.15, null, 'Light the fire and END the day (' + play.fire + '/' + FIRE_HITS + ')');
+      bushState.forEach(function (b) { if (b.left > 0) consider('bush', b.x, b.z, 1.25, 0.9, b, 'Pick berries'); });
+      trees.forEach(function (tr) { if (tr.hp > 0) consider('tree', tr.x, tr.z, 1.25, 0.34 * tr.s, tr, 'Chop tree (' + tr.hp + ' left)'); });
+      if (level.buildDay && play.hits < HAMMER_HITS) consider('site', SITE.x, SITE.z, 1.5, 1.6, null, 'Hammer the ' + level.build.name);
+      return best;
+    }
+    function takeJob(job) {
+      var names = { g: 'gathering food', w: 'chopping wood', b: 'building' };
+      if (play.job && play.job !== job) { toast('Today you are ' + names[play.job] + '. One villager, one job!'); Sound.sfx('no'); return false; }
+      if (job !== 'b' && play.got >= play.need[job]) { toast("Your day's work is done. Go to the fire to end the day."); Sound.sfx('no'); return false; }
+      return true;
+    }
+    function act() {
+      if (!play || play.cool > 0) return;
+      var t = play.target; if (!t) return;
+      var job = t.kind === 'bush' ? 'g' : (t.kind === 'tree' ? 'w' : (t.kind === 'site' ? 'b' : null));
+      if (job && !takeJob(job)) { play.cool = 0.8; return; }
+      play.cool = t.kind === 'bush' ? 0.55 : 0.75; play.swing = play.cool; play.pending = t;
+      me.rotation.y = Math.atan2(t.x - me.position.x, t.z - me.position.z);
+    }
+    function land(t) {   // the moment the hand, axe or hammer connects
+      var up = me.position.clone();
+      if (t.kind === 'bush') {
+        play.job = 'g'; play.got++; t.ref.left--; if (!t.ref.left) showBerries(t.ref, false);
+        Sound.sfx('pick'); spawnFloat(up, '+1 🍎', '#9dffb4');
+      } else if (t.kind === 'tree') {
+        play.job = 'w'; play.got++; t.ref.hp--; t.ref.shake = 0.35; Sound.sfx('chop'); spawnFloat(up, '+1 🪵', '#ffd479');
+        if (!t.ref.hp) { fellTree(t.ref); Sound.sfx('fall'); }
+      } else if (t.kind === 'site') {
+        play.job = 'b'; play.hits++; Sound.sfx('hammer'); spawnFloat(up, '🔨 ' + play.hits + '/' + HAMMER_HITS, '#ffd479');
+        frameMesh.scale.set(1, 1 + play.hits * 0.04, 1);
+      } else if (t.kind === 'fire') {
+        play.fire++; Sound.sfx('spark'); spawnFloat(up, '✨ ' + play.fire + '/' + FIRE_HITS, '#ffb35a');
+        if (play.fire >= FIRE_HITS) { finishPlay(); return; }
+      }
+      var done = play.job === 'b' ? play.hits >= HAMMER_HITS : (play.job && play.got >= play.need[play.job]);
+      if (done && !play.told) { play.told = true; held = false; Sound.sfx('done'); toast('Job done! Walk to the campfire to end the day.'); }
+      drawHud();
+    }
+    function myWork() {
+      return { food: play.job === 'g' ? play.got : 0, wood: play.job === 'w' ? play.got : 0, builder: play.job === 'b' && play.hits >= HAMMER_HITS };
+    }
+    function finishPlay() {
+      if (!play) return;
+      var done = play.onDone, work = myWork();
+      leavePlay(); done(work);
+    }
+    function leavePlay() {
+      if (!play) return;
+      play = null; clearInput();
+      container.classList.remove('fv-playing'); setFull(false);
+      targetRing.visible = false; me.visible = false; frameMesh.scale.set(1, 1, 1);
+      if (saved) { yaw = saved.yaw; pitch = saved.pitch; dist = saved.dist; saved = null; }
+    }
+
+    function collide(p) {
+      for (var n = 0; n < 2; n++) {
+        var all = solids.concat(tentSolids);
+        for (var i = 0; i < all.length; i++) {
+          var c = all[i]; if (c.tree && c.tree.hp <= 0) continue;
+          var dx = p.x - c.x, dz = p.z - c.z, min = c.r + 0.32, d = Math.hypot(dx, dz);
+          if (d < min && d > 0.001) { p.x = c.x + dx / d * min; p.z = c.z + dz / d * min; }
+        }
+      }
+      var r = Math.hypot(p.x, p.z); if (r > 29) { p.x *= 29 / r; p.z *= 29 / r; }
+      var rx = riverX(p.z); if (p.x > rx - 3.3) p.x = rx - 3.3;
+    }
+
+    function updatePlay(dt, t) {
+      play.elapsed += dt; play.cool = Math.max(0, play.cool - dt);
+      if (play.toast > 0) { play.toast -= dt; if (play.toast <= 0) ui.toast.style.opacity = 0; }
+      var sx = joy.x + (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0);
+      var sy = -joy.y + (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0);
+      var len = Math.hypot(sx, sy); if (len > 1) { sx /= len; sy /= len; len = 1; }
+      var moving = len > 0.12 && play.swing <= 0;
+      if (moving) {
+        var fx = -Math.cos(yaw), fz = -Math.sin(yaw), mx = fx * sy - fz * sx, mz = fz * sy + fx * sx;
+        var speed = (keys.ShiftLeft || keys.ShiftRight) ? 6.8 : 4.8;
+        me.position.x += mx * speed * dt; me.position.z += mz * speed * dt; collide(me.position);
+        var want = Math.atan2(mx, mz), diff = Math.atan2(Math.sin(want - me.rotation.y), Math.cos(want - me.rotation.y));
+        me.rotation.y += diff * Math.min(1, dt * 12);
+        if (t > idleUntil) yaw += sx * dt * 0.8;     // camera follows gently when you turn
+        play.stepT -= dt * len; if (play.stepT <= 0) { play.stepT = 0.34; Sound.sfx('step'); }
+      }
+      me.position.y = heightAt(me.position.x, me.position.z);
+
+      var u = me.userData, s = t * 10, aL = 0, aR = 0, lL = 0, lR = 0, lean = 0, bob = 0;
+      if (play.swing > 0) {
+        var before = play.swing; play.swing -= dt;
+        var pt = play.pending, dur = pt.kind === 'bush' ? 0.55 : 0.75, k = clamp(1 - play.swing / dur, 0, 1);
+        if (pt.kind === 'bush') { lean = Math.sin(k * Math.PI) * 0.75; aL = aR = -Math.sin(k * Math.PI) * 1.4; }
+        else if (pt.kind === 'fire') { lean = 0.75; lL = -0.5; aL = -1.2 + Math.sin(t * 30) * 0.25; aR = -1.2 - Math.sin(t * 30) * 0.25; }
+        else { aR = k < 0.55 ? -2.8 * Math.sin(k / 0.55 * Math.PI / 2) : -2.8 + (k - 0.55) / 0.45 * 2.3; aL = aR * 0.7; lean = k > 0.55 ? 0.35 : -0.1; }
+        if (before > dur * 0.3 && play.swing <= dur * 0.3) { land(pt); if (!play) return; }
+      } else if (moving) { lL = Math.sin(s) * 0.8; lR = -lL; aL = -lL * 0.8; aR = lL * 0.8; lean = 0.14; bob = Math.abs(Math.cos(s)) * 0.07; }
+      else { aL = Math.sin(t * 1.5) * 0.05; aR = -aL; }
+      u.legL.rotation.x = lL; u.legR.rotation.x = lR; u.armL.rotation.x = aL; u.armR.rotation.x = aR; u.up.rotation.x = lean; u.root.position.y = bob;
+
+      var target = findTarget(); play.target = target;
+      u.axe.visible = !!target && target.kind === 'tree' || play.job === 'w' && !(target && target.kind === 'site');
+      u.hammer.visible = !!target && target.kind === 'site';
+      u.basket.visible = play.job === 'g' || !!target && target.kind === 'bush';
+      targetRing.visible = !!target;
+      if (target) {
+        targetRing.position.set(target.x, heightAt(target.x, target.z) + 0.09, target.z);
+        targetRing.scale.setScalar((target.radius + 0.35) * (1 + Math.sin(t * 6) * 0.05));
+        ui.prompt.textContent = (matchTouch() ? '✋ ' : 'E  ·  ') + target.label; ui.prompt.style.opacity = 1;
+      } else ui.prompt.style.opacity = 0;
+      ui.act.classList.toggle('ready', !!target);
+      if (held && play.cool <= 0 && target && target.kind !== 'fire') act();   // hold to keep working
+
+      play.hudT -= dt; if (play.hudT <= 0) { play.hudT = 0.2; drawHud(); drawMap(); }
+      if (play.elapsed >= DAY_SECONDS) finishPlay();
+    }
+    function matchTouch() { return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches); }
+
+    function drawHud() {
+      if (!play) return;
+      var left = Math.max(0, Math.ceil(DAY_SECONDS - play.elapsed)), R = play.preview(myWork()), job;
+      ui.time.textContent = (left < 20 ? '🌇 ' : '☀️ ') + 'Daylight ' + Math.floor(left / 60) + ':' + ('0' + (left % 60)).slice(-2);
+      if (play.job === 'g') job = '🧺 Your food: ' + play.got + ' / ' + play.need.g;
+      else if (play.job === 'w') job = '🪓 Your wood: ' + play.got + ' / ' + play.need.w;
+      else if (play.job === 'b') job = '🔨 Your hammering: ' + play.hits + ' / ' + HAMMER_HITS;
+      else job = 'Pick ONE job: berries' + (level.buildDay ? ', trees or building' : ' or trees');
+      ui.job.textContent = job;
+      var goal = level.buildDay
+        ? level.build.name + ': ' + (R.built ? '✅ will be built' : '❌ not yet') + ' · 🍎 ' + R.endFood + ' (need ' + level.goalFoodEnd + ')'
+        : '🍎 ' + R.endFood + ' (need ' + level.goalFoodEnd + ') · 🪵 ' + R.endWood + ' (need ' + level.goalWoodEnd + ')';
+      ui.fore.textContent = 'Left tonight, with team: ' + goal + (R.fireLit ? '' : ' · 🔥 not enough wood');
+    }
+    function drawMap() {
+      var g = ui.map.getContext('2d'); if (!g || !g.arc) return;
+      var S = 2.1, fx = -Math.cos(yaw), fz = -Math.sin(yaw);
+      function pt(x, z, edge) {
+        var dx = x - me.position.x, dz = z - me.position.z, px = (-fz * dx + fx * dz) * S, py = -(fx * dx + fz * dz) * S, l = Math.hypot(px, py);
+        if (l > 56) { if (!edge) return null; px *= 56 / l; py *= 56 / l; }
+        return [64 + px, 64 + py];
+      }
+      function dot(x, z, r, c, edge) { var p = pt(x, z, edge); if (!p) return; g.fillStyle = c; g.beginPath(); g.arc(p[0], p[1], r, 0, 6.2832); g.fill(); }
+      g.clearRect(0, 0, 128, 128); g.fillStyle = 'rgba(10,30,20,0.72)'; g.beginPath(); g.arc(64, 64, 63, 0, 6.2832); g.fill();
+      for (var z = -40; z <= 40; z += 2) dot(riverX(z), z, 4, '#3d8fb5');
+      trees.forEach(function (tr) { if (tr.hp > 0) dot(tr.x, tr.z, 1.7, '#5f9e52'); });
+      bushState.forEach(function (b) { if (b.left) dot(b.x, b.z, 3.4, '#ff5fa2', play.job === 'g'); });
+      dot(-9.5, -6.5, 3.4, '#ff5fa2', true);
+      if (level.buildDay) dot(SITE.x, SITE.z, 5, '#6cc7ff', true);
+      dot(0, 0, 5, '#ff9a2e', true);
+      g.fillStyle = '#fff'; g.beginPath(); g.moveTo(64, 56); g.lineTo(69, 69); g.lineTo(59, 69); g.fill();
+    }
+
+    api.play = function (opts) {
+      if (!api.ok || play) return false;
+      try {
+        if (opts.level && opts.level !== level) api.showVillage(opts.level);   // keep 3D and game on the same day
+        if (opts.assign) api.setJobs(opts.assign, level);
+        resetWorld();
+        saved = { yaw: yaw, pitch: pitch, dist: dist };
+        yaw = Math.PI / 2; pitch = 0.36; playDist = 8.5; fireOn = false; working = true; night = false; idleUntil = 0;
+        play = { elapsed: 0, job: null, got: 0, hits: 0, fire: 0, cool: 0, swing: 0, pending: null, target: null, toast: 0, hudT: 0, stepT: 0, told: false,
+          need: opts.yields, preview: opts.preview, onDone: opts.onDone, onFail: opts.onFail };
+        villagers.forEach(function (v, i) { v.visible = i < level.villagers - 1; });
+        me.position.set(0, 0, 4.2); me.rotation.y = Math.PI; me.visible = true; focus.set(0, 1.5, 4.2);
+        clearInput(); container.classList.add('fv-playing'); setFull(true);
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+        Sound.start();
+        toast(matchTouch() ? 'Move with the stick. Tap ✋ to work. Drag to look around.' : 'Move: W A S D · Work: E or Space · Look: drag the mouse');
+        play.toast = 6;
+        drawHud();
+        return true;
+      } catch (e) { fail(e); return false; }
+    };
+    api.endPlay = function () { if (play) { try { finishPlay(); } catch (e) { fail(e); } } };
+
+    /* ---------- the calls the game uses ---------- */
     api.showVillage = function (L) {
       if (failed) { showFallback(); return; }
       try {
         if (!api.ok && !buildScene()) { showFallback(); return; }
+        leavePlay(); resetWorld(); tentSolids = [];
         level = L; night = false; working = false; fireOn = true; flash = 0; nextBolt = 1.8;
         event = L ? L.event : 'clear';
         berryExtra.visible = event === 'berries';
@@ -1424,7 +1781,7 @@
         var tents = L ? Math.max(1, Math.ceil(L.shelterStart / 2)) : 3;
         for (var i = 0; i < tents; i++) {
           var tm = makeTent(), a = 2.4 + i * (tents > 1 ? 2.55 / (tents - 1) : 0), r = 5.8;
-          tm.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); tm.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a)); tm.scale.setScalar(0.88); tentGroup.add(tm);
+          tm.position.set(Math.cos(a) * r, 0, Math.sin(a) * r); tm.rotation.y = Math.atan2(-Math.cos(a), -Math.sin(a)); tm.scale.setScalar(0.88); tentGroup.add(tm); tentSolids.push({ x: tm.position.x, z: tm.position.z, r: 0.75 });
         }
         showStock(L ? L.startFood : 8, L ? L.startWood : 8);
         villagers.forEach(function (v, i) { v.visible = !L || i < L.villagers; send(v, 'home', spots.home[i]); });
@@ -1452,7 +1809,7 @@
           builtMesh.position.set(SITE.x, 0, SITE.z); builtMesh.rotation.y = Math.atan2(-SITE.x, -SITE.z);
           builtMesh.scale.setScalar(0.01); scene.add(builtMesh); frameMesh.visible = false;
         }
-        villagers.forEach(function (v, i) { send(v, 'home', spots.home[i]); });
+        villagers.forEach(function (v, i) { v.visible = !level || i < level.villagers; send(v, 'home', spots.home[i]); });
       } catch (e) { fail(e); }
     };
     return api;
