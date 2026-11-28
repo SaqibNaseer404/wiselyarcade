@@ -41,6 +41,28 @@
     background:rgba(9,20,16,.6);color:#fff;font:inherit;font-size:1.15rem;font-weight:900;line-height:1}
   #fv-3d.fv-full{position:fixed;inset:0;z-index:9999;border-radius:0;background:#000}
   body.fv-noscroll{overflow:hidden}
+  #fv-3d{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+  .fv-g{display:none;position:absolute;z-index:3;color:#fff;font-weight:800;box-sizing:border-box}
+  .fv-playing .fv-g{display:block}
+  .fv-g-info{left:10px;top:10px;max-width:calc(100% - 160px);background:rgba(8,24,16,.72);border-radius:14px;padding:9px 13px;line-height:1.45;pointer-events:none;font-size:.9rem}
+  .fv-g-time{font-size:1.05rem}
+  .fv-g-job{color:#ffe066}
+  .fv-g-fore{font-weight:700;font-size:.8rem;opacity:.92}
+  #fv-3d canvas.fv-g-map{display:none;right:10px;top:10px;width:128px;height:128px;pointer-events:none;border-radius:50%}
+  #fv-3d.fv-playing canvas.fv-g-map{display:block}
+  .fv-g-toast,.fv-g-prompt{left:50%;transform:translateX(-50%);width:max-content;max-width:86%;text-align:center;background:rgba(8,24,16,.78);border-radius:999px;padding:8px 16px;opacity:0;pointer-events:none;transition:opacity .2s}
+  .fv-g-toast{top:30%;max-width:calc(100% - 120px);border-radius:18px}
+  .fv-g-prompt{bottom:170px;background:rgba(255,224,102,.95);color:#2b2100}
+  .fv-g-joy{left:22px;bottom:26px;width:124px;height:124px;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.45);touch-action:none}
+  .fv-g-knob{position:absolute;left:36px;top:36px;width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.85)}
+  button.fv-g-act{right:26px;bottom:40px;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.5);background:rgba(8,24,16,.6);font-size:2.4rem;cursor:pointer;touch-action:none}
+  button.fv-g-act.ready{background:#f59e0b;border-color:#fff}
+  .fv-playing .fv-cam{top:148px;bottom:auto;flex-direction:column}
+  @media (max-width:520px){#fv-3d canvas.fv-g-map{width:104px;height:104px}.fv-g-info{max-width:calc(100% - 134px)}.fv-playing .fv-cam{top:124px}}
+  @media (max-height:500px){.fv-playing .fv-cam{flex-direction:row;top:10px;right:150px}.fv-g-info{max-width:calc(100% - 360px)}.fv-g-toast{top:44%}.fv-g-prompt{bottom:20px}}
+  .fv-modes{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+  .fv-mode{flex:1;min-width:180px;border:2px solid rgba(20,83,45,.35);background:#fff;color:#14532d;border-radius:14px;padding:12px;font:inherit;font-weight:900;cursor:pointer}
+  .fv-mode.on{background:#14532d;color:#fff;border-color:#14532d}
   .fv-float-t{position:absolute;left:0;top:0;font-weight:900;font-size:.95rem;
     text-shadow:0 2px 6px rgba(0,0,0,.55);white-space:nowrap;will-change:transform,opacity}
   #fv-3d-fallback{display:none;background:#fff7e0;border:2px solid #eab308;border-radius:14px;
@@ -157,7 +179,7 @@
         <li>Pick a day. Read the <strong>weather</strong>, the <strong>goal</strong>, and tonight's costs — the meal and the fire.</li>
         <li>Assign every villager a job with the <strong>+ / −</strong> buttons: 🧺 gather food, 🪓 chop wood, 🔨 build. Watch them work in real 3D — drag the view to look around your village.</li>
         <li>On <strong>skill days</strong>, a real problem appears — the fire is out, the water is unsafe, the shelter is falling. Learn the real survival skill, answer the question, and put the steps in order. Solve it with no mistakes to earn the bonus.</li>
-        <li>Press <strong>Start the day</strong>. At nightfall you see the full maths: what came in, what the meal and fire cost, and what is left.</li>
+        <li>Choose <strong>Walk and work myself</strong> to do one job by hand, or <strong>Manage and watch</strong>. Press <strong>Start the day</strong>. At nightfall you see the full maths: what came in, what the meal and fire cost, and what is left.</li>
         <li>Hit the target with the village safe to earn stars and unlock the next day. There are <strong>100 days</strong> — and this game is <strong>tough from Day 1</strong>. There is no easy warm-up. Plan backwards from tonight.</li>
       </ol>
     </div>
@@ -166,7 +188,8 @@
       <h2>Controls</h2>
       <ul>
         <li><strong>Mouse / touch:</strong> tap + and − to assign villagers, tap answers and steps.</li>
-        <li><strong>Look around:</strong> drag the 3D village left or right to turn the camera.</li>
+        <li><strong>Look around:</strong> drag the 3D village to turn the camera.</li>
+        <li><strong>Walk and work:</strong> on a computer use W A S D or the arrow keys to move, Shift to run, and E or Space to work. On a phone use the stick and the ✋ button.</li>
         <li><strong>Failed a day?</strong> The night summary shows every number. Change the plan, not the goal — then try again.</li>
       </ul>
     </div>
@@ -227,7 +250,7 @@
 <script src="../js/main.js"></script>
 <script src="../js/recommend.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-<script src="../js/forest-village.js?v=3"></script>
+<script src="../js/forest-village.js?v=4"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); });
